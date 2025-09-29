@@ -126,7 +126,7 @@ exports.Prisma.ProductScalarFieldEnum = {
   images: 'images',
   olxUrl: 'olxUrl',
   pinduoduoUrl: 'pinduoduoUrl',
-  priceUAH: 'priceUAH',
+  priceCNY: 'priceCNY',
   priceInUA: 'priceInUA',
   workModalWindowIOS: 'workModalWindowIOS',
   soundReducer: 'soundReducer',
@@ -136,6 +136,7 @@ exports.Prisma.ProductScalarFieldEnum = {
   weight: 'weight',
   microphoneQuality: 'microphoneQuality',
   sellsCount: 'sellsCount',
+  purchasedCount: 'purchasedCount',
   chip: 'chip',
   equipment: 'equipment',
   createdAt: 'createdAt'

@@ -1090,19 +1090,21 @@ export namespace Prisma {
   }
 
   export type ProductAvgAggregateOutputType = {
-    priceUAH: number | null
+    priceCNY: number | null
     priceInUA: number | null
     weight: number | null
     microphoneQuality: number | null
     sellsCount: number | null
+    purchasedCount: number | null
   }
 
   export type ProductSumAggregateOutputType = {
-    priceUAH: number | null
+    priceCNY: number | null
     priceInUA: number | null
     weight: number | null
     microphoneQuality: number | null
     sellsCount: number | null
+    purchasedCount: number | null
   }
 
   export type ProductMinAggregateOutputType = {
@@ -1110,7 +1112,7 @@ export namespace Prisma {
     name: string | null
     olxUrl: string | null
     pinduoduoUrl: string | null
-    priceUAH: number | null
+    priceCNY: number | null
     priceInUA: number | null
     workModalWindowIOS: boolean | null
     soundReducer: boolean | null
@@ -1120,6 +1122,7 @@ export namespace Prisma {
     weight: number | null
     microphoneQuality: number | null
     sellsCount: number | null
+    purchasedCount: number | null
     chip: string | null
     equipment: string | null
     createdAt: Date | null
@@ -1130,7 +1133,7 @@ export namespace Prisma {
     name: string | null
     olxUrl: string | null
     pinduoduoUrl: string | null
-    priceUAH: number | null
+    priceCNY: number | null
     priceInUA: number | null
     workModalWindowIOS: boolean | null
     soundReducer: boolean | null
@@ -1140,6 +1143,7 @@ export namespace Prisma {
     weight: number | null
     microphoneQuality: number | null
     sellsCount: number | null
+    purchasedCount: number | null
     chip: string | null
     equipment: string | null
     createdAt: Date | null
@@ -1151,7 +1155,7 @@ export namespace Prisma {
     images: number
     olxUrl: number
     pinduoduoUrl: number
-    priceUAH: number
+    priceCNY: number
     priceInUA: number
     workModalWindowIOS: number
     soundReducer: number
@@ -1161,6 +1165,7 @@ export namespace Prisma {
     weight: number
     microphoneQuality: number
     sellsCount: number
+    purchasedCount: number
     chip: number
     equipment: number
     createdAt: number
@@ -1169,19 +1174,21 @@ export namespace Prisma {
 
 
   export type ProductAvgAggregateInputType = {
-    priceUAH?: true
+    priceCNY?: true
     priceInUA?: true
     weight?: true
     microphoneQuality?: true
     sellsCount?: true
+    purchasedCount?: true
   }
 
   export type ProductSumAggregateInputType = {
-    priceUAH?: true
+    priceCNY?: true
     priceInUA?: true
     weight?: true
     microphoneQuality?: true
     sellsCount?: true
+    purchasedCount?: true
   }
 
   export type ProductMinAggregateInputType = {
@@ -1189,7 +1196,7 @@ export namespace Prisma {
     name?: true
     olxUrl?: true
     pinduoduoUrl?: true
-    priceUAH?: true
+    priceCNY?: true
     priceInUA?: true
     workModalWindowIOS?: true
     soundReducer?: true
@@ -1199,6 +1206,7 @@ export namespace Prisma {
     weight?: true
     microphoneQuality?: true
     sellsCount?: true
+    purchasedCount?: true
     chip?: true
     equipment?: true
     createdAt?: true
@@ -1209,7 +1217,7 @@ export namespace Prisma {
     name?: true
     olxUrl?: true
     pinduoduoUrl?: true
-    priceUAH?: true
+    priceCNY?: true
     priceInUA?: true
     workModalWindowIOS?: true
     soundReducer?: true
@@ -1219,6 +1227,7 @@ export namespace Prisma {
     weight?: true
     microphoneQuality?: true
     sellsCount?: true
+    purchasedCount?: true
     chip?: true
     equipment?: true
     createdAt?: true
@@ -1230,7 +1239,7 @@ export namespace Prisma {
     images?: true
     olxUrl?: true
     pinduoduoUrl?: true
-    priceUAH?: true
+    priceCNY?: true
     priceInUA?: true
     workModalWindowIOS?: true
     soundReducer?: true
@@ -1240,6 +1249,7 @@ export namespace Prisma {
     weight?: true
     microphoneQuality?: true
     sellsCount?: true
+    purchasedCount?: true
     chip?: true
     equipment?: true
     createdAt?: true
@@ -1338,7 +1348,7 @@ export namespace Prisma {
     images: string[]
     olxUrl: string | null
     pinduoduoUrl: string | null
-    priceUAH: number
+    priceCNY: number
     priceInUA: number | null
     workModalWindowIOS: boolean
     soundReducer: boolean
@@ -1348,6 +1358,7 @@ export namespace Prisma {
     weight: number | null
     microphoneQuality: number | null
     sellsCount: number | null
+    purchasedCount: number | null
     chip: string | null
     equipment: string | null
     createdAt: Date
@@ -1378,7 +1389,7 @@ export namespace Prisma {
     images?: boolean
     olxUrl?: boolean
     pinduoduoUrl?: boolean
-    priceUAH?: boolean
+    priceCNY?: boolean
     priceInUA?: boolean
     workModalWindowIOS?: boolean
     soundReducer?: boolean
@@ -1388,6 +1399,7 @@ export namespace Prisma {
     weight?: boolean
     microphoneQuality?: boolean
     sellsCount?: boolean
+    purchasedCount?: boolean
     chip?: boolean
     equipment?: boolean
     createdAt?: boolean
@@ -1402,7 +1414,7 @@ export namespace Prisma {
     images?: boolean
     olxUrl?: boolean
     pinduoduoUrl?: boolean
-    priceUAH?: boolean
+    priceCNY?: boolean
     priceInUA?: boolean
     workModalWindowIOS?: boolean
     soundReducer?: boolean
@@ -1412,6 +1424,7 @@ export namespace Prisma {
     weight?: boolean
     microphoneQuality?: boolean
     sellsCount?: boolean
+    purchasedCount?: boolean
     chip?: boolean
     equipment?: boolean
     createdAt?: boolean
@@ -1423,7 +1436,7 @@ export namespace Prisma {
     images?: boolean
     olxUrl?: boolean
     pinduoduoUrl?: boolean
-    priceUAH?: boolean
+    priceCNY?: boolean
     priceInUA?: boolean
     workModalWindowIOS?: boolean
     soundReducer?: boolean
@@ -1433,6 +1446,7 @@ export namespace Prisma {
     weight?: boolean
     microphoneQuality?: boolean
     sellsCount?: boolean
+    purchasedCount?: boolean
     chip?: boolean
     equipment?: boolean
     createdAt?: boolean
@@ -1444,7 +1458,7 @@ export namespace Prisma {
     images?: boolean
     olxUrl?: boolean
     pinduoduoUrl?: boolean
-    priceUAH?: boolean
+    priceCNY?: boolean
     priceInUA?: boolean
     workModalWindowIOS?: boolean
     soundReducer?: boolean
@@ -1454,12 +1468,13 @@ export namespace Prisma {
     weight?: boolean
     microphoneQuality?: boolean
     sellsCount?: boolean
+    purchasedCount?: boolean
     chip?: boolean
     equipment?: boolean
     createdAt?: boolean
   }
 
-  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "images" | "olxUrl" | "pinduoduoUrl" | "priceUAH" | "priceInUA" | "workModalWindowIOS" | "soundReducer" | "sensesOfEar" | "wirelessCharger" | "gyroscope" | "weight" | "microphoneQuality" | "sellsCount" | "chip" | "equipment" | "createdAt", ExtArgs["result"]["product"]>
+  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "images" | "olxUrl" | "pinduoduoUrl" | "priceCNY" | "priceInUA" | "workModalWindowIOS" | "soundReducer" | "sensesOfEar" | "wirelessCharger" | "gyroscope" | "weight" | "microphoneQuality" | "sellsCount" | "purchasedCount" | "chip" | "equipment" | "createdAt", ExtArgs["result"]["product"]>
   export type ProductInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     expenses?: boolean | Product$expensesArgs<ExtArgs>
     incomes?: boolean | Product$incomesArgs<ExtArgs>
@@ -1480,7 +1495,7 @@ export namespace Prisma {
       images: string[]
       olxUrl: string | null
       pinduoduoUrl: string | null
-      priceUAH: number
+      priceCNY: number
       priceInUA: number | null
       workModalWindowIOS: boolean
       soundReducer: boolean
@@ -1490,6 +1505,7 @@ export namespace Prisma {
       weight: number | null
       microphoneQuality: number | null
       sellsCount: number | null
+      purchasedCount: number | null
       chip: string | null
       equipment: string | null
       createdAt: Date
@@ -1923,7 +1939,7 @@ export namespace Prisma {
     readonly images: FieldRef<"Product", 'String[]'>
     readonly olxUrl: FieldRef<"Product", 'String'>
     readonly pinduoduoUrl: FieldRef<"Product", 'String'>
-    readonly priceUAH: FieldRef<"Product", 'Float'>
+    readonly priceCNY: FieldRef<"Product", 'Float'>
     readonly priceInUA: FieldRef<"Product", 'Float'>
     readonly workModalWindowIOS: FieldRef<"Product", 'Boolean'>
     readonly soundReducer: FieldRef<"Product", 'Boolean'>
@@ -1933,6 +1949,7 @@ export namespace Prisma {
     readonly weight: FieldRef<"Product", 'Float'>
     readonly microphoneQuality: FieldRef<"Product", 'Int'>
     readonly sellsCount: FieldRef<"Product", 'Int'>
+    readonly purchasedCount: FieldRef<"Product", 'Int'>
     readonly chip: FieldRef<"Product", 'String'>
     readonly equipment: FieldRef<"Product", 'String'>
     readonly createdAt: FieldRef<"Product", 'DateTime'>
@@ -4581,7 +4598,7 @@ export namespace Prisma {
     images: 'images',
     olxUrl: 'olxUrl',
     pinduoduoUrl: 'pinduoduoUrl',
-    priceUAH: 'priceUAH',
+    priceCNY: 'priceCNY',
     priceInUA: 'priceInUA',
     workModalWindowIOS: 'workModalWindowIOS',
     soundReducer: 'soundReducer',
@@ -4591,6 +4608,7 @@ export namespace Prisma {
     weight: 'weight',
     microphoneQuality: 'microphoneQuality',
     sellsCount: 'sellsCount',
+    purchasedCount: 'purchasedCount',
     chip: 'chip',
     equipment: 'equipment',
     createdAt: 'createdAt'
@@ -4724,7 +4742,7 @@ export namespace Prisma {
     images?: StringNullableListFilter<"Product">
     olxUrl?: StringNullableFilter<"Product"> | string | null
     pinduoduoUrl?: StringNullableFilter<"Product"> | string | null
-    priceUAH?: FloatFilter<"Product"> | number
+    priceCNY?: FloatFilter<"Product"> | number
     priceInUA?: FloatNullableFilter<"Product"> | number | null
     workModalWindowIOS?: BoolFilter<"Product"> | boolean
     soundReducer?: BoolFilter<"Product"> | boolean
@@ -4734,6 +4752,7 @@ export namespace Prisma {
     weight?: FloatNullableFilter<"Product"> | number | null
     microphoneQuality?: IntNullableFilter<"Product"> | number | null
     sellsCount?: IntNullableFilter<"Product"> | number | null
+    purchasedCount?: IntNullableFilter<"Product"> | number | null
     chip?: StringNullableFilter<"Product"> | string | null
     equipment?: StringNullableFilter<"Product"> | string | null
     createdAt?: DateTimeFilter<"Product"> | Date | string
@@ -4747,7 +4766,7 @@ export namespace Prisma {
     images?: SortOrder
     olxUrl?: SortOrderInput | SortOrder
     pinduoduoUrl?: SortOrderInput | SortOrder
-    priceUAH?: SortOrder
+    priceCNY?: SortOrder
     priceInUA?: SortOrderInput | SortOrder
     workModalWindowIOS?: SortOrder
     soundReducer?: SortOrder
@@ -4757,6 +4776,7 @@ export namespace Prisma {
     weight?: SortOrderInput | SortOrder
     microphoneQuality?: SortOrderInput | SortOrder
     sellsCount?: SortOrderInput | SortOrder
+    purchasedCount?: SortOrderInput | SortOrder
     chip?: SortOrderInput | SortOrder
     equipment?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -4773,7 +4793,7 @@ export namespace Prisma {
     images?: StringNullableListFilter<"Product">
     olxUrl?: StringNullableFilter<"Product"> | string | null
     pinduoduoUrl?: StringNullableFilter<"Product"> | string | null
-    priceUAH?: FloatFilter<"Product"> | number
+    priceCNY?: FloatFilter<"Product"> | number
     priceInUA?: FloatNullableFilter<"Product"> | number | null
     workModalWindowIOS?: BoolFilter<"Product"> | boolean
     soundReducer?: BoolFilter<"Product"> | boolean
@@ -4783,6 +4803,7 @@ export namespace Prisma {
     weight?: FloatNullableFilter<"Product"> | number | null
     microphoneQuality?: IntNullableFilter<"Product"> | number | null
     sellsCount?: IntNullableFilter<"Product"> | number | null
+    purchasedCount?: IntNullableFilter<"Product"> | number | null
     chip?: StringNullableFilter<"Product"> | string | null
     equipment?: StringNullableFilter<"Product"> | string | null
     createdAt?: DateTimeFilter<"Product"> | Date | string
@@ -4796,7 +4817,7 @@ export namespace Prisma {
     images?: SortOrder
     olxUrl?: SortOrderInput | SortOrder
     pinduoduoUrl?: SortOrderInput | SortOrder
-    priceUAH?: SortOrder
+    priceCNY?: SortOrder
     priceInUA?: SortOrderInput | SortOrder
     workModalWindowIOS?: SortOrder
     soundReducer?: SortOrder
@@ -4806,6 +4827,7 @@ export namespace Prisma {
     weight?: SortOrderInput | SortOrder
     microphoneQuality?: SortOrderInput | SortOrder
     sellsCount?: SortOrderInput | SortOrder
+    purchasedCount?: SortOrderInput | SortOrder
     chip?: SortOrderInput | SortOrder
     equipment?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -4825,7 +4847,7 @@ export namespace Prisma {
     images?: StringNullableListFilter<"Product">
     olxUrl?: StringNullableWithAggregatesFilter<"Product"> | string | null
     pinduoduoUrl?: StringNullableWithAggregatesFilter<"Product"> | string | null
-    priceUAH?: FloatWithAggregatesFilter<"Product"> | number
+    priceCNY?: FloatWithAggregatesFilter<"Product"> | number
     priceInUA?: FloatNullableWithAggregatesFilter<"Product"> | number | null
     workModalWindowIOS?: BoolWithAggregatesFilter<"Product"> | boolean
     soundReducer?: BoolWithAggregatesFilter<"Product"> | boolean
@@ -4835,6 +4857,7 @@ export namespace Prisma {
     weight?: FloatNullableWithAggregatesFilter<"Product"> | number | null
     microphoneQuality?: IntNullableWithAggregatesFilter<"Product"> | number | null
     sellsCount?: IntNullableWithAggregatesFilter<"Product"> | number | null
+    purchasedCount?: IntNullableWithAggregatesFilter<"Product"> | number | null
     chip?: StringNullableWithAggregatesFilter<"Product"> | string | null
     equipment?: StringNullableWithAggregatesFilter<"Product"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Product"> | Date | string
@@ -4955,7 +4978,7 @@ export namespace Prisma {
     images?: ProductCreateimagesInput | string[]
     olxUrl?: string | null
     pinduoduoUrl?: string | null
-    priceUAH: number
+    priceCNY: number
     priceInUA?: number | null
     workModalWindowIOS?: boolean
     soundReducer?: boolean
@@ -4965,6 +4988,7 @@ export namespace Prisma {
     weight?: number | null
     microphoneQuality?: number | null
     sellsCount?: number | null
+    purchasedCount?: number | null
     chip?: string | null
     equipment?: string | null
     createdAt?: Date | string
@@ -4978,7 +5002,7 @@ export namespace Prisma {
     images?: ProductCreateimagesInput | string[]
     olxUrl?: string | null
     pinduoduoUrl?: string | null
-    priceUAH: number
+    priceCNY: number
     priceInUA?: number | null
     workModalWindowIOS?: boolean
     soundReducer?: boolean
@@ -4988,6 +5012,7 @@ export namespace Prisma {
     weight?: number | null
     microphoneQuality?: number | null
     sellsCount?: number | null
+    purchasedCount?: number | null
     chip?: string | null
     equipment?: string | null
     createdAt?: Date | string
@@ -5001,7 +5026,7 @@ export namespace Prisma {
     images?: ProductUpdateimagesInput | string[]
     olxUrl?: NullableStringFieldUpdateOperationsInput | string | null
     pinduoduoUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    priceUAH?: FloatFieldUpdateOperationsInput | number
+    priceCNY?: FloatFieldUpdateOperationsInput | number
     priceInUA?: NullableFloatFieldUpdateOperationsInput | number | null
     workModalWindowIOS?: BoolFieldUpdateOperationsInput | boolean
     soundReducer?: BoolFieldUpdateOperationsInput | boolean
@@ -5011,6 +5036,7 @@ export namespace Prisma {
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     microphoneQuality?: NullableIntFieldUpdateOperationsInput | number | null
     sellsCount?: NullableIntFieldUpdateOperationsInput | number | null
+    purchasedCount?: NullableIntFieldUpdateOperationsInput | number | null
     chip?: NullableStringFieldUpdateOperationsInput | string | null
     equipment?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -5024,7 +5050,7 @@ export namespace Prisma {
     images?: ProductUpdateimagesInput | string[]
     olxUrl?: NullableStringFieldUpdateOperationsInput | string | null
     pinduoduoUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    priceUAH?: FloatFieldUpdateOperationsInput | number
+    priceCNY?: FloatFieldUpdateOperationsInput | number
     priceInUA?: NullableFloatFieldUpdateOperationsInput | number | null
     workModalWindowIOS?: BoolFieldUpdateOperationsInput | boolean
     soundReducer?: BoolFieldUpdateOperationsInput | boolean
@@ -5034,6 +5060,7 @@ export namespace Prisma {
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     microphoneQuality?: NullableIntFieldUpdateOperationsInput | number | null
     sellsCount?: NullableIntFieldUpdateOperationsInput | number | null
+    purchasedCount?: NullableIntFieldUpdateOperationsInput | number | null
     chip?: NullableStringFieldUpdateOperationsInput | string | null
     equipment?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -5047,7 +5074,7 @@ export namespace Prisma {
     images?: ProductCreateimagesInput | string[]
     olxUrl?: string | null
     pinduoduoUrl?: string | null
-    priceUAH: number
+    priceCNY: number
     priceInUA?: number | null
     workModalWindowIOS?: boolean
     soundReducer?: boolean
@@ -5057,6 +5084,7 @@ export namespace Prisma {
     weight?: number | null
     microphoneQuality?: number | null
     sellsCount?: number | null
+    purchasedCount?: number | null
     chip?: string | null
     equipment?: string | null
     createdAt?: Date | string
@@ -5068,7 +5096,7 @@ export namespace Prisma {
     images?: ProductUpdateimagesInput | string[]
     olxUrl?: NullableStringFieldUpdateOperationsInput | string | null
     pinduoduoUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    priceUAH?: FloatFieldUpdateOperationsInput | number
+    priceCNY?: FloatFieldUpdateOperationsInput | number
     priceInUA?: NullableFloatFieldUpdateOperationsInput | number | null
     workModalWindowIOS?: BoolFieldUpdateOperationsInput | boolean
     soundReducer?: BoolFieldUpdateOperationsInput | boolean
@@ -5078,6 +5106,7 @@ export namespace Prisma {
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     microphoneQuality?: NullableIntFieldUpdateOperationsInput | number | null
     sellsCount?: NullableIntFieldUpdateOperationsInput | number | null
+    purchasedCount?: NullableIntFieldUpdateOperationsInput | number | null
     chip?: NullableStringFieldUpdateOperationsInput | string | null
     equipment?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -5089,7 +5118,7 @@ export namespace Prisma {
     images?: ProductUpdateimagesInput | string[]
     olxUrl?: NullableStringFieldUpdateOperationsInput | string | null
     pinduoduoUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    priceUAH?: FloatFieldUpdateOperationsInput | number
+    priceCNY?: FloatFieldUpdateOperationsInput | number
     priceInUA?: NullableFloatFieldUpdateOperationsInput | number | null
     workModalWindowIOS?: BoolFieldUpdateOperationsInput | boolean
     soundReducer?: BoolFieldUpdateOperationsInput | boolean
@@ -5099,6 +5128,7 @@ export namespace Prisma {
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     microphoneQuality?: NullableIntFieldUpdateOperationsInput | number | null
     sellsCount?: NullableIntFieldUpdateOperationsInput | number | null
+    purchasedCount?: NullableIntFieldUpdateOperationsInput | number | null
     chip?: NullableStringFieldUpdateOperationsInput | string | null
     equipment?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -5325,7 +5355,7 @@ export namespace Prisma {
     images?: SortOrder
     olxUrl?: SortOrder
     pinduoduoUrl?: SortOrder
-    priceUAH?: SortOrder
+    priceCNY?: SortOrder
     priceInUA?: SortOrder
     workModalWindowIOS?: SortOrder
     soundReducer?: SortOrder
@@ -5335,17 +5365,19 @@ export namespace Prisma {
     weight?: SortOrder
     microphoneQuality?: SortOrder
     sellsCount?: SortOrder
+    purchasedCount?: SortOrder
     chip?: SortOrder
     equipment?: SortOrder
     createdAt?: SortOrder
   }
 
   export type ProductAvgOrderByAggregateInput = {
-    priceUAH?: SortOrder
+    priceCNY?: SortOrder
     priceInUA?: SortOrder
     weight?: SortOrder
     microphoneQuality?: SortOrder
     sellsCount?: SortOrder
+    purchasedCount?: SortOrder
   }
 
   export type ProductMaxOrderByAggregateInput = {
@@ -5353,7 +5385,7 @@ export namespace Prisma {
     name?: SortOrder
     olxUrl?: SortOrder
     pinduoduoUrl?: SortOrder
-    priceUAH?: SortOrder
+    priceCNY?: SortOrder
     priceInUA?: SortOrder
     workModalWindowIOS?: SortOrder
     soundReducer?: SortOrder
@@ -5363,6 +5395,7 @@ export namespace Prisma {
     weight?: SortOrder
     microphoneQuality?: SortOrder
     sellsCount?: SortOrder
+    purchasedCount?: SortOrder
     chip?: SortOrder
     equipment?: SortOrder
     createdAt?: SortOrder
@@ -5373,7 +5406,7 @@ export namespace Prisma {
     name?: SortOrder
     olxUrl?: SortOrder
     pinduoduoUrl?: SortOrder
-    priceUAH?: SortOrder
+    priceCNY?: SortOrder
     priceInUA?: SortOrder
     workModalWindowIOS?: SortOrder
     soundReducer?: SortOrder
@@ -5383,17 +5416,19 @@ export namespace Prisma {
     weight?: SortOrder
     microphoneQuality?: SortOrder
     sellsCount?: SortOrder
+    purchasedCount?: SortOrder
     chip?: SortOrder
     equipment?: SortOrder
     createdAt?: SortOrder
   }
 
   export type ProductSumOrderByAggregateInput = {
-    priceUAH?: SortOrder
+    priceCNY?: SortOrder
     priceInUA?: SortOrder
     weight?: SortOrder
     microphoneQuality?: SortOrder
     sellsCount?: SortOrder
+    purchasedCount?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -6026,7 +6061,7 @@ export namespace Prisma {
     images?: ProductCreateimagesInput | string[]
     olxUrl?: string | null
     pinduoduoUrl?: string | null
-    priceUAH: number
+    priceCNY: number
     priceInUA?: number | null
     workModalWindowIOS?: boolean
     soundReducer?: boolean
@@ -6036,6 +6071,7 @@ export namespace Prisma {
     weight?: number | null
     microphoneQuality?: number | null
     sellsCount?: number | null
+    purchasedCount?: number | null
     chip?: string | null
     equipment?: string | null
     createdAt?: Date | string
@@ -6048,7 +6084,7 @@ export namespace Prisma {
     images?: ProductCreateimagesInput | string[]
     olxUrl?: string | null
     pinduoduoUrl?: string | null
-    priceUAH: number
+    priceCNY: number
     priceInUA?: number | null
     workModalWindowIOS?: boolean
     soundReducer?: boolean
@@ -6058,6 +6094,7 @@ export namespace Prisma {
     weight?: number | null
     microphoneQuality?: number | null
     sellsCount?: number | null
+    purchasedCount?: number | null
     chip?: string | null
     equipment?: string | null
     createdAt?: Date | string
@@ -6086,7 +6123,7 @@ export namespace Prisma {
     images?: ProductUpdateimagesInput | string[]
     olxUrl?: NullableStringFieldUpdateOperationsInput | string | null
     pinduoduoUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    priceUAH?: FloatFieldUpdateOperationsInput | number
+    priceCNY?: FloatFieldUpdateOperationsInput | number
     priceInUA?: NullableFloatFieldUpdateOperationsInput | number | null
     workModalWindowIOS?: BoolFieldUpdateOperationsInput | boolean
     soundReducer?: BoolFieldUpdateOperationsInput | boolean
@@ -6096,6 +6133,7 @@ export namespace Prisma {
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     microphoneQuality?: NullableIntFieldUpdateOperationsInput | number | null
     sellsCount?: NullableIntFieldUpdateOperationsInput | number | null
+    purchasedCount?: NullableIntFieldUpdateOperationsInput | number | null
     chip?: NullableStringFieldUpdateOperationsInput | string | null
     equipment?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -6108,7 +6146,7 @@ export namespace Prisma {
     images?: ProductUpdateimagesInput | string[]
     olxUrl?: NullableStringFieldUpdateOperationsInput | string | null
     pinduoduoUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    priceUAH?: FloatFieldUpdateOperationsInput | number
+    priceCNY?: FloatFieldUpdateOperationsInput | number
     priceInUA?: NullableFloatFieldUpdateOperationsInput | number | null
     workModalWindowIOS?: BoolFieldUpdateOperationsInput | boolean
     soundReducer?: BoolFieldUpdateOperationsInput | boolean
@@ -6118,6 +6156,7 @@ export namespace Prisma {
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     microphoneQuality?: NullableIntFieldUpdateOperationsInput | number | null
     sellsCount?: NullableIntFieldUpdateOperationsInput | number | null
+    purchasedCount?: NullableIntFieldUpdateOperationsInput | number | null
     chip?: NullableStringFieldUpdateOperationsInput | string | null
     equipment?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -6130,7 +6169,7 @@ export namespace Prisma {
     images?: ProductCreateimagesInput | string[]
     olxUrl?: string | null
     pinduoduoUrl?: string | null
-    priceUAH: number
+    priceCNY: number
     priceInUA?: number | null
     workModalWindowIOS?: boolean
     soundReducer?: boolean
@@ -6140,6 +6179,7 @@ export namespace Prisma {
     weight?: number | null
     microphoneQuality?: number | null
     sellsCount?: number | null
+    purchasedCount?: number | null
     chip?: string | null
     equipment?: string | null
     createdAt?: Date | string
@@ -6152,7 +6192,7 @@ export namespace Prisma {
     images?: ProductCreateimagesInput | string[]
     olxUrl?: string | null
     pinduoduoUrl?: string | null
-    priceUAH: number
+    priceCNY: number
     priceInUA?: number | null
     workModalWindowIOS?: boolean
     soundReducer?: boolean
@@ -6162,6 +6202,7 @@ export namespace Prisma {
     weight?: number | null
     microphoneQuality?: number | null
     sellsCount?: number | null
+    purchasedCount?: number | null
     chip?: string | null
     equipment?: string | null
     createdAt?: Date | string
@@ -6190,7 +6231,7 @@ export namespace Prisma {
     images?: ProductUpdateimagesInput | string[]
     olxUrl?: NullableStringFieldUpdateOperationsInput | string | null
     pinduoduoUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    priceUAH?: FloatFieldUpdateOperationsInput | number
+    priceCNY?: FloatFieldUpdateOperationsInput | number
     priceInUA?: NullableFloatFieldUpdateOperationsInput | number | null
     workModalWindowIOS?: BoolFieldUpdateOperationsInput | boolean
     soundReducer?: BoolFieldUpdateOperationsInput | boolean
@@ -6200,6 +6241,7 @@ export namespace Prisma {
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     microphoneQuality?: NullableIntFieldUpdateOperationsInput | number | null
     sellsCount?: NullableIntFieldUpdateOperationsInput | number | null
+    purchasedCount?: NullableIntFieldUpdateOperationsInput | number | null
     chip?: NullableStringFieldUpdateOperationsInput | string | null
     equipment?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -6212,7 +6254,7 @@ export namespace Prisma {
     images?: ProductUpdateimagesInput | string[]
     olxUrl?: NullableStringFieldUpdateOperationsInput | string | null
     pinduoduoUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    priceUAH?: FloatFieldUpdateOperationsInput | number
+    priceCNY?: FloatFieldUpdateOperationsInput | number
     priceInUA?: NullableFloatFieldUpdateOperationsInput | number | null
     workModalWindowIOS?: BoolFieldUpdateOperationsInput | boolean
     soundReducer?: BoolFieldUpdateOperationsInput | boolean
@@ -6222,6 +6264,7 @@ export namespace Prisma {
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     microphoneQuality?: NullableIntFieldUpdateOperationsInput | number | null
     sellsCount?: NullableIntFieldUpdateOperationsInput | number | null
+    purchasedCount?: NullableIntFieldUpdateOperationsInput | number | null
     chip?: NullableStringFieldUpdateOperationsInput | string | null
     equipment?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string

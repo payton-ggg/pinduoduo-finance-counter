@@ -10,7 +10,7 @@ import { ImagesFieldArray } from "./ImagesFieldArray";
 
 type FormValues = {
   name: string;
-  priceUAH: number;
+  priceCNY: number;
   priceInUA?: number;
   olxUrl?: string;
   pinduoduoUrl?: string;
@@ -22,6 +22,7 @@ type FormValues = {
   weight?: number;
   microphoneQuality?: number;
   sellsCount?: number;
+  purchasedCount?: number;
   chip?: string;
   equipment?: string;
   images: { url: string }[];
@@ -39,7 +40,7 @@ export default function ProductForm() {
   } = useForm<FormValues>({
     defaultValues: {
       name: "",
-      priceUAH: 0,
+      priceCNY: 0,
       priceInUA: undefined,
       olxUrl: "",
       pinduoduoUrl: "",
@@ -51,6 +52,7 @@ export default function ProductForm() {
       weight: undefined,
       microphoneQuality: undefined,
       sellsCount: undefined,
+      purchasedCount: undefined,
       chip: "",
       equipment: "",
       images: [{ url: "" }],
@@ -65,7 +67,7 @@ export default function ProductForm() {
   const onSubmit = async (values: FormValues) => {
     const payload = {
       name: values.name,
-      priceUAH: Number(values.priceUAH),
+      priceCNY: Number(values.priceCNY),
       priceInUA: values.priceInUA ?? null,
       olxUrl: values.olxUrl || null,
       pinduoduoUrl: values.pinduoduoUrl || null,
@@ -77,6 +79,7 @@ export default function ProductForm() {
       weight: values.weight ?? null,
       microphoneQuality: values.microphoneQuality ?? null,
       sellsCount: values.sellsCount ?? null,
+      purchasedCount: values.purchasedCount ?? null,
       chip: values.chip || null,
       equipment: values.equipment || null,
       images: (values.images || [])

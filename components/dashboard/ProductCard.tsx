@@ -12,7 +12,7 @@ export type ProductUI = {
   img: string;
   spent: number;
   income: number;
-  priceUAH: number;
+  priceCNY: number;
   priceInUA?: number;
 };
 
@@ -65,14 +65,9 @@ export function ProductCard({ product }: ProductCardProps) {
           </span>
         </p>
         <p className="text-sm mt-4 text-gray-600">
-          Price to buy:{" "}
-          {rate > 0
-            ? `${(product.priceUAH * rate).toFixed(2)}₴ | ${product.priceUAH}¥`
-            : `${product.priceUAH}¥`}
+          Закупка: {rate > 0 ? `${(product.priceCNY * rate).toFixed(2)}₴ | ${product.priceCNY}¥` : `${product.priceCNY}¥`}
         </p>
-        <p className="text-sm text-gray-600">
-          Price to sell: {product.priceInUA || "N/A"}₴
-        </p>
+        <p className="text-sm text-gray-600">Продажа: {product.priceInUA || "N/A"}₴</p>
         <Button
           onClick={() => handleOpen()}
           variant="outline"

@@ -1,13 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 export async function GET(
-  _req: Request,
-  { params }: { params: { id: string } }
+  _req: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params;
+  const { id } = await context.params;
   try {
     const product = await prisma.product.findUnique({
       where: { id },
@@ -23,10 +23,10 @@ export async function GET(
 }
 
 export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params;
+  const { id } = await context.params;
 
   try {
     const data = await req.json();
@@ -48,7 +48,7 @@ export async function PATCH(
         images: imagesUpdate,
         olxUrl: data.olxUrl,
         pinduoduoUrl: data.pinduoduoUrl,
-        priceUAH: data.priceUAH,
+        priceCNY: data.priceCNY,
         workModalWindowIOS: data.workModalWindowIOS,
         soundReducer: data.soundReducer,
         sensesOfEar: data.sensesOfEar,
@@ -57,6 +57,7 @@ export async function PATCH(
         weight: data.weight,
         microphoneQuality: data.microphoneQuality,
         sellsCount: data.sellsCount,
+        purchasedCount: data.purchasedCount,
         chip: data.chip,
         equipment: data.equipment,
         priceInUA: data.priceInUA,
@@ -73,10 +74,10 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _req: Request,
-  { params }: { params: { id: string } }
+  _req: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params;
+  const { id } = await context.params;
 
   try {
     // Ensure related records are removed first to avoid FK violations

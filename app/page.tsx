@@ -40,7 +40,7 @@ export default function Dashboard() {
             img,
             spent,
             income,
-            priceUAH: p.priceUAH || 0,
+            priceCNY: p.priceCNY || 0,
             priceInUA: p.priceInUA || 0,
           } as ProductUI;
         });

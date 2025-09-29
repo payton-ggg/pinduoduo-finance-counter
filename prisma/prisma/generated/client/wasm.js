@@ -98,7 +98,7 @@ exports.Prisma.ProductScalarFieldEnum = {
   images: 'images',
   olxUrl: 'olxUrl',
   pinduoduoUrl: 'pinduoduoUrl',
-  priceUAH: 'priceUAH',
+  priceCNY: 'priceCNY',
   priceInUA: 'priceInUA',
   workModalWindowIOS: 'workModalWindowIOS',
   soundReducer: 'soundReducer',
@@ -108,6 +108,7 @@ exports.Prisma.ProductScalarFieldEnum = {
   weight: 'weight',
   microphoneQuality: 'microphoneQuality',
   sellsCount: 'sellsCount',
+  purchasedCount: 'purchasedCount',
   chip: 'chip',
   equipment: 'equipment',
   createdAt: 'createdAt'
@@ -178,7 +179,7 @@ const config = {
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": "../../../../.env",
+    "rootEnvPath": null,
     "schemaEnvPath": "../../../../.env"
   },
   "relativePath": "../../..",
@@ -188,7 +189,6 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
-  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
@@ -197,13 +197,13 @@ const config = {
       }
     }
   },
-  "inlineSchema": "datasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\ngenerator client {\n  provider   = \"prisma-client-js\"\n  output     = \"./prisma/generated/client\"\n  engineType = \"binary\"\n}\n\nmodel Product {\n  id           String   @id @default(cuid())\n  name         String\n  images       String[] // массив ссылок на фото\n  olxUrl       String?\n  pinduoduoUrl String?\n  priceUAH     Float\n  priceInUA    Float?\n\n  workModalWindowIOS Boolean @default(false)\n  soundReducer       Boolean @default(false)\n  sensesOfEar        Boolean @default(false)\n  wirelessCharger    Boolean @default(false)\n  gyroscope          Boolean @default(false)\n\n  weight            Float?\n  microphoneQuality Int?\n  sellsCount        Int?\n  chip              String?\n  equipment         String?\n\n  expenses  Expense[]\n  incomes   Income[]\n  createdAt DateTime  @default(now())\n}\n\nmodel Expense {\n  id        String   @id @default(cuid())\n  productId String\n  product   Product  @relation(fields: [productId], references: [id])\n  amount    Float\n  type      String\n  createdAt DateTime @default(now())\n}\n\nmodel Income {\n  id        String   @id @default(cuid())\n  productId String\n  product   Product  @relation(fields: [productId], references: [id])\n  amount    Float\n  createdAt DateTime @default(now())\n}\n",
-  "inlineSchemaHash": "82f3c48c5033f1366523c43b840d6b3d134e240e8baee7e46027bc41a382fefd",
+  "inlineSchema": "datasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\ngenerator client {\n  provider   = \"prisma-client-js\"\n  output     = \"./prisma/generated/client\"\n  engineType = \"binary\"\n}\n\nmodel Product {\n  id           String   @id @default(cuid())\n  name         String\n  images       String[] // массив ссылок на фото\n  olxUrl       String?\n  pinduoduoUrl String?\n  priceCNY     Float    @map(\"priceUAH\")\n  priceInUA    Float?\n\n  workModalWindowIOS Boolean @default(false)\n  soundReducer       Boolean @default(false)\n  sensesOfEar        Boolean @default(false)\n  wirelessCharger    Boolean @default(false)\n  gyroscope          Boolean @default(false)\n\n  weight            Float?\n  microphoneQuality Int?\n  sellsCount        Int?\n  purchasedCount    Int?    @default(0)\n  chip              String?\n  equipment         String?\n\n  expenses  Expense[]\n  incomes   Income[]\n  createdAt DateTime  @default(now())\n}\n\nmodel Expense {\n  id        String   @id @default(cuid())\n  productId String\n  product   Product  @relation(fields: [productId], references: [id])\n  amount    Float\n  type      String\n  createdAt DateTime @default(now())\n}\n\nmodel Income {\n  id        String   @id @default(cuid())\n  productId String\n  product   Product  @relation(fields: [productId], references: [id])\n  amount    Float\n  createdAt DateTime @default(now())\n}\n",
+  "inlineSchemaHash": "8e5c03093f60ad55983162c9a49ff656cd813f7ed62260d86d6b71329b0adb86",
   "copyEngine": true
 }
 config.dirname = '/'
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"Product\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"images\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"olxUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"pinduoduoUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"priceUAH\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"priceInUA\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"workModalWindowIOS\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"soundReducer\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"sensesOfEar\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"wirelessCharger\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"gyroscope\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"weight\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"microphoneQuality\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"sellsCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"chip\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"equipment\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"expenses\",\"kind\":\"object\",\"type\":\"Expense\",\"relationName\":\"ExpenseToProduct\"},{\"name\":\"incomes\",\"kind\":\"object\",\"type\":\"Income\",\"relationName\":\"IncomeToProduct\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"Expense\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"productId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"product\",\"kind\":\"object\",\"type\":\"Product\",\"relationName\":\"ExpenseToProduct\"},{\"name\":\"amount\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"type\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"Income\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"productId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"product\",\"kind\":\"object\",\"type\":\"Product\",\"relationName\":\"IncomeToProduct\"},{\"name\":\"amount\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"Product\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"images\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"olxUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"pinduoduoUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"priceCNY\",\"kind\":\"scalar\",\"type\":\"Float\",\"dbName\":\"priceUAH\"},{\"name\":\"priceInUA\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"workModalWindowIOS\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"soundReducer\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"sensesOfEar\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"wirelessCharger\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"gyroscope\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"weight\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"microphoneQuality\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"sellsCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"purchasedCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"chip\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"equipment\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"expenses\",\"kind\":\"object\",\"type\":\"Expense\",\"relationName\":\"ExpenseToProduct\"},{\"name\":\"incomes\",\"kind\":\"object\",\"type\":\"Income\",\"relationName\":\"IncomeToProduct\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"Expense\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"productId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"product\",\"kind\":\"object\",\"type\":\"Product\",\"relationName\":\"ExpenseToProduct\"},{\"name\":\"amount\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"type\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"Income\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"productId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"product\",\"kind\":\"object\",\"type\":\"Product\",\"relationName\":\"IncomeToProduct\"},{\"name\":\"amount\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.engineWasm = {
   getRuntime: async () => require('./query_engine_bg.js'),

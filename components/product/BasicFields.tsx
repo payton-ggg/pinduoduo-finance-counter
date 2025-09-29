@@ -4,7 +4,7 @@ import { FieldErrors, UseFormRegister } from "react-hook-form";
 
 type FormValues = {
   name: string;
-  priceUAH: number;
+  priceCNY: number;
   priceInUA?: number;
   olxUrl?: string;
   pinduoduoUrl?: string;
@@ -13,6 +13,7 @@ type FormValues = {
   weight?: number;
   microphoneQuality?: number;
   sellsCount?: number;
+  purchasedCount?: number;
 };
 
 type BasicFieldsProps = {
@@ -31,47 +32,64 @@ export function BasicFields({ register, errors }: BasicFieldsProps) {
           placeholder="Например: AirPods Pro Replica"
         />
         {errors.name && (
-          <p className="text-red-600 text-sm mt-1">{String(errors.name.message)}</p>
+          <p className="text-red-600 text-sm mt-1">
+            {String(errors.name.message)}
+          </p>
         )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Цена (¥)</label>
+          <label className="block text-sm font-medium mb-1">Цена закупки (¥)</label>
           <input
             type="number"
             step="0.01"
             className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            {...register("priceUAH", {
+            {...register("priceCNY", {
               required: "Цена обязательна",
               valueAsNumber: true,
               min: { value: 0, message: "Цена должна быть >= 0" },
             })}
             placeholder="Например: 499.99"
           />
-          {errors.priceUAH && (
-            <p className="text-red-600 text-sm mt-1">{String(errors.priceUAH.message)}</p>
+          {errors.priceCNY && (
+            <p className="text-red-600 text-sm mt-1">
+              {String(errors.priceCNY.message)}
+            </p>
           )}
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Цена в гривне (₴)</label>
+          <label className="block text-sm font-medium mb-1">
+            Цена продажи (₴)
+          </label>
           <input
             type="number"
             step="0.01"
             className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            {...register("priceInUA", { valueAsNumber: true, min: { value: 0, message: "Должна быть >= 0" } })}
-            placeholder="Заполняется автоматически по курсу"
+            {...register("priceInUA", {
+              valueAsNumber: true,
+              min: { value: 0, message: "Должна быть >= 0" },
+            })}
+            placeholder="Цена за единицу"
           />
         </div>
       </div>
 
+      <div></div>
+
       <div>
         <label className="block text-sm font-medium mb-1">Ссылка OLX</label>
-        <input className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" {...register("olxUrl")} placeholder="https://www.olx.ua/…" />
+        <input
+          className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          {...register("olxUrl")}
+          placeholder="https://www.olx.ua/…"
+        />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Ссылка Pinduoduo</label>
+        <label className="block text-sm font-medium mb-1">
+          Ссылка Pinduoduo
+        </label>
         <input
           className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           {...register("pinduoduoUrl")}
@@ -82,26 +100,59 @@ export function BasicFields({ register, errors }: BasicFieldsProps) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium mb-1">Чип</label>
-          <input className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" {...register("chip")} placeholder="Например: H2" />
+          <input
+            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            {...register("chip")}
+            placeholder="Например: H2"
+          />
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Комплектация</label>
-          <input className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" {...register("equipment")} placeholder="Например: Чехол, Кабель" />
+          <input
+            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            {...register("equipment")}
+            placeholder="Например: Чехол, Кабель"
+          />
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div>
           <label className="block text-sm font-medium mb-1">Вес</label>
-          <input type="number" step="0.01" className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" {...register("weight", { valueAsNumber: true })} />
+          <input
+            type="number"
+            step="0.01"
+            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            {...register("weight", { valueAsNumber: true })}
+          />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Качество микрофона</label>
-          <input type="number" className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" {...register("microphoneQuality", { valueAsNumber: true })} />
+          <label className="block text-sm font-medium mb-1">
+            Качество микрофона
+          </label>
+          <input
+            type="number"
+            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            {...register("microphoneQuality", { valueAsNumber: true })}
+          />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Количество продаж</label>
-          <input type="number" className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" {...register("sellsCount", { valueAsNumber: true })} />
+          <label className="block text-sm font-medium mb-1">
+            Продано (шт)
+          </label>
+          <input
+            type="number"
+            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            {...register("sellsCount", { valueAsNumber: true })}
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Куплено (шт)</label>
+          <input
+            type="number"
+            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            {...register("purchasedCount", { valueAsNumber: true })}
+          />
         </div>
       </div>
     </div>

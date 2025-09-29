@@ -15,7 +15,7 @@ model Product {
   images    String[] // массив ссылок на фото
   olxUrl    String?
   pinduoduoUrl String?
-  priceUAH  Float
+  priceCNY  Float   @map("priceUAH")
   priceInUA Float?
 
   workModalWindowIOS Boolean @default(false)
@@ -26,7 +26,8 @@ model Product {
 
   weight    Float? 
   microphoneQuality Int?
-  sellsCount Int? 
+  sellsCount Int?
+  purchasedCount Int? @default(0)
   chip      String?
   equipment String? 
 

@@ -18,7 +18,7 @@ type FormValues = {
   images: { url: string }[];
   olxUrl?: string;
   pinduoduoUrl?: string;
-  priceUAH?: number;
+  priceCNY?: number;
   workModalWindowIOS?: boolean;
   soundReducer?: boolean;
   sensesOfEar?: boolean;
@@ -27,6 +27,7 @@ type FormValues = {
   weight?: number;
   microphoneQuality?: string;
   sellsCount?: number;
+  purchasedCount?: number;
   chip?: string;
   equipment?: string;
   priceInUA?: number;
@@ -49,7 +50,7 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
     images: normalizedImages,
     olxUrl: initialData?.olxUrl ?? "",
     pinduoduoUrl: initialData?.pinduoduoUrl ?? "",
-    priceUAH: initialData?.priceUAH ?? undefined,
+    priceCNY: initialData?.priceCNY ?? initialData?.priceUAH ?? undefined,
     workModalWindowIOS: initialData?.workModalWindowIOS ?? false,
     soundReducer: initialData?.soundReducer ?? false,
     sensesOfEar: initialData?.sensesOfEar ?? false,
@@ -58,11 +59,19 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
     weight: initialData?.weight ?? undefined,
     microphoneQuality: initialData?.microphoneQuality ?? "",
     sellsCount: initialData?.sellsCount ?? undefined,
+    purchasedCount: initialData?.purchasedCount ?? undefined,
     chip: initialData?.chip ?? "",
     equipment: initialData?.equipment ?? "",
     priceInUA: initialData?.priceInUA ?? undefined,
-    incomes: (initialData?.incomes || []).map((i: any) => ({ id: i.id, amount: i.amount })),
-    expenses: (initialData?.expenses || []).map((e: any) => ({ id: e.id, amount: e.amount, type: e.type })),
+    incomes: (initialData?.incomes || []).map((i: any) => ({
+      id: i.id,
+      amount: i.amount,
+    })),
+    expenses: (initialData?.expenses || []).map((e: any) => ({
+      id: e.id,
+      amount: e.amount,
+      type: e.type,
+    })),
   };
 
   const {
@@ -74,9 +83,21 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
     watch,
   } = useForm<FormValues>({ defaultValues });
 
-  const { fields: imageFields, append: appendImage, remove: removeImage } = useFieldArray({ control, name: "images" });
-  const { fields: incomeFields, append: appendIncome, remove: removeIncome } = useFieldArray({ control, name: "incomes" });
-  const { fields: expenseFields, append: appendExpense, remove: removeExpense } = useFieldArray({ control, name: "expenses" });
+  const {
+    fields: imageFields,
+    append: appendImage,
+    remove: removeImage,
+  } = useFieldArray({ control, name: "images" });
+  const {
+    fields: incomeFields,
+    append: appendIncome,
+    remove: removeIncome,
+  } = useFieldArray({ control, name: "incomes" });
+  const {
+    fields: expenseFields,
+    append: appendExpense,
+    remove: removeExpense,
+  } = useFieldArray({ control, name: "expenses" });
 
   useEffect(() => {
     const fetchRate = async () => {
@@ -96,19 +117,41 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
   }, []);
 
   const sells = watch("sellsCount");
-  const priceYuan = watch("priceUAH");
-  const computedUAH = (Number(priceYuan) || 0) * (rate > 0 ? rate : 1);
-  const computedIncome = (Number(sells) || 0) * computedUAH;
+  const purchased = watch("purchasedCount");
+  const priceCNY = watch("priceCNY");
+  const priceInUA = watch("priceInUA");
+  const purchaseUAH = (Number(priceCNY) || 0) * (rate > 0 ? rate : 1);
+  const sellingUAH = Number(priceInUA) || 0;
+  const computedIncome = (Number(sells) || 0) * sellingUAH;
+  const computedExpense = (Number(purchased) || 0) * purchaseUAH;
 
   useEffect(() => {
-    // Обновляем цену в гривне в скрытом поле и авто‑доход
-    setValue("priceInUA", Number.isFinite(computedUAH) ? Number(computedUAH.toFixed(2)) : 0, {
-      shouldDirty: true,
-    });
-    setValue("incomes", [{ amount: Number.isFinite(computedIncome) ? Number(computedIncome.toFixed(2)) : 0 }], {
-      shouldDirty: true,
-    });
-  }, [computedUAH, computedIncome, setValue]);
+    // Авто‑доход от продаж: sellsCount * priceInUA
+    setValue(
+      "incomes",
+      [
+        {
+          amount: Number.isFinite(computedIncome)
+            ? Number(computedIncome.toFixed(2))
+            : 0,
+        },
+      ],
+      { shouldDirty: true }
+    );
+    // Авто‑расход от закупки: purchasedCount * (priceCNY * rate)
+    setValue(
+      "expenses",
+      [
+        {
+          amount: Number.isFinite(computedExpense)
+            ? Number(computedExpense.toFixed(2))
+            : 0,
+          type: "Закупка",
+        },
+      ],
+      { shouldDirty: true }
+    );
+  }, [computedIncome, computedExpense, setValue]);
 
   const onSubmit = async (values: FormValues) => {
     const payload = {
@@ -125,7 +168,9 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
       return;
     }
     // Sync incomes (автоматический доход по количеству продаж и курсу)
-    const initialIncomeMap = new Map((initialData?.incomes || []).map((i: any) => [i.id, i]));
+    const initialIncomeMap = new Map(
+      (initialData?.incomes || []).map((i: any) => [i.id, i])
+    );
     for (const inc of values.incomes) {
       if (inc.id && initialIncomeMap.has(inc.id)) {
         await fetch(`/api/incomes`, {
@@ -151,20 +196,30 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
     }
 
     // Sync expenses
-    const initialExpenseMap = new Map((initialData?.expenses || []).map((e: any) => [e.id, e]));
+    const initialExpenseMap = new Map(
+      (initialData?.expenses || []).map((e: any) => [e.id, e])
+    );
     for (const exp of values.expenses) {
       if (exp.id && initialExpenseMap.has(exp.id)) {
         await fetch(`/api/expenses`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: exp.id, amount: Number(exp.amount), type: exp.type }),
+          body: JSON.stringify({
+            id: exp.id,
+            amount: Number(exp.amount),
+            type: exp.type,
+          }),
         });
         initialExpenseMap.delete(exp.id);
       } else {
         await fetch(`/api/expenses`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ productId: id, amount: Number(exp.amount), type: exp.type }),
+          body: JSON.stringify({
+            productId: id,
+            amount: Number(exp.amount),
+            type: exp.type,
+          }),
         });
       }
     }
@@ -191,23 +246,37 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
         setValue={setValue}
       />
 
-      {/* Доходы (авторасчёт) */}
+      {/* Доходы/Расходы (авторасчёт) */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <label className="text-sm font-medium">Доходы</label>
+          <label className="text-sm font-medium">Доходы / Расходы</label>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <div className="p-3 border rounded-md">
             <p className="text-sm text-gray-600">Курс CNY → UAH</p>
-            <p className="text-lg font-semibold">{rate > 0 ? rate.toFixed(2) : "—"}</p>
+            <p className="text-lg font-semibold">
+              {rate > 0 ? rate.toFixed(2) : "—"}
+            </p>
           </div>
           <div className="p-3 border rounded-md">
-            <p className="text-sm text-gray-600">Цена в гривне</p>
-            <p className="text-lg font-semibold">{computedUAH.toFixed(2)} ₴</p>
+            <p className="text-sm text-gray-600">Закупочная цена (UAH)</p>
+            <p className="text-lg font-semibold">{purchaseUAH.toFixed(2)} ₴</p>
+          </div>
+          <div className="p-3 border rounded-md">
+            <p className="text-sm text-gray-600">Продажная цена (UAH)</p>
+            <p className="text-lg font-semibold">{sellingUAH.toFixed(2)} ₴</p>
           </div>
           <div className="p-3 border rounded-md">
             <p className="text-sm text-gray-600">Рассчитанный доход</p>
-            <p className="text-lg font-semibold">{computedIncome.toFixed(2)} ₴</p>
+            <p className="text-lg font-semibold">
+              {computedIncome.toFixed(2)} ₴
+            </p>
+          </div>
+          <div className="p-3 border rounded-md">
+            <p className="text-sm text-gray-600">Рассчитанный расход</p>
+            <p className="text-lg font-semibold">
+              {computedExpense.toFixed(2)} ₴
+            </p>
           </div>
         </div>
       </div>
@@ -216,7 +285,12 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="text-sm font-medium">Расходы</label>
-          <Button type="button" onClick={() => appendExpense({ amount: 0, type: "" })}>Добавить расход</Button>
+          <Button
+            type="button"
+            onClick={() => appendExpense({ amount: 0, type: "" })}
+          >
+            Добавить расход
+          </Button>
         </div>
         <div className="space-y-2">
           {expenseFields.map((field, index) => (
@@ -226,14 +300,22 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
                 step="0.01"
                 className="flex-1 border rounded p-2"
                 placeholder="Сумма"
-                {...register(`expenses.${index}.amount` as const, { valueAsNumber: true })}
+                {...register(`expenses.${index}.amount` as const, {
+                  valueAsNumber: true,
+                })}
               />
               <input
                 className="flex-1 border rounded p-2"
                 placeholder="Тип"
                 {...register(`expenses.${index}.type` as const)}
               />
-              <Button type="button" variant="outline" onClick={() => removeExpense(index)}>Удалить</Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => removeExpense(index)}
+              >
+                Удалить
+              </Button>
             </div>
           ))}
         </div>
