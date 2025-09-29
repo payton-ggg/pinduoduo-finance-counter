@@ -18,8 +18,23 @@ export async function POST(req: Request) {
   const newProduct = await prisma.product.create({
     data: {
       name: data.name,
-      imageUrl: data.imageUrl,
+      images: data.images,
+      olxUrl: data.olxUrl,
+      pinduoduoUrl: data.pinduoduoUrl,
+      priceUAH: data.priceUAH,
+      workModalWindowIOS: data.workModalWindowIOS,
+      soundReducer: data.soundReducer,
     },
   });
   return NextResponse.json(newProduct);
+}
+
+export async function DELETE(req: Request) {
+  const { id } = await req.json();
+  await prisma.product.delete({
+    where: {
+      id,
+    },
+  });
+  return NextResponse.json({ message: "Product deleted" });
 }

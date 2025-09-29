@@ -10,7 +10,14 @@ generator client {
 model Product {
   id        String   @id @default(cuid())
   name      String
-  imageUrl  String?
+  images    String[] // массив ссылок на фото
+  olxUrl    String?
+  pinduoduoUrl String?
+  priceUAH  Float
+
+  workModalWindowIOS Boolean @default(false)
+  soundReducer       Boolean @default(false)
+
   expenses  Expense[]
   incomes   Income[]
   createdAt DateTime @default(now())
@@ -32,3 +39,4 @@ model Income {
   amount    Float
   createdAt DateTime @default(now())
 }
+
