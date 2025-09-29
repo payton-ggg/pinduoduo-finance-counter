@@ -52,16 +52,16 @@ export function ImagesFieldArray({
       </div>
       <div className="space-y-2">
         {fields.map((field, index) => (
-          <div key={field.id} className="flex gap-2">
+          <div key={field.id} className="flex flex-col sm:flex-row gap-2">
             <input
-              className="flex-1 border rounded p-2"
+              className="flex-1 border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="https://…"
               {...register(`images.${index}.url` as const)}
             />
             <input
               type="file"
               accept="image/*"
-              className="border rounded p-2"
+              className="border rounded-md p-2 text-sm"
               onChange={(e) => handleFileChange(index, e.target.files?.[0])}
               disabled={uploadingIndex === index}
             />

@@ -8,7 +8,7 @@ type FlagsFieldsProps = {
 
 export function FlagsFields({ register }: FlagsFieldsProps) {
   return (
-    <div className="grid grid-cols-3 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
       <label className="inline-flex items-center gap-2">
         <input type="checkbox" {...register("workModalWindowIOS")} />
         <span>Work Modal Window iOS</span>

@@ -26,7 +26,7 @@ export function BasicFields({ register, errors }: BasicFieldsProps) {
       <div>
         <label className="block text-sm font-medium mb-1">Name</label>
         <input
-          className="w-full border rounded p-2"
+          className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           {...register("name", { required: "Name is required" })}
           placeholder="AirPods Pro Replica"
         />
@@ -35,13 +35,13 @@ export function BasicFields({ register, errors }: BasicFieldsProps) {
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium mb-1">Price (UAH)</label>
           <input
             type="number"
             step="0.01"
-            className="w-full border rounded p-2"
+            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             {...register("priceUAH", {
               required: "Price is required",
               valueAsNumber: true,
@@ -58,7 +58,7 @@ export function BasicFields({ register, errors }: BasicFieldsProps) {
           <input
             type="number"
             step="0.01"
-            className="w-full border rounded p-2"
+            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             {...register("priceInUA", { valueAsNumber: true, min: { value: 0, message: "Must be >= 0" } })}
             placeholder="Optional"
           />
@@ -67,41 +67,41 @@ export function BasicFields({ register, errors }: BasicFieldsProps) {
 
       <div>
         <label className="block text-sm font-medium mb-1">OLX URL</label>
-        <input className="w-full border rounded p-2" {...register("olxUrl")} placeholder="https://www.olx.ua/…" />
+        <input className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" {...register("olxUrl")} placeholder="https://www.olx.ua/…" />
       </div>
 
       <div>
         <label className="block text-sm font-medium mb-1">Pinduoduo URL</label>
         <input
-          className="w-full border rounded p-2"
+          className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           {...register("pinduoduoUrl")}
           placeholder="https://mobile.yangkeduo.com/…"
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium mb-1">Chip</label>
-          <input className="w-full border rounded p-2" {...register("chip")} placeholder="e.g. H2" />
+          <input className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" {...register("chip")} placeholder="e.g. H2" />
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Equipment</label>
-          <input className="w-full border rounded p-2" {...register("equipment")} placeholder="e.g. Case, Cable" />
+          <input className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" {...register("equipment")} placeholder="e.g. Case, Cable" />
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div>
           <label className="block text-sm font-medium mb-1">Weight</label>
-          <input type="number" step="0.01" className="w-full border rounded p-2" {...register("weight", { valueAsNumber: true })} />
+          <input type="number" step="0.01" className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" {...register("weight", { valueAsNumber: true })} />
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Mic Quality</label>
-          <input type="number" className="w-full border rounded p-2" {...register("microphoneQuality", { valueAsNumber: true })} />
+          <input type="number" className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" {...register("microphoneQuality", { valueAsNumber: true })} />
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Sells Count</label>
-          <input type="number" className="w-full border rounded p-2" {...register("sellsCount", { valueAsNumber: true })} />
+          <input type="number" className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" {...register("sellsCount", { valueAsNumber: true })} />
         </div>
       </div>
     </div>

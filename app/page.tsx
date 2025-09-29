@@ -40,9 +40,12 @@ export default function Dashboard() {
             img,
             spent,
             income,
+            priceUAH: p.priceUAH || 0,
+            priceInUA: p.priceInUA || 0,
           } as ProductUI;
         });
         setProducts(mapped);
+        console.log("Products loaded:", mapped);
       } catch (err) {
         console.error("Failed to load products", err);
       } finally {
@@ -56,7 +59,7 @@ export default function Dashboard() {
   const totalIncome = products.reduce((sum, p) => sum + p.income, 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="py-8 space-y-6">
       <Header onAdd={() => router.push("/product")} />
       <Summary
         totalSpent={totalSpent}
