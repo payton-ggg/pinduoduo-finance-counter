@@ -28,12 +28,10 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <Card className="hover:shadow-lg transition cursor-pointer">
       <CardContent className="p-4">
-        <Image
+        <img
           src={product.img}
           alt={product.name}
           className="w-full object-cover rounded-md mb-3"
-          width={100}
-          height={100}
         />
         <h3 className="text-lg font-semibold mb-1">{product.name}</h3>
         <p className="text-sm text-gray-600">Spent: ${product.spent}</p>
