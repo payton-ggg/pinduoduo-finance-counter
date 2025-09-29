@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -64,6 +66,8 @@ export default function Dashboard() {
                 src={p.img}
                 alt={p.name}
                 className="w-full h-32 object-cover rounded-md mb-3"
+                width={100}
+                height={100}
               />
               <h3 className="text-lg font-semibold mb-1">{p.name}</h3>
               <p className="text-sm text-gray-600">Spent: ${p.spent}</p>
