@@ -1,0 +1,87 @@
+import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
+
+export async function GET(
+  _req: Request,
+  { params }: { params: { id: string } }
+) {
+  const { id } = await params;
+  try {
+    const product = await prisma.product.findUnique({
+      where: { id },
+      include: { incomes: true, expenses: true },
+    });
+    if (!product) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    return NextResponse.json(product);
+  } catch (e) {
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
+}
+
+export async function PATCH(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  const { id } = await params;
+
+  try {
+    const data = await req.json();
+    // Normalize images for Prisma String[] update
+    let imagesUpdate: { set: string[] } | undefined;
+    if (Array.isArray(data.images)) {
+      const urls = (data.images as any[])
+        .map((v) => (typeof v === "string" ? v : v?.url))
+        .filter(Boolean);
+      imagesUpdate = { set: urls };
+    } else if (typeof data.images === "string") {
+      imagesUpdate = { set: [data.images] };
+    }
+
+    const updated = await prisma.product.update({
+      where: { id },
+      data: {
+        name: data.name,
+        images: imagesUpdate,
+        olxUrl: data.olxUrl,
+        pinduoduoUrl: data.pinduoduoUrl,
+        priceUAH: data.priceUAH,
+        workModalWindowIOS: data.workModalWindowIOS,
+        soundReducer: data.soundReducer,
+        sensesOfEar: data.sensesOfEar,
+        wirelessCharger: data.wirelessCharger,
+        gyroscope: data.gyroscope,
+        weight: data.weight,
+        microphoneQuality: data.microphoneQuality,
+        sellsCount: data.sellsCount,
+        chip: data.chip,
+        equipment: data.equipment,
+        priceInUA: data.priceInUA,
+      },
+    });
+    return NextResponse.json(updated);
+  } catch (e) {
+    console.log("PATCH id:", id, "error:", e);
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "Server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  _req: Request,
+  { params }: { params: { id: string } }
+) {
+  const { id } = await params;
+
+  try {
+    await prisma.product.delete({ where: { id } });
+    return NextResponse.json({ message: "Product deleted" });
+  } catch (e) {
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
+}

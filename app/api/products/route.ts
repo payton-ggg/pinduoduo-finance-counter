@@ -15,10 +15,19 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const data = await req.json();
+  // Normalize images to string[] for create
+  const images: string[] = Array.isArray(data.images)
+    ? (data.images as any[])
+        .map((v) => (typeof v === "string" ? v : v?.url))
+        .filter(Boolean)
+    : typeof data.images === "string"
+    ? [data.images]
+    : [];
+
   const newProduct = await prisma.product.create({
     data: {
       name: data.name,
-      images: data.images,
+      images,
       olxUrl: data.olxUrl,
       pinduoduoUrl: data.pinduoduoUrl,
       priceUAH: data.priceUAH,
