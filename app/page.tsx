@@ -17,14 +17,21 @@ export default function Dashboard() {
         const data = await res.json();
         const mapped: ProductUI[] = (data || []).map((p: any) => {
           const spent = Array.isArray(p.expenses)
-            ? p.expenses.reduce((sum: number, e: any) => sum + (e.amount || 0), 0)
+            ? p.expenses.reduce(
+                (sum: number, e: any) => sum + (e.amount || 0),
+                0
+              )
             : 0;
           const income = Array.isArray(p.incomes)
-            ? p.incomes.reduce((sum: number, i: any) => sum + (i.amount || 0), 0)
+            ? p.incomes.reduce(
+                (sum: number, i: any) => sum + (i.amount || 0),
+                0
+              )
             : 0;
-          const img = Array.isArray(p.images) && p.images.length > 0
-            ? p.images[0]
-            : "https://via.placeholder.com/150";
+          const img =
+            Array.isArray(p.images) && p.images.length > 0
+              ? p.images[0]
+              : "https://images.prom.ua/6613313628_w640_h640_naushniki-apple-airpods.jpg";
           return {
             id: p.id,
             name: p.name,

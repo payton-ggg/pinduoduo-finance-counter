@@ -14,14 +14,25 @@ model Product {
   olxUrl    String?
   pinduoduoUrl String?
   priceUAH  Float
+  priceInUA Float?
 
   workModalWindowIOS Boolean @default(false)
   soundReducer       Boolean @default(false)
+  sensesOfEar        Boolean @default(false)
+  wirelessCharger    Boolean @default(false)
+  gyroscope          Boolean @default(false)
+
+  weight    Float? 
+  microphoneQuality Int?
+  sellsCount Int? 
+  chip      String?
+  equipment String? 
 
   expenses  Expense[]
   incomes   Income[]
   createdAt DateTime @default(now())
 }
+
 
 model Expense {
   id        String   @id @default(cuid())

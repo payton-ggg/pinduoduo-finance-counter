@@ -3,6 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export type ProductUI = {
   id: string | number;
@@ -18,6 +19,11 @@ type ProductCardProps = {
 
 export function ProductCard({ product }: ProductCardProps) {
   const balance = product.income - product.spent;
+  const router = useRouter();
+
+  const handleOpen = () => {
+    router.push(`/product/${product.id}`);
+  };
 
   return (
     <Card className="hover:shadow-lg transition cursor-pointer">
@@ -25,7 +31,7 @@ export function ProductCard({ product }: ProductCardProps) {
         <Image
           src={product.img}
           alt={product.name}
-          className="w-full h-32 object-cover rounded-md mb-3"
+          className="w-full object-cover rounded-md mb-3"
           width={100}
           height={100}
         />
@@ -38,7 +44,11 @@ export function ProductCard({ product }: ProductCardProps) {
             {balance}
           </span>
         </p>
-        <Button variant="outline" className="w-full mt-3">
+        <Button
+          onClick={() => handleOpen()}
+          variant="outline"
+          className="w-full mt-3"
+        >
           Open
         </Button>
       </CardContent>
