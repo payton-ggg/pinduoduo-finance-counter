@@ -1,16 +1,47 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { UseFieldArrayReturn, UseFormRegister } from "react-hook-form";
+import { UseFieldArrayReturn, UseFormRegister, UseFormSetValue } from "react-hook-form";
 
 type ImagesFieldArrayProps = {
   fields: { id: string }[];
   register: UseFormRegister<any>;
   append: UseFieldArrayReturn<any, "images", "id">["append"];
   remove: UseFieldArrayReturn<any, "images", "id">["remove"];
+  setValue: UseFormSetValue<any>;
 };
 
-export function ImagesFieldArray({ fields, register, append, remove }: ImagesFieldArrayProps) {
+export function ImagesFieldArray({
+  fields,
+  register,
+  append,
+  remove,
+  setValue,
+}: ImagesFieldArrayProps) {
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
+
+  const handleFileChange = async (index: number, file?: File) => {
+    if (!file) return;
+    try {
+      setUploadingIndex(index);
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      if (!res.ok) throw new Error("Upload failed");
+      const result = await res.json();
+      const url = result.secure_url || result.url;
+      if (url) {
+        setValue(`images.${index}.url`, url, { shouldValidate: true, shouldDirty: true });
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error uploading image");
+    } finally {
+      setUploadingIndex(null);
+    }
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
@@ -27,7 +58,21 @@ export function ImagesFieldArray({ fields, register, append, remove }: ImagesFie
               placeholder="https://…"
               {...register(`images.${index}.url` as const)}
             />
-            <Button type="button" variant="outline" onClick={() => remove(index)}>
+            <input
+              type="file"
+              accept="image/*"
+              className="border rounded p-2"
+              onChange={(e) => handleFileChange(index, e.target.files?.[0])}
+              disabled={uploadingIndex === index}
+            />
+            {uploadingIndex === index && (
+              <span className="text-sm text-gray-600 self-center">Uploading…</span>
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => remove(index)}
+            >
               Remove
             </Button>
           </div>

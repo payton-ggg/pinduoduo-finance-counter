@@ -35,6 +35,7 @@ export default function ProductForm() {
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
+    setValue,
   } = useForm<FormValues>({
     defaultValues: {
       name: "",
@@ -105,7 +106,13 @@ export default function ProductForm() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <BasicFields register={register} errors={errors} />
         <FlagsFields register={register} />
-        <ImagesFieldArray fields={fields} register={register} append={append} remove={remove} />
+        <ImagesFieldArray
+          fields={fields}
+          register={register}
+          append={append}
+          remove={remove}
+          setValue={setValue}
+        />
 
         <Button type="submit" disabled={isSubmitting} className="w-full">
           {isSubmitting ? "Creating…" : "Create Product"}
