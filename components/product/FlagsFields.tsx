@@ -11,23 +11,23 @@ export function FlagsFields({ register }: FlagsFieldsProps) {
     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
       <label className="inline-flex items-center gap-2">
         <input type="checkbox" {...register("workModalWindowIOS")} />
-        <span>Work Modal Window iOS</span>
+        <span>Модальное окно iOS</span>
       </label>
       <label className="inline-flex items-center gap-2">
         <input type="checkbox" {...register("soundReducer")} />
-        <span>Sound Reducer</span>
+        <span>Шумоподавление</span>
       </label>
       <label className="inline-flex items-center gap-2">
         <input type="checkbox" {...register("sensesOfEar")} />
-        <span>Senses of Ear</span>
+        <span>Датчик уха</span>
       </label>
       <label className="inline-flex items-center gap-2">
         <input type="checkbox" {...register("wirelessCharger")} />
-        <span>Wireless Charger</span>
+        <span>Беспроводная зарядка</span>
       </label>
       <label className="inline-flex items-center gap-2">
         <input type="checkbox" {...register("gyroscope")} />
-        <span>Gyroscope</span>
+        <span>Гироскоп</span>
       </label>
     </div>
   );

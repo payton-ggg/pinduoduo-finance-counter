@@ -56,12 +56,12 @@ export function ProductCard({ product }: ProductCardProps) {
           className="w-full object-cover rounded-lg mb-3 aspect-[4/3] h-40 sm:h-48"
         />
         <h3 className="text-lg font-semibold mb-1">{product.name}</h3>
-        <p className="text-sm text-gray-600">Spent: ${product.spent}</p>
-        <p className="text-sm text-gray-600">Income: ${product.income}</p>
+        <p className="text-sm text-gray-600">Spent: {product.spent} ₴</p>
+        <p className="text-sm text-gray-600">Income: {product.income} ₴</p>
         <p className="text-sm font-semibold mt-2">
           Balance:{" "}
           <span className={balance >= 0 ? "text-green-600" : "text-red-600"}>
-            {balance}
+            {balance}₴
           </span>
         </p>
         <p className="text-sm mt-4 text-gray-600">

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useFieldArray } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,7 @@ type FormValues = {
 
 export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
   const router = useRouter();
+  const [rate, setRate] = useState<number>(0);
 
   const normalizedImages: { url: string }[] = Array.isArray(initialData?.images)
     ? initialData.images.map((img: any) =>
@@ -69,11 +71,44 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
     handleSubmit,
     formState: { isSubmitting },
     setValue,
+    watch,
   } = useForm<FormValues>({ defaultValues });
 
   const { fields: imageFields, append: appendImage, remove: removeImage } = useFieldArray({ control, name: "images" });
   const { fields: incomeFields, append: appendIncome, remove: removeIncome } = useFieldArray({ control, name: "incomes" });
   const { fields: expenseFields, append: appendExpense, remove: removeExpense } = useFieldArray({ control, name: "expenses" });
+
+  useEffect(() => {
+    const fetchRate = async () => {
+      try {
+        const response = await fetch(
+          "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=CNY&json"
+        );
+        const data = await response.json();
+        if (data && data.length > 0) {
+          setRate(Number(data[0].rate) || 0);
+        }
+      } catch (error) {
+        console.error("Failed to fetch exchange rate:", error);
+      }
+    };
+    fetchRate();
+  }, []);
+
+  const sells = watch("sellsCount");
+  const priceYuan = watch("priceUAH");
+  const computedUAH = (Number(priceYuan) || 0) * (rate > 0 ? rate : 1);
+  const computedIncome = (Number(sells) || 0) * computedUAH;
+
+  useEffect(() => {
+    // Обновляем цену в гривне в скрытом поле и авто‑доход
+    setValue("priceInUA", Number.isFinite(computedUAH) ? Number(computedUAH.toFixed(2)) : 0, {
+      shouldDirty: true,
+    });
+    setValue("incomes", [{ amount: Number.isFinite(computedIncome) ? Number(computedIncome.toFixed(2)) : 0 }], {
+      shouldDirty: true,
+    });
+  }, [computedUAH, computedIncome, setValue]);
 
   const onSubmit = async (values: FormValues) => {
     const payload = {
@@ -89,7 +124,7 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
       alert("Не удалось обновить продукт");
       return;
     }
-    // Sync incomes
+    // Sync incomes (автоматический доход по количеству продаж и курсу)
     const initialIncomeMap = new Map((initialData?.incomes || []).map((i: any) => [i.id, i]));
     for (const inc of values.incomes) {
       if (inc.id && initialIncomeMap.has(inc.id)) {
@@ -156,33 +191,32 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
         setValue={setValue}
       />
 
-      {/* Incomes */}
+      {/* Доходы (авторасчёт) */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <label className="text-sm font-medium">Incomes</label>
-          <Button type="button" onClick={() => appendIncome({ amount: 0 })}>Add Income</Button>
+          <label className="text-sm font-medium">Доходы</label>
         </div>
-        <div className="space-y-2">
-          {incomeFields.map((field, index) => (
-            <div key={field.id} className="flex gap-2">
-              <input
-                type="number"
-                step="0.01"
-                className="flex-1 border rounded p-2"
-                placeholder="Amount"
-                {...register(`incomes.${index}.amount` as const, { valueAsNumber: true })}
-              />
-              <Button type="button" variant="outline" onClick={() => removeIncome(index)}>Remove</Button>
-            </div>
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="p-3 border rounded-md">
+            <p className="text-sm text-gray-600">Курс CNY → UAH</p>
+            <p className="text-lg font-semibold">{rate > 0 ? rate.toFixed(2) : "—"}</p>
+          </div>
+          <div className="p-3 border rounded-md">
+            <p className="text-sm text-gray-600">Цена в гривне</p>
+            <p className="text-lg font-semibold">{computedUAH.toFixed(2)} ₴</p>
+          </div>
+          <div className="p-3 border rounded-md">
+            <p className="text-sm text-gray-600">Рассчитанный доход</p>
+            <p className="text-lg font-semibold">{computedIncome.toFixed(2)} ₴</p>
+          </div>
         </div>
       </div>
 
-      {/* Expenses */}
+      {/* Расходы */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <label className="text-sm font-medium">Expenses</label>
-          <Button type="button" onClick={() => appendExpense({ amount: 0, type: "" })}>Add Expense</Button>
+          <label className="text-sm font-medium">Расходы</label>
+          <Button type="button" onClick={() => appendExpense({ amount: 0, type: "" })}>Добавить расход</Button>
         </div>
         <div className="space-y-2">
           {expenseFields.map((field, index) => (
@@ -191,15 +225,15 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
                 type="number"
                 step="0.01"
                 className="flex-1 border rounded p-2"
-                placeholder="Amount"
+                placeholder="Сумма"
                 {...register(`expenses.${index}.amount` as const, { valueAsNumber: true })}
               />
               <input
                 className="flex-1 border rounded p-2"
-                placeholder="Type"
+                placeholder="Тип"
                 {...register(`expenses.${index}.type` as const)}
               />
-              <Button type="button" variant="outline" onClick={() => removeExpense(index)}>Remove</Button>
+              <Button type="button" variant="outline" onClick={() => removeExpense(index)}>Удалить</Button>
             </div>
           ))}
         </div>

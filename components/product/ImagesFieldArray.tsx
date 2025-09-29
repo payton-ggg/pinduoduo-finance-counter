@@ -45,9 +45,9 @@ export function ImagesFieldArray({
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <label className="text-sm font-medium">Images</label>
+        <label className="text-sm font-medium">Изображения</label>
         <Button type="button" onClick={() => append({ url: "" })}>
-          Add Image
+          Добавить изображение
         </Button>
       </div>
       <div className="space-y-2">
@@ -66,14 +66,14 @@ export function ImagesFieldArray({
               disabled={uploadingIndex === index}
             />
             {uploadingIndex === index && (
-              <span className="text-sm text-gray-600 self-center">Uploading…</span>
+              <span className="text-sm text-gray-600 self-center">Загрузка…</span>
             )}
             <Button
               type="button"
               variant="outline"
               onClick={() => remove(index)}
             >
-              Remove
+              Удалить
             </Button>
           </div>
         ))}

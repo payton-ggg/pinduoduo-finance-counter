@@ -7,7 +7,7 @@ export async function GET(
   _req: Request,
   { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
+  const { id } = params;
   try {
     const product = await prisma.product.findUnique({
       where: { id },
@@ -26,7 +26,7 @@ export async function PATCH(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
+  const { id } = params;
 
   try {
     const data = await req.json();
@@ -76,12 +76,19 @@ export async function DELETE(
   _req: Request,
   { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
+  const { id } = params;
 
   try {
+    // Ensure related records are removed first to avoid FK violations
+    await prisma.expense.deleteMany({ where: { productId: id } });
+    await prisma.income.deleteMany({ where: { productId: id } });
     await prisma.product.delete({ where: { id } });
     return NextResponse.json({ message: "Product deleted" });
   } catch (e) {
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    console.error("DELETE /api/products/[id] failed:", e);
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "Server error" },
+      { status: 500 }
+    );
   }
 }
