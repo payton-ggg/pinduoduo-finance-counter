@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Header } from "@/components/dashboard/Header";
 import { Summary } from "@/components/dashboard/Summary";
 import { ProductGrid } from "@/components/dashboard/ProductGrid";
 import type { ProductUI } from "@/components/dashboard/ProductCard";
 
 export default function Dashboard() {
+  const router = useRouter();
   const [products, setProducts] = useState<ProductUI[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -55,7 +57,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <Header />
+      <Header onAdd={() => router.push("/product")} />
       <Summary
         totalSpent={totalSpent}
         totalIncome={totalIncome}

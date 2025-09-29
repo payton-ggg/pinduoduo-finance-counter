@@ -1,0 +1,53 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider   = "prisma-client-js"
+  output     = "./prisma/generated/client"
+  engineType = "binary"
+}
+
+model Product {
+  id           String   @id @default(cuid())
+  name         String
+  images       String[] // массив ссылок на фото
+  olxUrl       String?
+  pinduoduoUrl String?
+  priceUAH     Float
+  priceInUA    Float?
+
+  workModalWindowIOS Boolean @default(false)
+  soundReducer       Boolean @default(false)
+  sensesOfEar        Boolean @default(false)
+  wirelessCharger    Boolean @default(false)
+  gyroscope          Boolean @default(false)
+
+  weight            Float?
+  microphoneQuality Int?
+  sellsCount        Int?
+  chip              String?
+  equipment         String?
+
+  expenses  Expense[]
+  incomes   Income[]
+  createdAt DateTime  @default(now())
+}
+
+model Expense {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  amount    Float
+  type      String
+  createdAt DateTime @default(now())
+}
+
+model Income {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  amount    Float
+  createdAt DateTime @default(now())
+}

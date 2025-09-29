@@ -24,6 +24,15 @@ export async function POST(req: Request) {
       priceUAH: data.priceUAH,
       workModalWindowIOS: data.workModalWindowIOS,
       soundReducer: data.soundReducer,
+      sensesOfEar: data.sensesOfEar,
+      wirelessCharger: data.wirelessCharger,
+      gyroscope: data.gyroscope,
+      weight: data.weight,
+      microphoneQuality: data.microphoneQuality,
+      sellsCount: data.sellsCount,
+      chip: data.chip,
+      equipment: data.equipment,
+      priceInUA: data.priceInUA,
     },
   });
   return NextResponse.json(newProduct);
