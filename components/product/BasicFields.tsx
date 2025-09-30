@@ -6,6 +6,7 @@ type FormValues = {
   name: string;
   priceCNY: number;
   shippingUA?: number;
+  managementUAH?: number;
   priceInUA?: number;
   olxUrl?: string;
   pinduoduoUrl?: string;
@@ -92,6 +93,21 @@ export function BasicFields({ register, errors }: BasicFieldsProps) {
               min: { value: 0, message: "Должна быть >= 0" },
             })}
             placeholder="Например: 10.00"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Расходы на управление (₴)
+          </label>
+          <input
+            type="number"
+            step="0.01"
+            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            {...register("managementUAH", {
+              valueAsNumber: true,
+              min: { value: 0, message: "Должна быть >= 0" },
+            })}
+            placeholder="Например: 5.00"
           />
         </div>
       </div>

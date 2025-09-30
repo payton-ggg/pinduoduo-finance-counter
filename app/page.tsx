@@ -43,6 +43,8 @@ export default function Dashboard() {
             priceCNY: p.priceCNY || 0,
             shippingUA:
               typeof p.shippingUA === "number" ? p.shippingUA : undefined,
+            managementUAH:
+              typeof p.managementUAH === "number" ? p.managementUAH : undefined,
             priceInUA: p.priceInUA || 0,
           } as ProductUI;
         });

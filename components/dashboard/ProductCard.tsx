@@ -14,6 +14,7 @@ export type ProductUI = {
   income: number;
   priceCNY: number;
   shippingUA?: number;
+  managementUAH?: number;
   priceInUA?: number;
 };
 
@@ -74,6 +75,11 @@ export function ProductCard({ product }: ProductCardProps) {
         {typeof product.shippingUA === "number" && (
           <p className="text-sm text-gray-600">
             Доставка: {product.shippingUA} ₴
+          </p>
+        )}
+        {typeof product.managementUAH === "number" && (
+          <p className="text-sm text-gray-600">
+            Управление: {product.managementUAH} ₴
           </p>
         )}
         <p className="text-sm text-gray-600">

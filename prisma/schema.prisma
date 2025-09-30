@@ -16,6 +16,7 @@ model Product {
   pinduoduoUrl String?
   priceCNY  Float   @map("priceUAH")
   shippingUA Float?
+  managementUAH Float?
   priceInUA Float?
 
   workModalWindowIOS Boolean @default(false)

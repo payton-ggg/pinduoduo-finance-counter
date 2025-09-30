@@ -12,6 +12,7 @@ type FormValues = {
   name: string;
   priceCNY: number;
   shippingUA?: number;
+  managementUAH?: number;
   priceInUA?: number;
   olxUrl?: string;
   pinduoduoUrl?: string;
@@ -43,6 +44,7 @@ export default function ProductForm() {
       name: "",
       priceCNY: 0,
       shippingUA: undefined,
+      managementUAH: undefined,
       priceInUA: undefined,
       olxUrl: "",
       pinduoduoUrl: "",
@@ -71,6 +73,7 @@ export default function ProductForm() {
       name: values.name,
       priceCNY: Number(values.priceCNY),
       shippingUA: values.shippingUA ?? null,
+      managementUAH: values.managementUAH ?? null,
       priceInUA: values.priceInUA ?? null,
       olxUrl: values.olxUrl || null,
       pinduoduoUrl: values.pinduoduoUrl || null,

@@ -34,6 +34,7 @@ export async function POST(req: Request) {
       pinduoduoUrl: data.pinduoduoUrl,
       priceCNY: data.priceCNY,
       shippingUA: data.shippingUA,
+      managementUAH: data.managementUAH,
       workModalWindowIOS: data.workModalWindowIOS,
       soundReducer: data.soundReducer,
       sensesOfEar: data.sensesOfEar,

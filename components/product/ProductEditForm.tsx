@@ -20,6 +20,7 @@ type FormValues = {
   pinduoduoUrl?: string;
   priceCNY?: number;
   shippingUA?: number;
+  managementUAH?: number;
   workModalWindowIOS?: boolean;
   soundReducer?: boolean;
   sensesOfEar?: boolean;
@@ -53,6 +54,7 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
     pinduoduoUrl: initialData?.pinduoduoUrl ?? "",
     priceCNY: initialData?.priceCNY ?? initialData?.priceUAH ?? undefined,
     shippingUA: initialData?.shippingUA ?? undefined,
+    managementUAH: initialData?.managementUAH ?? undefined,
     workModalWindowIOS: initialData?.workModalWindowIOS ?? false,
     soundReducer: initialData?.soundReducer ?? false,
     sensesOfEar: initialData?.sensesOfEar ?? false,
@@ -123,11 +125,12 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
   const priceCNY = watch("priceCNY");
   const priceInUA = watch("priceInUA");
   const shippingUA = watch("shippingUA");
+  const managementUAH = watch("managementUAH");
   const purchaseUAH = (Number(priceCNY) || 0) * (rate > 0 ? rate : 1);
   const sellingUAH = Number(priceInUA) || 0;
   const computedIncome = (Number(sells) || 0) * sellingUAH;
   const computedExpense =
-    (Number(purchased) || 0) * purchaseUAH + (Number(shippingUA) || 0);
+    (Number(purchased) || 0) * purchaseUAH + (Number(shippingUA) || 0) + (Number(managementUAH) || 0);
 
   useEffect(() => {
     // Авто‑доход от продаж: sellsCount * priceInUA
