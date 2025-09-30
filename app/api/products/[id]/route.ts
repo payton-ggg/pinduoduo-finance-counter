@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 // IMPORTANT: ensure we use the client from node_modules to match generated output
 import { PrismaClient } from "@prisma/client";
 
+export const runtime = "nodejs";
+
 const prisma = new PrismaClient();
 
 export async function GET(
