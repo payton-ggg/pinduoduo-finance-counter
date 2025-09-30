@@ -15,6 +15,7 @@ model Product {
   olxUrl    String?
   pinduoduoUrl String?
   priceCNY  Float   @map("priceUAH")
+  shippingUA Float?
   priceInUA Float?
 
   workModalWindowIOS Boolean @default(false)

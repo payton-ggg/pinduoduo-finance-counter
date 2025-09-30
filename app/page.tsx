@@ -41,6 +41,8 @@ export default function Dashboard() {
             spent,
             income,
             priceCNY: p.priceCNY || 0,
+            shippingUA:
+              typeof p.shippingUA === "number" ? p.shippingUA : undefined,
             priceInUA: p.priceInUA || 0,
           } as ProductUI;
         });

@@ -31,6 +31,7 @@ export async function POST(req: Request) {
       olxUrl: data.olxUrl,
       pinduoduoUrl: data.pinduoduoUrl,
       priceCNY: data.priceCNY,
+      shippingUA: data.shippingCNY,
       workModalWindowIOS: data.workModalWindowIOS,
       soundReducer: data.soundReducer,
       sensesOfEar: data.sensesOfEar,

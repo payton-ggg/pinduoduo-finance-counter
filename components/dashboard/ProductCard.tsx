@@ -13,6 +13,7 @@ export type ProductUI = {
   spent: number;
   income: number;
   priceCNY: number;
+  shippingUA?: number;
   priceInUA?: number;
 };
 
@@ -61,13 +62,23 @@ export function ProductCard({ product }: ProductCardProps) {
         <p className="text-sm font-semibold mt-2">
           Balance:{" "}
           <span className={balance >= 0 ? "text-green-600" : "text-red-600"}>
-            {balance}₴
+            {balance.toFixed(2)}₴
           </span>
         </p>
         <p className="text-sm mt-4 text-gray-600">
-          Закупка: {rate > 0 ? `${(product.priceCNY * rate).toFixed(2)}₴ | ${product.priceCNY}¥` : `${product.priceCNY}¥`}
+          Закупка:{" "}
+          {rate > 0
+            ? `${(product.priceCNY * rate).toFixed(2)}₴ | ${product.priceCNY}¥`
+            : `${product.priceCNY}¥`}
         </p>
-        <p className="text-sm text-gray-600">Продажа: {product.priceInUA || "N/A"}₴</p>
+        {typeof product.shippingUA === "number" && (
+          <p className="text-sm text-gray-600">
+            Доставка: {product.shippingUA} ₴
+          </p>
+        )}
+        <p className="text-sm text-gray-600">
+          Продажа: {product.priceInUA || "N/A"}₴
+        </p>
         <Button
           onClick={() => handleOpen()}
           variant="outline"

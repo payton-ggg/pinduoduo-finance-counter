@@ -11,6 +11,7 @@ import { ImagesFieldArray } from "./ImagesFieldArray";
 type FormValues = {
   name: string;
   priceCNY: number;
+  shippingUA?: number;
   priceInUA?: number;
   olxUrl?: string;
   pinduoduoUrl?: string;
@@ -41,6 +42,7 @@ export default function ProductForm() {
     defaultValues: {
       name: "",
       priceCNY: 0,
+      shippingUA: undefined,
       priceInUA: undefined,
       olxUrl: "",
       pinduoduoUrl: "",
@@ -68,6 +70,7 @@ export default function ProductForm() {
     const payload = {
       name: values.name,
       priceCNY: Number(values.priceCNY),
+      shippingUA: values.shippingUA ?? null,
       priceInUA: values.priceInUA ?? null,
       olxUrl: values.olxUrl || null,
       pinduoduoUrl: values.pinduoduoUrl || null,

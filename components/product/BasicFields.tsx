@@ -5,6 +5,7 @@ import { FieldErrors, UseFormRegister } from "react-hook-form";
 type FormValues = {
   name: string;
   priceCNY: number;
+  shippingUA?: number;
   priceInUA?: number;
   olxUrl?: string;
   pinduoduoUrl?: string;
@@ -40,7 +41,9 @@ export function BasicFields({ register, errors }: BasicFieldsProps) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Цена закупки (¥)</label>
+          <label className="block text-sm font-medium mb-1">
+            Цена закупки (¥)
+          </label>
           <input
             type="number"
             step="0.01"
@@ -71,6 +74,24 @@ export function BasicFields({ register, errors }: BasicFieldsProps) {
               min: { value: 0, message: "Должна быть >= 0" },
             })}
             placeholder="Цена за единицу"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Цена доставки (₴)
+          </label>
+          <input
+            type="number"
+            step="0.01"
+            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            {...register("shippingUA", {
+              valueAsNumber: true,
+              min: { value: 0, message: "Должна быть >= 0" },
+            })}
+            placeholder="Например: 10.00"
           />
         </div>
       </div>
@@ -137,9 +158,7 @@ export function BasicFields({ register, errors }: BasicFieldsProps) {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Продано (шт)
-          </label>
+          <label className="block text-sm font-medium mb-1">Продано (шт)</label>
           <input
             type="number"
             className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"

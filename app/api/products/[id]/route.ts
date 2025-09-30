@@ -50,6 +50,7 @@ export async function PATCH(
         olxUrl: data.olxUrl,
         pinduoduoUrl: data.pinduoduoUrl,
         priceCNY: data.priceCNY,
+        shippingUA: data.shippingCNY,
         workModalWindowIOS: data.workModalWindowIOS,
         soundReducer: data.soundReducer,
         sensesOfEar: data.sensesOfEar,
