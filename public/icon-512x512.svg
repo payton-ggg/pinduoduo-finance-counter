@@ -1,0 +1,11 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="64" fill="#FF6B35"/>
+  <circle cx="256" cy="256" r="180" fill="white"/>
+  <path d="M256 128C201.1 128 156 173.1 156 228C156 282.9 201.1 328 256 328C310.9 328 356 282.9 356 228C356 173.1 310.9 128 256 128ZM256 288C222.9 288 196 261.1 196 228C196 194.9 222.9 168 256 168C289.1 168 316 194.9 316 228C316 261.1 289.1 288 256 288Z" fill="#FF6B35"/>
+  <path d="M256 344C222.9 344 196 370.9 196 404C196 437.1 222.9 464 256 464C289.1 464 316 437.1 316 404C316 370.9 289.1 344 256 344Z" fill="#FF6B35"/>
+  <circle cx="200" cy="180" r="24" fill="#FFB800"/>
+  <circle cx="312" cy="180" r="24" fill="#FFB800"/>
+  <circle cx="200" cy="276" r="20" fill="#FFB800"/>
+  <circle cx="312" cy="276" r="20" fill="#FFB800"/>
+  <text x="256" y="440" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="32" font-weight="bold">PinDuoDuo</text>
+</svg>
