@@ -39,6 +39,7 @@ export default function ProductForm() {
     formState: { errors, isSubmitting },
     reset,
     setValue,
+    watch,
   } = useForm<FormValues>({
     defaultValues: {
       name: "",
@@ -113,7 +114,12 @@ export default function ProductForm() {
     <Card className="p-6 max-w-3xl mx-auto">
       <h1 className="text-xl font-bold mb-4">Create Product</h1>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <BasicFields register={register} errors={errors} />
+        <BasicFields
+          register={register}
+          errors={errors}
+          setValue={setValue}
+          watch={watch}
+        />
         <FlagsFields register={register} />
         <ImagesFieldArray
           fields={fields}

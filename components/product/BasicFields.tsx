@@ -1,6 +1,12 @@
 "use client";
 
-import { FieldErrors, UseFormRegister } from "react-hook-form";
+import { useEffect } from "react";
+import {
+  FieldErrors,
+  UseFormRegister,
+  UseFormSetValue,
+  UseFormWatch,
+} from "react-hook-form";
 
 type FormValues = {
   name: string;
@@ -16,14 +22,34 @@ type FormValues = {
   microphoneQuality?: number;
   sellsCount?: number;
   purchasedCount?: number;
+  exchangeRate?: number; // Added for calculation
 };
 
 type BasicFieldsProps = {
   register: UseFormRegister<any>;
   errors: FieldErrors<FormValues>;
+  setValue: UseFormSetValue<any>;
+  watch: UseFormWatch<any>;
 };
 
-export function BasicFields({ register, errors }: BasicFieldsProps) {
+export function BasicFields({
+  register,
+  errors,
+  setValue,
+  watch,
+}: BasicFieldsProps) {
+  const weight = watch("weight");
+  const purchasedCount = watch("purchasedCount");
+  const exchangeRate = watch("exchangeRate");
+
+  useEffect(() => {
+    if (weight && purchasedCount && exchangeRate) {
+      // 18 USD per kg
+      const shippingCostUSD = (weight / 1000) * purchasedCount * 18;
+      const shippingCostUAH = shippingCostUSD * exchangeRate;
+      setValue("shippingUA", parseFloat(shippingCostUAH.toFixed(2)));
+    }
+  }, [weight, purchasedCount, exchangeRate, setValue]);
   return (
     <div className="space-y-4">
       <div>
@@ -38,6 +64,20 @@ export function BasicFields({ register, errors }: BasicFieldsProps) {
             {String(errors.name.message)}
           </p>
         )}
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">
+          Курс (USD - UAH)
+        </label>
+        <input
+          type="number"
+          step="0.01"
+          className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          {...register("exchangeRate", { valueAsNumber: true })}
+          defaultValue={42}
+          placeholder="42.00"
+        />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

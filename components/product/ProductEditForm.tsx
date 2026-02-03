@@ -130,7 +130,9 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
   const sellingUAH = Number(priceInUA) || 0;
   const computedIncome = (Number(sells) || 0) * sellingUAH;
   const computedExpense =
-    (Number(purchased) || 0) * purchaseUAH + (Number(shippingUA) || 0) + (Number(managementUAH) || 0);
+    (Number(purchased) || 0) * purchaseUAH +
+    (Number(shippingUA) || 0) +
+    (Number(managementUAH) || 0);
 
   useEffect(() => {
     // Авто‑доход от продаж: sellsCount * priceInUA
@@ -243,7 +245,12 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <BasicFields register={register} errors={{}} />
+      <BasicFields
+        setValue={setValue}
+        register={register}
+        errors={{}}
+        watch={watch}
+      />
       <FlagsFields register={register} />
       <ImagesFieldArray
         fields={imageFields}

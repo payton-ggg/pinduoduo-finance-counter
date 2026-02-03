@@ -47,6 +47,11 @@ export async function POST(req: Request) {
       chip: data.chip,
       equipment: data.equipment,
       priceInUA: data.priceInUA,
+      expenses: {
+        create: data.shippingUA
+          ? [{ amount: data.shippingUA, type: "Shipping" }]
+          : [],
+      },
     },
   });
   return NextResponse.json(newProduct);
