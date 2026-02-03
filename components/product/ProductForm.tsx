@@ -118,6 +118,10 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
   const computedIncome = (Number(sells) || 0) * sellingUAH;
   const computedExpense = (Number(purchased) || 0) * purchaseUAH;
 
+  // Potential (Projected) Profit Calculation
+  const potentialRevenue = (Number(purchased) || 0) * sellingUAH;
+  const potentialProfit = potentialRevenue - computedExpense; // Rough estimate using current expense calc which includes purchase cost
+
   // Auto-sync calculated income/expense to form arrays if in Edit mode or if user wants these to be auto-generated
   // For now, we replicate the EditForm logic which forces these into the form state
   useEffect(() => {
@@ -327,6 +331,18 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
               <p className="text-sm text-gray-600">Рассчитанный расход</p>
               <p className="text-lg font-semibold">
                 {computedExpense.toFixed(2)} ₴
+              </p>
+            </div>
+            <div className="p-3 border rounded-md bg-green-50/50 dark:bg-green-900/20 col-span-1 sm:col-span-4">
+              <p className="text-sm text-gray-600 font-medium">
+                Прогноз чистой прибыли (если продать всё, {purchased || 0} шт)
+              </p>
+              <p
+                className={`text-xl font-bold ${
+                  potentialProfit >= 0 ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                {potentialProfit.toFixed(2)} ₴
               </p>
             </div>
           </div>

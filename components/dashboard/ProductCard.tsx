@@ -14,6 +14,7 @@ export type ProductUI = {
   shippingUA?: number;
   managementUAH?: number;
   priceInUA?: number;
+  totalPurchased?: number;
 };
 
 type ProductCardProps = {
@@ -24,10 +25,13 @@ export function ProductCard({ product }: ProductCardProps) {
   const [rate, setRate] = useState(0);
   const balance = product.income - product.spent;
 
+  // Projected Profit: (Total Stock * Selling Price) - Total Spent
+  // This assumes 'spent' covers all costs for the batch.
+  const projectedRevenue =
+    (product.totalPurchased || 0) * (product.priceInUA || 0);
+  const projectedProfit = projectedRevenue - product.spent;
+
   useEffect(() => {
-    // Only fetch if we really need to display dynamic CNY conversion client-side,
-    // but usually this is better passed from parent or context.
-    // Keeping local for now to preserve existing logic.
     const fetchRate = async () => {
       try {
         const res = await fetch(
@@ -43,7 +47,7 @@ export function ProductCard({ product }: ProductCardProps) {
   }, []);
 
   const purchaseCostUAH =
-    rate > 0 ? product.priceCNY * rate : product.priceCNY * 1; // fallback if no rate
+    rate > 0 ? product.priceCNY * rate : product.priceCNY * 1;
 
   return (
     <Card className="group overflow-hidden rounded-xl border-border/50 bg-card hover:border-primary/50 hover:shadow-lg transition-all duration-300 h-full flex flex-col">
@@ -55,13 +59,13 @@ export function ProductCard({ product }: ProductCardProps) {
         />
         <div className="absolute top-2 right-2">
           {balance >= 0 ? (
-            <div className="flex items-center gap-1 rounded-full bg-green-500/90 px-2 py-1 text-[10px] font-bold text-white shadow-sm backdrop-blur-md">
-              <TrendingUp className="h-3 w-3" />
+            <div className="flex items-center gap-1 rounded-full bg-green-500/90 px-2.5 py-1 text-xs font-bold text-white shadow-sm backdrop-blur-md">
+              <TrendingUp className="h-4 w-4" />
               {balance.toFixed(0)} ₴
             </div>
           ) : (
-            <div className="flex items-center gap-1 rounded-full bg-red-500/90 px-2 py-1 text-[10px] font-bold text-white shadow-sm backdrop-blur-md">
-              <TrendingDown className="h-3 w-3" />
+            <div className="flex items-center gap-1 rounded-full bg-red-500/90 px-2.5 py-1 text-xs font-bold text-white shadow-sm backdrop-blur-md">
+              <TrendingDown className="h-4 w-4" />
               {balance.toFixed(0)} ₴
             </div>
           )}
@@ -70,38 +74,64 @@ export function ProductCard({ product }: ProductCardProps) {
 
       <CardContent className="p-4 space-y-3 flex-1 flex flex-col">
         <div>
-          <h3 className="font-bold text-base line-clamp-1 group-hover:text-primary transition-colors">
+          <h3 className="font-bold text-lg line-clamp-1 group-hover:text-primary transition-colors">
             {product.name}
           </h3>
-          <p className="text-xs text-muted-foreground flex gap-2 mt-1 items-center flex-wrap">
-            <span className="flex items-center gap-1 bg-muted px-1.5 py-0.5 rounded text-[10px]">
-              <Coins className="w-3 h-3" />
-              {rate > 0
-                ? `${product.priceCNY}¥ ≈ ${purchaseCostUAH.toFixed(0)}₴`
-                : `${product.priceCNY}¥`}
-            </span>
-            {product.priceInUA && (
-              <span className="flex items-center gap-1 text-primary font-medium text-[10px]">
-                <TrendingUp className="w-3 h-3" />
-                Продажа: {product.priceInUA} ₴
+          <div className="flex flex-col gap-1 mt-1.5">
+            <p className="text-sm text-muted-foreground flex gap-2 items-center">
+              <span className="flex items-center gap-1 bg-muted px-2 py-0.5 rounded text-xs">
+                <Coins className="w-3.5 h-3.5" />
+                {rate > 0
+                  ? `${product.priceCNY}¥ ≈ ${purchaseCostUAH.toFixed(0)}₴`
+                  : `${product.priceCNY}¥`}
               </span>
+            </p>
+            {product.priceInUA && (
+              <p className="flex items-center gap-1 text-primary font-medium text-sm">
+                <TrendingUp className="w-3.5 h-3.5" />
+                Продажа: {product.priceInUA} ₴
+              </p>
             )}
-          </p>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground bg-muted/30 p-2 rounded-lg mt-auto">
-          <div className="flex flex-col">
-            <span className="text-[10px] uppercase opacity-70">Расходы</span>
-            <span className="font-semibold text-foreground">
-              {product.spent.toLocaleString()} ₴
-            </span>
+        <div className="mt-auto space-y-2">
+          {/* Main Stats */}
+          <div className="grid grid-cols-2 gap-3 text-sm text-muted-foreground bg-muted/30 p-2.5 rounded-lg">
+            <div className="flex flex-col">
+              <span className="text-[10px] uppercase opacity-70 font-semibold">
+                Расходы
+              </span>
+              <span className="font-bold text-foreground">
+                {product.spent.toLocaleString()} ₴
+              </span>
+            </div>
+            <div className="flex flex-col text-right">
+              <span className="text-[10px] uppercase opacity-70 font-semibold">
+                Доходы
+              </span>
+              <span className="font-bold text-foreground">
+                {product.income.toLocaleString()} ₴
+              </span>
+            </div>
           </div>
-          <div className="flex flex-col text-right">
-            <span className="text-[10px] uppercase opacity-70">Доходы</span>
-            <span className="font-semibold text-foreground">
-              {product.income.toLocaleString()} ₴
-            </span>
-          </div>
+
+          {/* Projected Profit Pill */}
+          {(product.totalPurchased || 0) > 0 && (
+            <div className="bg-primary/5 border border-primary/10 rounded-lg p-2 flex justify-between items-center">
+              <span className="text-[10px] uppercase font-bold text-primary/80">
+                Прогноз (100% продаж)
+              </span>
+              <span
+                className={`text-sm font-bold ${
+                  projectedProfit >= 0 ? "text-primary" : "text-destructive"
+                }`}
+              >
+                {projectedProfit > 0 ? "+" : ""}
+                {projectedProfit.toLocaleString()} ₴
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Detail text - only show if exists */}

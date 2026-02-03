@@ -49,6 +49,7 @@ export default function Dashboard() {
             managementUAH:
               typeof p.managementUAH === "number" ? p.managementUAH : undefined,
             priceInUA: p.priceInUA || 0,
+            totalPurchased: p.purchasedCount || 0,
           } as ProductUI;
         });
         setProducts(mapped);
