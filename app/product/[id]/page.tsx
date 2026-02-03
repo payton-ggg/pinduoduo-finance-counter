@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import ProductEditForm from "@/components/product/ProductEditForm";
+import ProductForm from "@/components/product/ProductForm";
 import { DeleteProductButton } from "@/components/product/DeleteProductButton";
 
 export default async function ProductId({
@@ -30,7 +30,7 @@ export default async function ProductId({
         </h1>
         <DeleteProductButton id={id} />
       </div>
-      <ProductEditForm id={id} initialData={product} />
+      <ProductForm id={id} initialData={product} />
     </div>
   );
 }

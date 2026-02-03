@@ -17,9 +17,7 @@ type FormValues = {
   olxUrl?: string;
   pinduoduoUrl?: string;
   chip?: string;
-  equipment?: string;
   weight?: number;
-  microphoneQuality?: number;
   sellsCount?: number;
   purchasedCount?: number;
   exchangeRate?: number; // Added for calculation
@@ -174,25 +172,6 @@ export function BasicFields({
         />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Чип</label>
-          <input
-            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            {...register("chip")}
-            placeholder="Например: H2"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Комплектация</label>
-          <input
-            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            {...register("equipment")}
-            placeholder="Например: Чехол, Кабель"
-          />
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div>
           <label className="block text-sm font-medium mb-1">Вес</label>
@@ -204,13 +183,11 @@ export function BasicFields({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Качество микрофона
-          </label>
+          <label className="block text-sm font-medium mb-1">Чип</label>
           <input
-            type="number"
             className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            {...register("microphoneQuality", { valueAsNumber: true })}
+            {...register("chip")}
+            placeholder="Например: H2"
           />
         </div>
         <div>
