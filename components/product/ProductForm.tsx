@@ -116,10 +116,7 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
   const sellingUAH = Number(priceInUA) || 0;
 
   const computedIncome = (Number(sells) || 0) * sellingUAH;
-  const computedExpense =
-    (Number(purchased) || 0) * purchaseUAH +
-    (Number(shippingUA) || 0) +
-    (Number(managementUAH) || 0);
+  const computedExpense = (Number(purchased) || 0) * purchaseUAH;
 
   // Auto-sync calculated income/expense to form arrays if in Edit mode or if user wants these to be auto-generated
   // For now, we replicate the EditForm logic which forces these into the form state

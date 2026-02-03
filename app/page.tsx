@@ -18,12 +18,15 @@ export default function Dashboard() {
         const res = await fetch("/api/products");
         const data = await res.json();
         const mapped: ProductUI[] = (data || []).map((p: any) => {
-          const spent = Array.isArray(p.expenses)
-            ? p.expenses.reduce(
-                (sum: number, e: any) => sum + (e.amount || 0),
-                0
-              )
-            : 0;
+          const spent =
+            (Array.isArray(p.expenses)
+              ? p.expenses.reduce(
+                  (sum: number, e: any) => sum + (e.amount || 0),
+                  0
+                )
+              : 0) +
+            (typeof p.shippingUA === "number" ? p.shippingUA : 0) +
+            (typeof p.managementUAH === "number" ? p.managementUAH : 0);
           const income = Array.isArray(p.incomes)
             ? p.incomes.reduce(
                 (sum: number, i: any) => sum + (i.amount || 0),
