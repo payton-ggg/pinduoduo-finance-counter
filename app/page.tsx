@@ -66,7 +66,7 @@ export default function Dashboard() {
   const totalIncome = products.reduce((sum, p) => sum + p.income, 0);
 
   return (
-    <div className="py-8 space-y-6">
+    <div className="py-4 space-y-4">
       <Header onAdd={() => router.push("/product")} />
       <Summary
         totalSpent={totalSpent}

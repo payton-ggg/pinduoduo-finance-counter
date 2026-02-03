@@ -49,7 +49,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="w-full max-w-full mx-auto px-2 sm:px-4">
             {children}
           </div>
         </ThemeProvider>
