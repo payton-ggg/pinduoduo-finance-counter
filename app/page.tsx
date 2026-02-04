@@ -16,7 +16,11 @@ export default function Dashboard() {
     const load = async () => {
       try {
         const res = await fetch("/api/products");
-        const data = await res.json();
+        if (!res.ok) {
+           throw new Error(`Failed to fetch: ${res.status} ${res.statusText}`);
+        }
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : [];
         const mapped: ProductUI[] = (data || []).map((p: any) => {
           const spent =
             (Array.isArray(p.expenses)

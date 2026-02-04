@@ -73,7 +73,6 @@ export function BasicFields({
           step="0.01"
           className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           {...register("exchangeRate", { valueAsNumber: true })}
-          defaultValue={42}
           placeholder="42.00"
         />
       </div>

@@ -116,7 +116,7 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
   const sellingUAH = Number(priceInUA) || 0;
 
   const computedIncome = (Number(sells) || 0) * sellingUAH;
-  const computedExpense = (Number(purchased) || 0) * purchaseUAH;
+  const computedExpense = ((Number(purchased) || 0) * purchaseUAH) + Number(shippingUA);
 
   // Potential (Projected) Profit Calculation
   const potentialRevenue = (Number(purchased) || 0) * sellingUAH;
@@ -317,12 +317,17 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
             </div>
             <div className="p-3 border rounded-md">
               <p className="text-sm text-gray-600">Закупочная цена (UAH)</p>
+              <div className="w-full justify-between">
               <p className="text-lg font-semibold">
                 {purchaseUAH.toFixed(2)} ₴
               </p>
+              <p className="text-lg font-semibold">
+                {(Number(purchaseUAH.toFixed(2)) * Number(purchased)).toFixed(2)} ₴
+              </p>
+              </div>
             </div>
             <div className="p-3 border rounded-md">
-              <p className="text-sm text-gray-600">Рассчитанный доход</p>
+              <p className="text-sm text-gray-600">Доход</p>
               <p className="text-lg font-semibold">
                 {computedIncome.toFixed(2)} ₴
               </p>
@@ -338,6 +343,7 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
                 Прогноз чистой прибыли (если продать всё, {purchased || 0} шт)
               </p>
               <p
+                suppressHydrationWarning={true}
                 className={`text-xl font-bold ${
                   potentialProfit >= 0 ? "text-green-600" : "text-red-600"
                 }`}
