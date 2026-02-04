@@ -10,6 +10,9 @@ import type { ProductUI } from "@/components/dashboard/ProductCard";
 export default function Dashboard() {
   const router = useRouter();
   const [products, setProducts] = useState<ProductUI[]>([]);
+  const [selectedIds, setSelectedIds] = useState<Set<string | number>>(
+    new Set()
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -42,11 +45,10 @@ export default function Dashboard() {
           const unitCost = (p.priceCNY || 0) * (rate > 0 ? rate : 1);
           const goodsCost = unitCost * (p.purchasedCount || 0);
 
-          const spent = (
+          const spent =
             goodsCost +
             (typeof p.shippingUA === "number" ? p.shippingUA : 0) +
-            (typeof p.managementUAH === "number" ? p.managementUAH : 0)
-          ).toFixed(2);
+            (typeof p.managementUAH === "number" ? p.managementUAH : 0);
 
           const income = Array.isArray(p.incomes)
             ? p.incomes.reduce(
@@ -74,6 +76,8 @@ export default function Dashboard() {
           } as ProductUI;
         });
         setProducts(mapped);
+        // Default select all
+        setSelectedIds(new Set(mapped.map((p) => p.id)));
         console.log("Products loaded:", mapped);
       } catch (err) {
         console.error("Failed to load products", err);
@@ -84,21 +88,36 @@ export default function Dashboard() {
     load();
   }, []);
 
-  const totalSpent = products.reduce((sum, p) => sum + p.spent, 0);
-  const totalIncome = products.reduce((sum, p) => sum + p.income, 0);
+  const toggleSelection = (id: string | number) => {
+    const newSet = new Set(selectedIds);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    setSelectedIds(newSet);
+  };
+
+  const selectedProducts = products.filter((p) => selectedIds.has(p.id));
+  const totalSpent = selectedProducts.reduce((sum, p) => sum + p.spent, 0);
+  const totalIncome = selectedProducts.reduce((sum, p) => sum + p.income, 0);
 
   return (
     <div className="py-4 space-y-4">
       <Header onAdd={() => router.push("/product")} />
       <Summary
-        totalSpent={totalSpent}
-        totalIncome={totalIncome}
-        variationsCount={products.length}
+        totalSpent={Number(totalSpent.toFixed(2))}
+        totalIncome={Number(totalIncome.toFixed(2))}
+        variationsCount={selectedProducts.length}
       />
       {loading ? (
         <div className="text-center text-gray-600">Loading products...</div>
       ) : (
-        <ProductGrid products={products} />
+        <ProductGrid
+          products={products}
+          selectedIds={selectedIds}
+          onToggle={toggleSelection}
+        />
       )}
     </div>
   );

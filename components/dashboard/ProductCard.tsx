@@ -2,7 +2,13 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { useEffect, useState } from "react";
-import { TrendingUp, TrendingDown, Coins } from "lucide-react";
+import {
+  TrendingUp,
+  TrendingDown,
+  Coins,
+  CheckSquare,
+  Square,
+} from "lucide-react";
 
 export type ProductUI = {
   id: string | number;
@@ -19,9 +25,15 @@ export type ProductUI = {
 
 type ProductCardProps = {
   product: ProductUI;
+  isSelected?: boolean;
+  onToggle?: () => void;
 };
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({
+  product,
+  isSelected,
+  onToggle,
+}: ProductCardProps) {
   const [rate, setRate] = useState(0);
   const balance = product.income - product.spent;
 
@@ -49,15 +61,40 @@ export function ProductCard({ product }: ProductCardProps) {
   const purchaseCostUAH =
     rate > 0 ? product.priceCNY * rate : product.priceCNY * 1;
 
+  const handleSelection = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onToggle) onToggle();
+  };
+
   return (
-    <Card className="group overflow-hidden rounded-xl border-border/50 bg-card hover:border-primary/50 hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+    <Card
+      className={`group overflow-hidden rounded-xl border-border/50 bg-card hover:border-primary/50 hover:shadow-lg transition-all duration-300 h-full flex flex-col ${
+        isSelected === false ? "opacity-60 grayscale-[0.5]" : ""
+      }`}
+    >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
         <img
           src={product.img}
           alt={product.name}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
-        <div className="absolute top-2 right-2">
+
+        {/* Selection Checkbox */}
+        {onToggle && (
+          <div
+            onClick={handleSelection}
+            className="absolute top-2 left-2 z-20 cursor-pointer text-black  drop-shadow-md hover:scale-110 transition-transform"
+          >
+            {isSelected ? (
+              <CheckSquare className="w-6 h-6 fill-primary stroke-black" />
+            ) : (
+              <Square className="w-6 h-6 stroke-black/80 fill-black/20" />
+            )}
+          </div>
+        )}
+
+        <div className="absolute top-2 right-2 z-10">
           {balance >= 0 ? (
             <div className="flex items-center gap-1 rounded-full bg-green-500/90 px-2.5 py-1 text-xs font-bold text-white shadow-sm backdrop-blur-md">
               <TrendingUp className="h-4 w-4" />

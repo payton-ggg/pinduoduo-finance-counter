@@ -5,19 +5,29 @@ import { ProductCard, ProductUI } from "./ProductCard";
 
 type ProductGridProps = {
   products: ProductUI[];
+  selectedIds?: Set<string | number>;
+  onToggle?: (id: string | number) => void;
 };
 
-export function ProductGrid({ products }: ProductGridProps) {
+export function ProductGrid({
+  products,
+  selectedIds,
+  onToggle,
+}: ProductGridProps) {
   return (
     <div className="grid grid-cols-1 min-[450px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
       {products.map((p, index) => (
         <Link
           href={`/product/${p.id}`}
           key={p.id}
-          className="animate-in fade-in zoom-in-95 duration-500 fill-mode-forwards block h-full"
+          className="animate-in fade-in zoom-in-95 duration-500 fill-mode-forwards block h-full group/link"
           style={{ animationDelay: `${index * 50}ms` }}
         >
-          <ProductCard product={p} />
+          <ProductCard
+            product={p}
+            isSelected={selectedIds ? selectedIds.has(p.id) : false}
+            onToggle={onToggle ? () => onToggle(p.id) : undefined}
+          />
         </Link>
       ))}
     </div>
