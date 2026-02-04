@@ -43,6 +43,8 @@ export function ProductCard({
     (product.totalPurchased || 0) * (product.priceInUA || 0);
   const projectedProfit = projectedRevenue - product.spent;
 
+  const margin = product.income - product.spent;
+
   useEffect(() => {
     const fetchRate = async () => {
       try {
@@ -169,6 +171,19 @@ export function ProductCard({
               </span>
             </div>
           )}
+
+            <div className="bg-primary/5 border border-primary/10 rounded-lg p-2 flex justify-between items-center">
+              <span className="text-[10px] uppercase font-bold text-primary/80">
+                Моржа
+              </span>
+              <span
+                className={`text-sm font-bold ${
+                  margin >= 0 ? "text-primary" : "text-destructive"
+                }`}
+              >
+                {margin.toFixed(2)} ₴
+              </span>
+            </div>
         </div>
 
         {/* Detail text - only show if exists */}
