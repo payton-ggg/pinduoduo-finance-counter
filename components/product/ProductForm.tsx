@@ -24,6 +24,7 @@ type FormValues = {
   incomes: { id?: string; amount: number }[];
   expenses: { id?: string; amount: number; type: string }[];
   exchangeRate?: number;
+  archive?: number | null;
 };
 
 type ProductFormProps = {
@@ -64,6 +65,7 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
       type: e.type,
     })),
     exchangeRate: 42,
+    archive: initialData?.archive ?? null,
   };
 
   const {
@@ -177,6 +179,7 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
       sellsCount: values.sellsCount ?? null,
       purchasedCount: values.purchasedCount ?? null,
       chip: values.chip || null,
+      archive: values.archive ?? null,
       images: (values.images || [])
         .map((i) => i.url.trim())
         .filter((u) => u.length > 0),
@@ -293,6 +296,22 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
           setValue={setValue}
           watch={watch}
         />
+
+        {/* Archive Checkbox */}
+        {id && (
+          <div className="flex items-center gap-2 p-4 border rounded-md bg-muted/30">
+            <input
+              type="checkbox"
+              id="archive"
+              className="w-4 h-4 rounded"
+              checked={watch("archive") !== null && watch("archive") !== undefined}
+              onChange={(e) => setValue("archive", e.target.checked ? 1 : null)}
+            />
+            <label htmlFor="archive" className="text-sm font-medium cursor-pointer">
+              Переместить в архив
+            </label>
+          </div>
+        )}
 
         <ImagesFieldArray
           fields={imageFields}

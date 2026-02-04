@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-// IMPORTANT: ensure we use the client from node_modules to match generated output
-import { PrismaClient } from "@prisma/client";
-
-export const runtime = "nodejs";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export async function GET(
   _req: NextRequest,
@@ -66,6 +61,7 @@ export async function PATCH(
         chip: data.chip,
         equipment: data.equipment,
         priceInUA: data.priceInUA,
+        archive: data.archive,
       },
     });
     return NextResponse.json(updated);

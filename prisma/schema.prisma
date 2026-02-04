@@ -30,7 +30,8 @@ model Product {
   sellsCount Int?
   purchasedCount Int? @default(0)
   chip      String?
-  equipment String? 
+  equipment String?
+  archive   Int? // null = not archived, any value = archived
 
   expenses  Expense[]
   incomes   Income[]

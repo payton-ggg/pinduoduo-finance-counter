@@ -21,6 +21,7 @@ export type ProductUI = {
   managementUAH?: number;
   priceInUA?: number;
   totalPurchased?: number;
+  archive?: number | null;
 };
 
 type ProductCardProps = {
