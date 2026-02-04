@@ -112,15 +112,23 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
   const shippingUA = watch("shippingUA");
   const managementUAH = watch("managementUAH");
 
-  const purchaseUAH = (Number(priceCNY) || 0) * (rate > 0 ? rate : 1);
-  const sellingUAH = Number(priceInUA) || 0;
+  const purchaseUnitCostUAH = (Number(priceCNY) || 0) * (rate > 0 ? rate : 1);
+  const sellingPriceUAH = Number(priceInUA) || 0;
 
-  const computedIncome = (Number(sells) || 0) * sellingUAH;
-  const computedExpense = ((Number(purchased) || 0) * purchaseUAH) + Number(shippingUA);
+  // Total cost of purchasing the goods (without shipping/management)
+  const totalGoodsCost = (Number(purchased) || 0) * purchaseUnitCostUAH;
+
+  const computedIncome = (Number(sells) || 0) * sellingPriceUAH;
+
+  // Total expenses = Goods Cost + Shipping + Management
+  const computedExpense =
+    totalGoodsCost + (Number(shippingUA) || 0) + (Number(managementUAH) || 0);
 
   // Potential (Projected) Profit Calculation
-  const potentialRevenue = (Number(purchased) || 0) * sellingUAH;
-  const potentialProfit = potentialRevenue - computedExpense; // Rough estimate using current expense calc which includes purchase cost
+  // Revenue if all purchased items are sold
+  const potentialTotalRevenue = (Number(purchased) || 0) * sellingPriceUAH;
+  // Profit = Total Potential Revenue - Total Expenses
+  const potentialProfit = potentialTotalRevenue - computedExpense;
 
   // Auto-sync calculated income/expense to form arrays if in Edit mode or if user wants these to be auto-generated
   // For now, we replicate the EditForm logic which forces these into the form state
@@ -128,12 +136,6 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
     // Only auto-update if we have valid numbers
     if (computedIncome > 0) {
       const currentIncomes = watch("incomes") || [];
-      // Simple logic: if empty, add one. If exists, update first?
-      // The original logic was aggressive: setValue completely.
-      // We'll stick to the original "Auto-rules" logic for consistency, but maybe be gentler?
-      // Original:
-      // setValue("incomes", [{ amount: ... }], { shouldDirty: true })
-      // This wipes manual entries. Let's keep it for now as per "fix this" (match EditForm)
       setValue(
         "incomes",
         [
@@ -146,7 +148,7 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
         { shouldDirty: true }
       );
     }
-  }, [computedIncome, setValue, watch]); // Removed unnecessary deps
+  }, [computedIncome, setValue, watch]);
 
   useEffect(() => {
     if (computedExpense > 0) {
@@ -318,16 +320,16 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
             <div className="p-3 border rounded-md">
               <p className="text-sm text-gray-600">Закупочная цена (UAH)</p>
               <div className="w-full justify-between">
-              <p className="text-lg font-semibold">
-                {purchaseUAH.toFixed(2)} ₴
-              </p>
-              <p className="text-lg font-semibold">
-                {(Number(purchaseUAH.toFixed(2)) * Number(purchased)).toFixed(2)} ₴
-              </p>
+                <p className="text-lg font-semibold">
+                  {purchaseUnitCostUAH.toFixed(2)} ₴
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  (Всего: {totalGoodsCost.toFixed(2)} ₴)
+                </p>
               </div>
             </div>
             <div className="p-3 border rounded-md">
-              <p className="text-sm text-gray-600">Доход</p>
+              <p className="text-sm text-gray-600">Доход (текущий)</p>
               <p className="text-lg font-semibold">
                 {computedIncome.toFixed(2)} ₴
               </p>
