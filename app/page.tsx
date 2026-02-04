@@ -102,9 +102,17 @@ export default function Dashboard() {
   const totalSpent = selectedProducts.reduce((sum, p) => sum + p.spent, 0);
   const totalIncome = selectedProducts.reduce((sum, p) => sum + p.income, 0);
 
+  const clearSelection = () => setSelectedIds(new Set());
+  const selectAll = () => setSelectedIds(new Set(products.map((p) => p.id)));
+
   return (
     <div className="py-4 space-y-4">
-      <Header onAdd={() => router.push("/product")} />
+      <Header
+        onAdd={() => router.push("/product")}
+        onClearSelection={clearSelection}
+        onSelectAll={selectAll}
+        hasSelection={selectedIds.size > 0}
+      />
       <Summary
         totalSpent={Number(totalSpent.toFixed(2))}
         totalIncome={Number(totalIncome.toFixed(2))}
