@@ -129,6 +129,7 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
   // Potential (Projected) Profit Calculation
   const potentialTotalRevenue = (Number(purchased) || 0) * sellingPriceUAH;
   const potentialProfit = potentialTotalRevenue - totalCalculatedCosts;
+  const margin = computedIncome - totalCalculatedCosts
 
   // Auto-sync calculated income/expense to form arrays
   useEffect(() => {
@@ -322,51 +323,64 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
         />
 
         {/* Financial Summary */}
-        <div>
+        <div className="overflow-x-auto">
           <div className="flex items-center justify-between mb-2">
             <label className="text-sm font-medium">Финансовый расчет</label>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div className="p-3 border rounded-md">
-              <p className="text-sm text-gray-600">Курс CNY → UAH</p>
-              <p className="text-lg font-semibold">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="p-3 border rounded-md min-w-0">
+              <p className="text-xs sm:text-sm text-gray-600">Курс CNY → UAH</p>
+              <p className="text-base sm:text-lg font-semibold break-words">
                 {rate > 0 ? rate.toFixed(2) : "—"}
               </p>
             </div>
-            <div className="p-3 border rounded-md">
-              <p className="text-sm text-gray-600">Закупочная цена (UAH)</p>
+            <div className="p-3 border rounded-md min-w-0">
+              <p className="text-xs sm:text-sm text-gray-600">Закупочная цена (UAH)</p>
               <div className="w-full justify-between">
-                <p className="text-lg font-semibold">
+                <p className="text-base sm:text-lg font-semibold break-words">
                   {purchaseUnitCostUAH.toFixed(2)} ₴
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground break-words">
                   (Всего: {totalGoodsCost.toFixed(2)} ₴)
                 </p>
               </div>
             </div>
-            <div className="p-3 border rounded-md">
-              <p className="text-sm text-gray-600">Доход (текущий)</p>
-              <p className="text-lg font-semibold">
+            <div className="p-3 border rounded-md min-w-0">
+              <p className="text-xs sm:text-sm text-gray-600">Доход (текущий)</p>
+              <p className="text-base sm:text-lg font-semibold break-words">
                 {computedIncome.toFixed(2)} ₴
               </p>
             </div>
-            <div className="p-3 border rounded-md">
-              <p className="text-sm text-gray-600">Рассчитанный расход</p>
-              <p className="text-lg font-semibold">
+            <div className="p-3 border rounded-md min-w-0">
+              <p className="text-xs sm:text-sm text-gray-600">Рассчитанный расход</p>
+              <p className="text-base sm:text-lg font-semibold break-words">
                 {totalCalculatedCosts.toFixed(2)} ₴
               </p>
             </div>
-            <div className="p-3 border rounded-md bg-green-50/50 dark:bg-green-900/20 col-span-1 sm:col-span-4">
-              <p className="text-sm text-gray-600 font-medium">
+            <div className="p-3 border rounded-md bg-green-50/50 dark:bg-green-900/20 col-span-1 sm:col-span-2 lg:col-span-4 min-w-0">
+              <p className="text-xs sm:text-sm text-gray-600 font-medium break-words">
                 Прогноз чистой прибыли (если продать всё, {purchased || 0} шт)
               </p>
               <p
                 suppressHydrationWarning={true}
-                className={`text-xl font-bold ${
+                className={`text-lg sm:text-xl font-bold break-words ${
                   potentialProfit >= 0 ? "text-green-600" : "text-red-600"
                 }`}
               >
                 {potentialProfit.toFixed(2)} ₴
+              </p>
+            </div>
+             <div className="p-3 border rounded-md bg-green-50/50 dark:bg-green-900/20 col-span-1 sm:col-span-2 lg:col-span-4 min-w-0">
+              <p className="text-xs sm:text-sm text-gray-600 font-medium break-words">
+                Моржа (на {sells || 0} шт из {purchased || 0} шт)
+              </p>
+              <p
+                suppressHydrationWarning={true}
+                className={`text-lg sm:text-xl font-bold break-words ${
+                  potentialProfit >= 0 ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                {margin.toFixed(2)} ₴
               </p>
             </div>
           </div>
@@ -374,41 +388,42 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
 
         {/* Expenses List (Editable) */}
         <div>
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
             <label className="text-sm font-medium">Расходы (Делатизация)</label>
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() => appendExpense({ amount: 0, type: "" })}
+              className="w-full sm:w-auto"
             >
               Добавить расход
             </Button>
           </div>
           <div className="space-y-2">
             {expenseFields.map((field, index) => (
-              <div key={field.id} className="flex gap-2">
+              <div key={field.id} className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="number"
                   step="0.01"
-                  className="flex-1 border rounded p-2"
+                  className="w-full sm:flex-1 border rounded p-2 text-sm sm:text-base min-w-0"
                   placeholder="Сумма"
                   {...register(`expenses.${index}.amount` as const, {
                     valueAsNumber: true,
                   })}
                 />
                 <input
-                  className="flex-1 border rounded p-2"
+                  className="w-full sm:flex-1 border rounded p-2 text-sm sm:text-base min-w-0"
                   placeholder="Тип (напр. Закупка, Доставка)"
                   {...register(`expenses.${index}.type` as const)}
                 />
                 <Button
                   type="button"
                   variant="ghost"
-                  className="text-red-500"
+                  className="text-red-500 w-full sm:w-auto"
                   onClick={() => removeExpense(index)}
                 >
-                  X
+                  Удалить
                 </Button>
               </div>
             ))}
@@ -420,7 +435,7 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
           </div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex justify-between flex-col gap-2">
           <Button type="submit" disabled={isSubmitting} className="w-full">
             {isSubmitting
               ? "Сохранение..."
@@ -433,6 +448,7 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
               type="button"
               variant="outline"
               onClick={() => router.back()}
+              className="w-full sm:w-auto"
             >
               Отмена
             </Button>
