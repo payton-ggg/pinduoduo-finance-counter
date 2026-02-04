@@ -15,22 +15,39 @@ export default function Dashboard() {
   useEffect(() => {
     const load = async () => {
       try {
+        // Fetch exchange rate first
+        let rate = 1;
+        try {
+          const rateRes = await fetch(
+            "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=CNY&json"
+          );
+          const rateData = await rateRes.json();
+          if (rateData && rateData.length > 0) {
+            rate = rateData[0].rate;
+          }
+        } catch (e) {
+          console.error("Failed to fetch rate, using 1", e);
+        }
+
         const res = await fetch("/api/products");
         if (!res.ok) {
-           throw new Error(`Failed to fetch: ${res.status} ${res.statusText}`);
+          throw new Error(`Failed to fetch: ${res.status} ${res.statusText}`);
         }
         const text = await res.text();
         const data = text ? JSON.parse(text) : [];
+
         const mapped: ProductUI[] = (data || []).map((p: any) => {
-          const spent =
-            (Array.isArray(p.expenses)
-              ? p.expenses.reduce(
-                  (sum: number, e: any) => sum + (e.amount || 0),
-                  0
-                )
-              : 0) +
+          // Calculate expenses dynamically to Fix Data Mismatch
+          // Formula: (PriceCNY * Rate * PurchasedCount) + Shipping + Management
+          const unitCost = (p.priceCNY || 0) * (rate > 0 ? rate : 1);
+          const goodsCost = unitCost * (p.purchasedCount || 0);
+
+          const spent = (
+            goodsCost +
             (typeof p.shippingUA === "number" ? p.shippingUA : 0) +
-            (typeof p.managementUAH === "number" ? p.managementUAH : 0);
+            (typeof p.managementUAH === "number" ? p.managementUAH : 0)
+          ).toFixed(2);
+
           const income = Array.isArray(p.incomes)
             ? p.incomes.reduce(
                 (sum: number, i: any) => sum + (i.amount || 0),

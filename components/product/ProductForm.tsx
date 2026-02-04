@@ -120,22 +120,17 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
 
   const computedIncome = (Number(sells) || 0) * sellingPriceUAH;
 
-  // Total expenses = Goods Cost + Shipping + Management
-  const computedExpense =
+  // Expenses for the summary/profit calculation (Includes everything)
+  const totalCalculatedCosts =
     totalGoodsCost + (Number(shippingUA) || 0) + (Number(managementUAH) || 0);
 
   // Potential (Projected) Profit Calculation
-  // Revenue if all purchased items are sold
   const potentialTotalRevenue = (Number(purchased) || 0) * sellingPriceUAH;
-  // Profit = Total Potential Revenue - Total Expenses
-  const potentialProfit = potentialTotalRevenue - computedExpense;
+  const potentialProfit = potentialTotalRevenue - totalCalculatedCosts;
 
-  // Auto-sync calculated income/expense to form arrays if in Edit mode or if user wants these to be auto-generated
-  // For now, we replicate the EditForm logic which forces these into the form state
+  // Auto-sync calculated income/expense to form arrays
   useEffect(() => {
-    // Only auto-update if we have valid numbers
     if (computedIncome > 0) {
-      const currentIncomes = watch("incomes") || [];
       setValue(
         "incomes",
         [
@@ -148,16 +143,18 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
         { shouldDirty: true }
       );
     }
-  }, [computedIncome, setValue, watch]);
+  }, [computedIncome, setValue]);
 
+  // Sync ONLY the goods cost to the 'expenses' array
+  // Shipping and Management are separate fields
   useEffect(() => {
-    if (computedExpense > 0) {
+    if (totalGoodsCost > 0) {
       setValue(
         "expenses",
         [
           {
-            amount: Number.isFinite(computedExpense)
-              ? Number(computedExpense.toFixed(2))
+            amount: Number.isFinite(totalGoodsCost)
+              ? Number(totalGoodsCost.toFixed(2))
               : 0,
             type: "Закупка",
           },
@@ -165,7 +162,7 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
         { shouldDirty: true }
       );
     }
-  }, [computedExpense, setValue]);
+  }, [totalGoodsCost, setValue]);
 
   const onSubmit = async (values: FormValues) => {
     const payloadStart = {
@@ -337,7 +334,7 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
             <div className="p-3 border rounded-md">
               <p className="text-sm text-gray-600">Рассчитанный расход</p>
               <p className="text-lg font-semibold">
-                {computedExpense.toFixed(2)} ₴
+                {totalCalculatedCosts.toFixed(2)} ₴
               </p>
             </div>
             <div className="p-3 border rounded-md bg-green-50/50 dark:bg-green-900/20 col-span-1 sm:col-span-4">

@@ -103,7 +103,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 Расходы
               </span>
               <span className="font-bold text-foreground">
-                {product.spent.toLocaleString()} ₴
+                {product.spent.toFixed(2)} ₴
               </span>
             </div>
             <div className="flex flex-col text-right">
@@ -111,7 +111,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 Доходы
               </span>
               <span className="font-bold text-foreground">
-                {product.income.toLocaleString()} ₴
+                {product.income.toFixed(2)} ₴
               </span>
             </div>
           </div>
@@ -128,7 +128,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 }`}
               >
                 {projectedProfit > 0 ? "+" : ""}
-                {projectedProfit.toLocaleString()} ₴
+                {projectedProfit.toFixed(2)} ₴
               </span>
             </div>
           )}
