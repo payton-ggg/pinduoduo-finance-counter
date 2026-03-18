@@ -21,6 +21,8 @@ type FormValues = {
   sellsCount?: number;
   purchasedCount?: number;
   exchangeRate?: number; // Added for calculation
+  shippingType?: "air" | "sea" | "custom";
+  customShippingRate?: number;
 };
 
 type BasicFieldsProps = {
@@ -39,15 +41,29 @@ export function BasicFields({
   const weight = watch("weight");
   const purchasedCount = watch("purchasedCount");
   const exchangeRate = watch("exchangeRate");
+  const shippingType = watch("shippingType") || "air";
+  const customShippingRate = watch("customShippingRate");
 
   useEffect(() => {
     if (weight && purchasedCount && exchangeRate) {
-      // 18 USD per kg
-      const shippingCostUSD = (weight / 1000) * purchasedCount * 18;
+      let ratePerKgUSD = 0;
+      switch (shippingType) {
+        case "air":
+          ratePerKgUSD = 18.1;
+          break;
+        case "sea":
+          ratePerKgUSD = 6.4;
+          break;
+        case "custom":
+          ratePerKgUSD = customShippingRate || 0;
+          break;
+      }
+      
+      const shippingCostUSD = (weight / 1000) * purchasedCount * ratePerKgUSD;
       const shippingCostUAH = shippingCostUSD * exchangeRate;
       setValue("shippingUA", parseFloat(shippingCostUAH.toFixed(2)));
     }
-  }, [weight, purchasedCount, exchangeRate, setValue]);
+  }, [weight, purchasedCount, exchangeRate, shippingType, customShippingRate, setValue]);
   return (
     <div className="space-y-4">
       <div>
@@ -116,10 +132,42 @@ export function BasicFields({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div>
           <label className="block text-sm font-medium mb-1">
-            Цена доставки (₴)
+            Тип доставки
+          </label>
+          <select
+            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-background"
+            {...register("shippingType")}
+          >
+            <option value="air">Авиа (18.1$ / кг)</option>
+            <option value="sea">Море (6.4$ / кг)</option>
+            <option value="custom">Своя цена / кг</option>
+          </select>
+        </div>
+        
+        {shippingType === "custom" && (
+           <div>
+             <label className="block text-sm font-medium mb-1">
+               Своя цена ($)
+             </label>
+             <input
+               type="number"
+               step="0.01"
+               className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+               {...register("customShippingRate", {
+                 valueAsNumber: true,
+                 min: { value: 0, message: ">= 0" },
+               })}
+               placeholder="Например: 10.5"
+             />
+           </div>
+        )}
+
+        <div className={shippingType !== "custom" ? "sm:col-span-1 lg:col-span-2" : ""}>
+          <label className="block text-sm font-medium mb-1">
+            Цена доставки (₴) - Авто/Руч.
           </label>
           <input
             type="number"

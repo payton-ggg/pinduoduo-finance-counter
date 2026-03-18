@@ -24,6 +24,8 @@ type FormValues = {
   incomes: { id?: string; amount: number }[];
   expenses: { id?: string; amount: number; type: string }[];
   exchangeRate?: number;
+  shippingType?: "air" | "sea" | "custom";
+  customShippingRate?: number;
   archive?: number | null;
 };
 
@@ -65,6 +67,8 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
       type: e.type,
     })),
     exchangeRate: 42,
+    shippingType: "air",
+    customShippingRate: undefined,
     archive: initialData?.archive ?? null,
   };
 
