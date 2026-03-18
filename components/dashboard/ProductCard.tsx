@@ -22,6 +22,8 @@ export type ProductUI = {
   priceInUA?: number;
   totalPurchased?: number;
   archive?: number | null;
+  rateCNY?: number;
+  rateUSD?: number;
 };
 
 type ProductCardProps = {
@@ -61,8 +63,10 @@ export function ProductCard({
     fetchRate();
   }, []);
 
+  const actualRateCNY = product.rateCNY || rate;
+
   const purchaseCostUAH =
-    rate > 0 ? product.priceCNY * rate : product.priceCNY * 1;
+    actualRateCNY > 0 ? product.priceCNY * actualRateCNY : product.priceCNY * 1;
 
   const handleSelection = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -121,7 +125,7 @@ export function ProductCard({
             <p className="text-sm text-muted-foreground flex gap-2 items-center">
               <span className="flex items-center gap-1 bg-muted px-2 py-0.5 rounded text-xs">
                 <Coins className="w-3.5 h-3.5" />
-                {rate > 0
+                {actualRateCNY > 0
                   ? `${product.priceCNY}¥ ≈ ${purchaseCostUAH.toFixed(0)}₴`
                   : `${product.priceCNY}¥`}
               </span>

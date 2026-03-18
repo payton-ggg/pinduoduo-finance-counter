@@ -18,6 +18,8 @@ model Product {
   shippingUA Float?
   managementUAH Float?
   priceInUA Float?
+  rateCNY   Float?
+  rateUSD   Float?
 
   workModalWindowIOS Boolean @default(false)
   soundReducer       Boolean @default(false)

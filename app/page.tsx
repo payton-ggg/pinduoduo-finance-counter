@@ -44,7 +44,8 @@ export default function Dashboard() {
       const mapped: ProductUI[] = (data || []).map((p: any) => {
         // Calculate expenses dynamically to Fix Data Mismatch
         // Formula: (PriceCNY * Rate * PurchasedCount) + Shipping + Management
-        const unitCost = (p.priceCNY || 0) * (rate > 0 ? rate : 1);
+        const actualRateCNY = p.rateCNY || rate;
+        const unitCost = (p.priceCNY || 0) * (actualRateCNY > 0 ? actualRateCNY : 1);
         const goodsCost = unitCost * (p.purchasedCount || 0);
 
         const spent =
@@ -76,6 +77,8 @@ export default function Dashboard() {
           priceInUA: p.priceInUA || 0,
           totalPurchased: p.purchasedCount || 0,
           archive: p.archive,
+          rateCNY: p.rateCNY,
+          rateUSD: p.rateUSD,
         } as ProductUI;
       });
       setProducts(mapped);

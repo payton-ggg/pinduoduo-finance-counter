@@ -23,7 +23,8 @@ type FormValues = {
   priceInUA?: number;
   incomes: { id?: string; amount: number }[];
   expenses: { id?: string; amount: number; type: string }[];
-  exchangeRate?: number;
+  rateCNY?: number;
+  rateUSD?: number;
   shippingType?: "air" | "sea" | "custom";
   customShippingRate?: number;
   archive?: number | null;
@@ -36,7 +37,6 @@ type ProductFormProps = {
 
 export default function ProductForm({ id, initialData }: ProductFormProps) {
   const router = useRouter();
-  const [rate, setRate] = useState<number>(0);
 
   const normalizedImages: { url: string }[] = Array.isArray(initialData?.images)
     ? initialData.images.map((img: any) =>
@@ -66,7 +66,8 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
       amount: e.amount,
       type: e.type,
     })),
-    exchangeRate: 42,
+    rateCNY: initialData?.rateCNY ?? undefined,
+    rateUSD: initialData?.rateUSD ?? undefined,
     shippingType: "air",
     customShippingRate: undefined,
     archive: initialData?.archive ?? null,
@@ -95,21 +96,33 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
   } = useFieldArray({ control, name: "expenses" });
 
   useEffect(() => {
-    const fetchRate = async () => {
+    const fetchRates = async () => {
       try {
-        const response = await fetch(
-          "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=CNY&json"
-        );
-        const data = await response.json();
-        if (data && data.length > 0) {
-          setRate(Number(data[0].rate) || 0);
+        if (!initialData?.rateCNY) {
+          const resCNY = await fetch(
+            "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=CNY&json"
+          );
+          const dataCNY = await resCNY.json();
+          if (dataCNY && dataCNY.length > 0) {
+            setValue("rateCNY", Number(dataCNY[0].rate));
+          }
+        }
+        
+        if (!initialData?.rateUSD) {
+          const resUSD = await fetch(
+            "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=USD&json"
+          );
+          const dataUSD = await resUSD.json();
+          if (dataUSD && dataUSD.length > 0) {
+            setValue("rateUSD", Number(dataUSD[0].rate));
+          }
         }
       } catch (error) {
-        console.error("Failed to fetch exchange rate:", error);
+        console.error("Failed to fetch exchange rates:", error);
       }
     };
-    fetchRate();
-  }, []);
+    fetchRates();
+  }, [initialData, setValue]);
 
   const sells = watch("sellsCount");
   const purchased = watch("purchasedCount");
@@ -117,8 +130,9 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
   const priceInUA = watch("priceInUA");
   const shippingUA = watch("shippingUA");
   const managementUAH = watch("managementUAH");
+  const rateCNY = watch("rateCNY") || 0;
 
-  const purchaseUnitCostUAH = (Number(priceCNY) || 0) * (rate > 0 ? rate : 1);
+  const purchaseUnitCostUAH = (Number(priceCNY) || 0) * (rateCNY > 0 ? rateCNY : 1);
   const sellingPriceUAH = Number(priceInUA) || 0;
 
   // Total cost of purchasing the goods (without shipping/management)
@@ -335,7 +349,7 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
             <div className="p-3 border rounded-md min-w-0">
               <p className="text-xs sm:text-sm text-gray-600">Курс CNY → UAH</p>
               <p className="text-base sm:text-lg font-semibold break-words">
-                {rate > 0 ? rate.toFixed(2) : "—"}
+                {rateCNY > 0 ? rateCNY.toFixed(2) : "—"}
               </p>
             </div>
             <div className="p-3 border rounded-md min-w-0">

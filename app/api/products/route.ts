@@ -43,6 +43,10 @@ export async function POST(req: Request) {
       chip: data.chip,
       equipment: data.equipment,
       priceInUA: data.priceInUA,
+      // @ts-ignore: Need to run prisma generate
+      rateCNY: data.rateCNY,
+      // @ts-ignore: Need to run prisma generate
+      rateUSD: data.rateUSD,
       expenses: {
         create: data.shippingUA
           ? [{ amount: data.shippingUA, type: "Shipping" }]

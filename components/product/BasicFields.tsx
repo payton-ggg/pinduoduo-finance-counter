@@ -20,7 +20,8 @@ type FormValues = {
   weight?: number;
   sellsCount?: number;
   purchasedCount?: number;
-  exchangeRate?: number; // Added for calculation
+  rateCNY?: number;
+  rateUSD?: number;
   shippingType?: "air" | "sea" | "custom";
   customShippingRate?: number;
 };
@@ -40,12 +41,14 @@ export function BasicFields({
 }: BasicFieldsProps) {
   const weight = watch("weight");
   const purchasedCount = watch("purchasedCount");
-  const exchangeRate = watch("exchangeRate");
+  const rateCNY = watch("rateCNY");
+  const rateUSD = watch("rateUSD");
   const shippingType = watch("shippingType") || "air";
   const customShippingRate = watch("customShippingRate");
 
   useEffect(() => {
-    if (weight && purchasedCount && exchangeRate) {
+    // We only calculate shipping if we have rateUSD, weight, and count
+    if (weight && purchasedCount && rateUSD) {
       let ratePerKgUSD = 0;
       switch (shippingType) {
         case "air":
@@ -60,10 +63,10 @@ export function BasicFields({
       }
       
       const shippingCostUSD = (weight / 1000) * purchasedCount * ratePerKgUSD;
-      const shippingCostUAH = shippingCostUSD * exchangeRate;
+      const shippingCostUAH = shippingCostUSD * rateUSD;
       setValue("shippingUA", parseFloat(shippingCostUAH.toFixed(2)));
     }
-  }, [weight, purchasedCount, exchangeRate, shippingType, customShippingRate, setValue]);
+  }, [weight, purchasedCount, rateUSD, shippingType, customShippingRate, setValue]);
   return (
     <div className="space-y-4">
       <div>
@@ -80,17 +83,31 @@ export function BasicFields({
         )}
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-1">
-          Курс (USD - UAH)
-        </label>
-        <input
-          type="number"
-          step="0.01"
-          className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          {...register("exchangeRate", { valueAsNumber: true })}
-          placeholder="42.00"
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Курс (CNY - UAH) 🇨🇳
+          </label>
+          <input
+            type="number"
+            step="0.0001"
+            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            {...register("rateCNY", { valueAsNumber: true })}
+            placeholder="Например: 5.80"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Курс (USD - UAH) 🇺🇸
+          </label>
+          <input
+            type="number"
+            step="0.0001"
+            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            {...register("rateUSD", { valueAsNumber: true })}
+            placeholder="Например: 42.00"
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
