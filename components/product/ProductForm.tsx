@@ -68,8 +68,8 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
     })),
     rateCNY: initialData?.rateCNY ?? undefined,
     rateUSD: initialData?.rateUSD ?? undefined,
-    shippingType: "air",
-    customShippingRate: undefined,
+    shippingType: initialData?.shippingType ?? "air",
+    customShippingRate: initialData?.customShippingRate ?? undefined,
     archive: initialData?.archive ?? null,
   };
 
@@ -199,6 +199,10 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
       purchasedCount: values.purchasedCount ?? null,
       chip: values.chip || null,
       archive: values.archive ?? null,
+      rateCNY: values.rateCNY ?? null,
+      rateUSD: values.rateUSD ?? null,
+      shippingType: values.shippingType || null,
+      customShippingRate: values.customShippingRate ?? null,
       images: (values.images || [])
         .map((i) => i.url.trim())
         .filter((u) => u.length > 0),

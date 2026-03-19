@@ -20,6 +20,8 @@ model Product {
   priceInUA Float?
   rateCNY   Float?
   rateUSD   Float?
+  shippingType String?
+  customShippingRate Float?
 
   workModalWindowIOS Boolean @default(false)
   soundReducer       Boolean @default(false)

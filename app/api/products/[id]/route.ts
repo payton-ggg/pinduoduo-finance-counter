@@ -66,6 +66,10 @@ export async function PATCH(
         rateCNY: data.rateCNY,
         // @ts-ignore: Need to run prisma generate
         rateUSD: data.rateUSD,
+        // @ts-ignore: Need to run prisma generate
+        shippingType: data.shippingType,
+        // @ts-ignore: Need to run prisma generate
+        customShippingRate: data.customShippingRate,
       },
     });
     return NextResponse.json(updated);

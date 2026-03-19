@@ -47,6 +47,10 @@ export async function POST(req: Request) {
       rateCNY: data.rateCNY,
       // @ts-ignore: Need to run prisma generate
       rateUSD: data.rateUSD,
+      // @ts-ignore: Need to run prisma generate
+      shippingType: data.shippingType,
+      // @ts-ignore: Need to run prisma generate
+      customShippingRate: data.customShippingRate,
       expenses: {
         create: data.shippingUA
           ? [{ amount: data.shippingUA, type: "Shipping" }]
