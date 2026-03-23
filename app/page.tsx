@@ -89,7 +89,6 @@ export default function Dashboard() {
         )
         .map((p) => p.id);
       setSelectedIds(new Set(filteredIds));
-      console.log("Products loaded:", mapped);
     } catch (err) {
       console.error("Failed to load products", err);
     } finally {

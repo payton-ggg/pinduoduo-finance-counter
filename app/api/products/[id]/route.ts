@@ -74,7 +74,6 @@ export async function PATCH(
     });
     return NextResponse.json(updated);
   } catch (e) {
-    console.log("PATCH id:", id, "error:", e);
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "Server error" },
       { status: 500 }
