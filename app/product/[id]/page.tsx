@@ -1,26 +1,30 @@
-import { headers } from "next/headers";
+import { prisma } from "@/lib/prisma";
 import ProductForm from "@/components/product/ProductForm";
 import { DeleteProductButton } from "@/components/product/DeleteProductButton";
+import { notFound } from "next/navigation";
+import { getExchangeRates } from "@/lib/rates";
 
 export default async function ProductId({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const h = await headers();
-  const host = h.get("host") ?? "localhost:3000";
-  const proto = h.get("x-forwarded-proto") ?? "http";
-  const baseUrl = `${proto}://${host}`;
   const { id } = await params;
-  const res = await fetch(`${baseUrl}/api/products/${id}`, {
-    cache: "no-store",
-  });
-  if (!res.ok) {
-    return (
-      <div className="p-4">Не удалось загрузить продукт: {res.statusText}</div>
-    );
+  
+  const [rates, product] = await Promise.all([
+    getExchangeRates(),
+    prisma.product.findUnique({
+      where: { id },
+      include: {
+        expenses: true,
+        incomes: true,
+      },
+    })
+  ]);
+
+  if (!product) {
+    notFound();
   }
-  const product = await res.json();
 
   return (
     <div className="max-w-3xl mx-auto py-8 px-4 sm:px-0">
@@ -30,7 +34,7 @@ export default async function ProductId({
         </h1>
         <DeleteProductButton id={id} />
       </div>
-      <ProductForm id={id} initialData={product} />
+      <ProductForm id={id} initialData={product} initialRates={rates} />
     </div>
   );
 }

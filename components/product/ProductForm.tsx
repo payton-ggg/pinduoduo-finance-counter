@@ -33,9 +33,10 @@ type FormValues = {
 type ProductFormProps = {
   id?: string;
   initialData?: any;
+  initialRates?: { cny?: number; usd?: number };
 };
 
-export default function ProductForm({ id, initialData }: ProductFormProps) {
+export default function ProductForm({ id, initialData, initialRates }: ProductFormProps) {
   const router = useRouter();
 
   const normalizedImages: { url: string }[] = Array.isArray(initialData?.images)
@@ -99,22 +100,30 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
     const fetchRates = async () => {
       try {
         if (!initialData?.rateCNY) {
-          const resCNY = await fetch(
-            "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=CNY&json"
-          );
-          const dataCNY = await resCNY.json();
-          if (dataCNY && dataCNY.length > 0) {
-            setValue("rateCNY", Number(dataCNY[0].rate));
+          if (initialRates?.cny) {
+            setValue("rateCNY", initialRates.cny);
+          } else {
+            const resCNY = await fetch(
+              "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=CNY&json"
+            );
+            const dataCNY = await resCNY.json();
+            if (dataCNY && dataCNY.length > 0) {
+              setValue("rateCNY", Number(dataCNY[0].rate));
+            }
           }
         }
         
         if (!initialData?.rateUSD) {
-          const resUSD = await fetch(
-            "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=USD&json"
-          );
-          const dataUSD = await resUSD.json();
-          if (dataUSD && dataUSD.length > 0) {
-            setValue("rateUSD", Number(dataUSD[0].rate));
+          if (initialRates?.usd) {
+            setValue("rateUSD", initialRates.usd);
+          } else {
+            const resUSD = await fetch(
+              "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=USD&json"
+            );
+            const dataUSD = await resUSD.json();
+            if (dataUSD && dataUSD.length > 0) {
+              setValue("rateUSD", Number(dataUSD[0].rate));
+            }
           }
         }
       } catch (error) {
@@ -122,7 +131,7 @@ export default function ProductForm({ id, initialData }: ProductFormProps) {
       }
     };
     fetchRates();
-  }, [initialData, setValue]);
+  }, [initialData, initialRates, setValue]);
 
   const sells = watch("sellsCount");
   const purchased = watch("purchasedCount");

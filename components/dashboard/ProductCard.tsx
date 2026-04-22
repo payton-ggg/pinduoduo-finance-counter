@@ -30,14 +30,15 @@ type ProductCardProps = {
   product: ProductUI;
   isSelected?: boolean;
   onToggle?: () => void;
+  globalRate?: number;
 };
 
 export function ProductCard({
   product,
   isSelected,
   onToggle,
+  globalRate,
 }: ProductCardProps) {
-  const [rate, setRate] = useState(0);
   const balance = product.income - product.spent;
 
   // Projected Profit: (Total Stock * Selling Price) - Total Spent
@@ -48,22 +49,7 @@ export function ProductCard({
 
   const margin = product.income - product.spent;
 
-  useEffect(() => {
-    const fetchRate = async () => {
-      try {
-        const res = await fetch(
-          "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=CNY&json"
-        );
-        const data = await res.json();
-        if (data && data.length > 0) setRate(data[0].rate);
-      } catch (e) {
-        console.error(e);
-      }
-    };
-    fetchRate();
-  }, []);
-
-  const actualRateCNY = product.rateCNY || rate;
+  const actualRateCNY = product.rateCNY || globalRate || 0;
 
   const purchaseCostUAH =
     actualRateCNY > 0 ? product.priceCNY * actualRateCNY : product.priceCNY * 1;
