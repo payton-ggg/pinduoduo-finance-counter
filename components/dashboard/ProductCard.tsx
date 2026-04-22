@@ -66,7 +66,7 @@ export function ProductCard({
         isSelected === false ? "opacity-60 grayscale-[0.5]" : ""
       }`}
     >
-      <div className="relative aspect-video sm:aspect-[4/3] w-full overflow-hidden bg-muted/20">
+      <div className="relative aspect-square w-full overflow-hidden bg-muted/20">
         <img
           src={product.img || "/placeholder.png"}
           alt={product.name}
