@@ -90,6 +90,12 @@ export function DashboardClient({ initialProducts, globalRate }: DashboardClient
   const totalSpent = selectedProducts.reduce((sum, p) => sum + p.spent, 0);
   const totalIncome = selectedProducts.reduce((sum, p) => sum + p.income, 0);
 
+  const totalProjectedRevenue = selectedProducts.reduce((sum, p) => {
+    return sum + (p.totalPurchased || 0) * (p.priceInUA || 0);
+  }, 0);
+
+  const totalProjectedProfit = totalProjectedRevenue - totalSpent;
+
   // Update local state when initialProducts changes (from server refresh)
   useEffect(() => {
     setProducts(initialProducts);
@@ -105,13 +111,13 @@ export function DashboardClient({ initialProducts, globalRate }: DashboardClient
       />
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b">
+      <div className="glass p-1.5 rounded-2xl flex gap-1 w-fit mb-6">
         <button
           onClick={() => setActiveTab("active")}
-          className={`flex items-center gap-2 px-4 py-2 font-medium transition-colors border-b-2 ${
+          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-black transition-all duration-300 ${
             activeTab === "active"
-              ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground"
+              ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-105"
+              : "text-muted-foreground hover:text-foreground hover:bg-foreground/5"
           }`}
         >
           <Package className="w-4 h-4" />
@@ -119,10 +125,10 @@ export function DashboardClient({ initialProducts, globalRate }: DashboardClient
         </button>
         <button
           onClick={() => setActiveTab("archive")}
-          className={`flex items-center gap-2 px-4 py-2 font-medium transition-colors border-b-2 ${
+          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-black transition-all duration-300 ${
             activeTab === "archive"
-              ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground"
+              ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-105"
+              : "text-muted-foreground hover:text-foreground hover:bg-foreground/5"
           }`}
         >
           <Archive className="w-4 h-4" />
@@ -133,31 +139,33 @@ export function DashboardClient({ initialProducts, globalRate }: DashboardClient
       <Summary
         totalSpent={Number(totalSpent.toFixed(2))}
         totalIncome={Number(totalIncome.toFixed(2))}
+        totalProjectedRevenue={Number(totalProjectedRevenue.toFixed(2))}
+        totalProjectedProfit={Number(totalProjectedProfit.toFixed(2))}
         variationsCount={selectedProducts.length}
       />
 
       {/* Bulk Actions */}
       {selectedIds.size > 0 && (
-        <div className="flex gap-2">
+        <div className="flex animate-in fade-in slide-in-from-top-2 duration-500">
           {activeTab === "active" ? (
             <Button
               variant="outline"
               size="sm"
               onClick={bulkArchive}
-              className="flex items-center gap-2"
+              className="glass border-none rounded-xl font-bold flex items-center gap-2 hover:bg-destructive/10 hover:text-destructive transition-all"
             >
               <Archive className="w-4 h-4" />
-              Переместить в архив ({selectedIds.size})
+              В архив ({selectedIds.size})
             </Button>
           ) : (
             <Button
               variant="outline"
               size="sm"
               onClick={bulkUnarchive}
-              className="flex items-center gap-2"
+              className="glass border-none rounded-xl font-bold flex items-center gap-2 hover:bg-primary/20 transition-all"
             >
               <Package className="w-4 h-4" />
-              Вернуть из архива ({selectedIds.size})
+              Вернуть ({selectedIds.size})
             </Button>
           )}
         </div>
