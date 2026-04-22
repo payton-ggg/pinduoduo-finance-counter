@@ -62,62 +62,66 @@ export function ProductCard({
 
   return (
     <Card
-      className={`group overflow-hidden glass-card h-full flex flex-col border-none ${
+      className={`group overflow-hidden glass-card h-full flex flex-col border-none shadow-lg transition-all duration-300 ${
         isSelected === false ? "opacity-60 grayscale-[0.5]" : ""
       }`}
     >
-      <div className="relative aspect-[4/3] w-full overflow-hidden">
+      <div className="relative aspect-video sm:aspect-[4/3] w-full overflow-hidden bg-muted/20">
         <img
-          src={product.img}
+          src={product.img || "/placeholder.png"}
           alt={product.name}
-          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+          loading="lazy"
+          className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-110"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = "https://placehold.co/400x300?text=No+Image";
+          }}
         />
         
         {/* Futuristic Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-40 group-hover:opacity-60 transition-opacity duration-500" />
 
         {/* Selection Checkbox */}
         {onToggle && (
           <div
             onClick={handleSelection}
-            className="absolute top-3 left-3 z-20 cursor-pointer transition-transform hover:scale-110 active:scale-95"
+            className="absolute top-2 left-2 sm:top-3 sm:left-3 z-20 cursor-pointer transition-transform hover:scale-110 active:scale-95"
           >
             {isSelected ? (
-              <div className="bg-primary p-1 rounded-lg shadow-lg shadow-primary/20">
-                <CheckSquare className="w-5 h-5 text-primary-foreground" />
+              <div className="bg-primary p-1.5 rounded-lg shadow-lg shadow-primary/30">
+                <CheckSquare className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
               </div>
             ) : (
-              <div className="bg-black/20 backdrop-blur-md p-1 rounded-lg border border-white/20">
-                <Square className="w-5 h-5 text-white/80" />
+              <div className="bg-black/40 backdrop-blur-md p-1.5 rounded-lg border border-white/20">
+                <Square className="w-4 h-4 sm:w-5 sm:h-5 text-white/90" />
               </div>
             )}
           </div>
         )}
 
-        <div className="absolute top-3 right-3 z-10">
-          <div className={`flex items-center gap-1.5 rounded-2xl px-3 py-1.5 text-xs font-black text-white shadow-xl backdrop-blur-xl border border-white/20 ${
+        <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10">
+          <div className={`flex items-center gap-1 sm:gap-1.5 rounded-xl sm:rounded-2xl px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-black text-white shadow-xl backdrop-blur-xl border border-white/20 ${
             balance >= 0 ? "bg-green-500/80" : "bg-red-500/80"
           }`}>
-            {balance >= 0 ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
+            {balance >= 0 ? <TrendingUp className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> : <TrendingDown className="h-3 w-3 sm:h-3.5 sm:w-3.5" />}
             {balance.toFixed(0)} ₴
           </div>
         </div>
       </div>
 
-      <CardContent className="p-5 space-y-4 flex-1 flex flex-col relative">
+      <CardContent className="p-3 sm:p-5 space-y-3 sm:space-y-4 flex-1 flex flex-col relative">
         <div className="space-y-1.5">
-          <h3 className="font-black text-lg leading-tight text-foreground group-hover:text-primary transition-colors line-clamp-1">
+          <h3 className="font-black text-base sm:text-lg leading-tight text-foreground group-hover:text-primary transition-colors line-clamp-1">
             {product.name}
           </h3>
-          <div className="flex flex-wrap gap-2 items-center">
-            <span className="inline-flex items-center gap-1.5 bg-secondary/50 backdrop-blur-md px-2.5 py-1 rounded-lg text-[11px] font-bold text-secondary-foreground border border-secondary">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2 items-center">
+            <span className="inline-flex items-center gap-1 bg-secondary/50 backdrop-blur-md px-2 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-[11px] font-bold text-secondary-foreground border border-secondary">
               <Coins className="w-3 h-3" />
               {actualRateCNY > 0
                 ? `${product.priceCNY}¥ ≈ ${purchaseCostUAH.toFixed(0)}₴`
                 : `${product.priceCNY}¥`}
             </span>
             {product.priceInUA && (
-              <span className="inline-flex items-center gap-1.5 bg-primary/10 px-2.5 py-1 rounded-lg text-[11px] font-bold text-primary border border-primary/20">
+              <span className="inline-flex items-center gap-1 bg-primary/10 px-2 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-[11px] font-bold text-primary border border-primary/20">
                 <TrendingUp className="w-3 h-3" />
                 {product.priceInUA} ₴
               </span>
@@ -125,34 +129,34 @@ export function ProductCard({
           </div>
         </div>
 
-        <div className="mt-auto space-y-3">
+        <div className="mt-auto space-y-2.5 sm:space-y-3">
           {/* Main Stats Grid */}
-          <div className="grid grid-cols-2 gap-2 p-3 rounded-2xl bg-foreground/[0.03] border border-foreground/[0.05]">
+          <div className="grid grid-cols-2 gap-2 p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-foreground/[0.03] border border-foreground/[0.05]">
             <div className="space-y-0.5">
-              <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold">Расход</span>
-              <p className="font-black text-sm text-foreground">{product.spent.toFixed(2)} ₴</p>
+              <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-muted-foreground font-bold">Расход</span>
+              <p className="font-black text-xs sm:text-sm text-foreground">{product.spent.toFixed(1)} ₴</p>
             </div>
             <div className="space-y-0.5 text-right border-l border-foreground/10 pl-2">
-              <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold">Доход</span>
-              <p className="font-black text-sm text-foreground">{product.income.toFixed(2)} ₴</p>
+              <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-muted-foreground font-bold">Доход</span>
+              <p className="font-black text-xs sm:text-sm text-foreground">{product.income.toFixed(1)} ₴</p>
             </div>
           </div>
 
           {/* Profit Badges */}
-          <div className="space-y-2">
+          <div className="space-y-1.5 sm:space-y-2">
             {(product.totalPurchased || 0) > 0 && (
-              <div className="flex justify-between items-center px-3 py-2 rounded-xl bg-primary/5 border border-primary/10">
-                <span className="text-[10px] font-bold text-primary/70 uppercase">Прогноз</span>
-                <span className={`text-xs font-black ${projectedProfit >= 0 ? "text-primary" : "text-destructive"}`}>
-                  {projectedProfit > 0 ? "+" : ""}{projectedProfit.toFixed(2)} ₴
+              <div className="flex justify-between items-center px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-primary/5 border border-primary/10">
+                <span className="text-[9px] sm:text-[10px] font-bold text-primary/70 uppercase">Прогноз</span>
+                <span className={`text-[11px] sm:text-xs font-black ${projectedProfit >= 0 ? "text-primary" : "text-destructive"}`}>
+                  {projectedProfit > 0 ? "+" : ""}{projectedProfit.toFixed(0)} ₴
                 </span>
               </div>
             )}
 
-            <div className="flex justify-between items-center px-3 py-2 rounded-xl bg-foreground/[0.03] border border-foreground/[0.05]">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase">Моржа</span>
-              <span className={`text-xs font-black ${margin >= 0 ? "text-primary" : "text-destructive"}`}>
-                {margin.toFixed(2)} ₴
+            <div className="flex justify-between items-center px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-foreground/[0.03] border border-foreground/[0.05]">
+              <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground uppercase">Моржа</span>
+              <span className={`text-[11px] sm:text-xs font-black ${margin >= 0 ? "text-primary" : "text-destructive"}`}>
+                {margin.toFixed(0)} ₴
               </span>
             </div>
           </div>
@@ -160,7 +164,7 @@ export function ProductCard({
 
         {/* Floating Details */}
         {(product.shippingUA || product.managementUAH) && (
-          <div className="flex gap-3 text-[10px] font-bold text-muted-foreground/60 pt-2 border-t border-foreground/5">
+          <div className="flex flex-wrap gap-x-3 gap-y-1 text-[9px] sm:text-[10px] font-bold text-muted-foreground/60 pt-2 border-t border-foreground/5">
             {product.shippingUA && <span className="flex items-center gap-1">📦 {product.shippingUA}₴</span>}
             {product.managementUAH && <span className="flex items-center gap-1">⚙️ {product.managementUAH}₴</span>}
           </div>
