@@ -27,7 +27,7 @@ export function Summary({
   const profit = totalIncome - totalSpent;
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6">
       <Card className="p-5 glass-card flex flex-col justify-between space-y-3">
         <div className="flex items-center justify-between text-muted-foreground/80">
           <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
