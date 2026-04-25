@@ -43,7 +43,7 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
 
   const normalizedImages: { url: string }[] = Array.isArray(initialData?.images)
     ? initialData.images.map((img: any) =>
-        typeof img === "string" ? { url: img } : { url: img?.url ?? "" }
+        typeof img === "string" ? { url: img } : { url: img?.url ?? "" },
       )
     : [];
 
@@ -107,7 +107,7 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
     const fetchRate = async () => {
       try {
         const response = await fetch(
-          "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=CNY&json"
+          "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=CNY&json",
         );
         const data = await response.json();
         if (data && data.length > 0) {
@@ -145,7 +145,7 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
             : 0,
         },
       ],
-      { shouldDirty: true }
+      { shouldDirty: true },
     );
     // Авто‑расход от закупки: purchasedCount * (priceCNY * rate)
     setValue(
@@ -158,7 +158,7 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
           type: "Закупка",
         },
       ],
-      { shouldDirty: true }
+      { shouldDirty: true },
     );
   }, [computedIncome, computedExpense, setValue]);
 
@@ -178,7 +178,7 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
     }
     // Sync incomes (автоматический доход по количеству продаж и курсу)
     const initialIncomeMap = new Map(
-      (initialData?.incomes || []).map((i: any) => [i.id, i])
+      (initialData?.incomes || []).map((i: any) => [i.id, i]),
     );
     for (const inc of values.incomes) {
       if (inc.id && initialIncomeMap.has(inc.id)) {
@@ -206,7 +206,7 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
 
     // Sync expenses
     const initialExpenseMap = new Map(
-      (initialData?.expenses || []).map((e: any) => [e.id, e])
+      (initialData?.expenses || []).map((e: any) => [e.id, e]),
     );
     for (const exp of values.expenses) {
       if (exp.id && initialExpenseMap.has(exp.id)) {
@@ -259,8 +259,6 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
         remove={removeImage}
         setValue={setValue}
       />
-
-      {/* Доходы/Расходы (авторасчёт) */}
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="text-sm font-medium">Доходы / Расходы</label>
@@ -295,7 +293,6 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
         </div>
       </div>
 
-      {/* Расходы */}
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="text-sm font-medium">Расходы</label>

@@ -36,12 +36,16 @@ type ProductFormProps = {
   initialRates?: { cny?: number; usd?: number };
 };
 
-export default function ProductForm({ id, initialData, initialRates }: ProductFormProps) {
+export default function ProductForm({
+  id,
+  initialData,
+  initialRates,
+}: ProductFormProps) {
   const router = useRouter();
 
   const normalizedImages: { url: string }[] = Array.isArray(initialData?.images)
     ? initialData.images.map((img: any) =>
-        typeof img === "string" ? { url: img } : { url: img?.url ?? "" }
+        typeof img === "string" ? { url: img } : { url: img?.url ?? "" },
       )
     : [{ url: "" }];
 
@@ -104,7 +108,7 @@ export default function ProductForm({ id, initialData, initialRates }: ProductFo
             setValue("rateCNY", initialRates.cny);
           } else {
             const resCNY = await fetch(
-              "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=CNY&json"
+              "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=CNY&json",
             );
             const dataCNY = await resCNY.json();
             if (dataCNY && dataCNY.length > 0) {
@@ -112,13 +116,13 @@ export default function ProductForm({ id, initialData, initialRates }: ProductFo
             }
           }
         }
-        
+
         if (!initialData?.rateUSD) {
           if (initialRates?.usd) {
             setValue("rateUSD", initialRates.usd);
           } else {
             const resUSD = await fetch(
-              "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=USD&json"
+              "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=USD&json",
             );
             const dataUSD = await resUSD.json();
             if (dataUSD && dataUSD.length > 0) {
@@ -141,7 +145,8 @@ export default function ProductForm({ id, initialData, initialRates }: ProductFo
   const managementUAH = watch("managementUAH");
   const rateCNY = watch("rateCNY") || 0;
 
-  const purchaseUnitCostUAH = (Number(priceCNY) || 0) * (rateCNY > 0 ? rateCNY : 1);
+  const purchaseUnitCostUAH =
+    (Number(priceCNY) || 0) * (rateCNY > 0 ? rateCNY : 1);
   const sellingPriceUAH = Number(priceInUA) || 0;
 
   // Total cost of purchasing the goods (without shipping/management)
@@ -156,7 +161,7 @@ export default function ProductForm({ id, initialData, initialRates }: ProductFo
   // Potential (Projected) Profit Calculation
   const potentialTotalRevenue = (Number(purchased) || 0) * sellingPriceUAH;
   const potentialProfit = potentialTotalRevenue - totalCalculatedCosts;
-  const margin = computedIncome - totalCalculatedCosts
+  const margin = computedIncome - totalCalculatedCosts;
 
   // Auto-sync calculated income/expense to form arrays
   useEffect(() => {
@@ -170,7 +175,7 @@ export default function ProductForm({ id, initialData, initialRates }: ProductFo
               : 0,
           },
         ],
-        { shouldDirty: true }
+        { shouldDirty: true },
       );
     }
   }, [computedIncome, setValue]);
@@ -189,7 +194,7 @@ export default function ProductForm({ id, initialData, initialRates }: ProductFo
             type: "Закупка",
           },
         ],
-        { shouldDirty: true }
+        { shouldDirty: true },
       );
     }
   }, [totalGoodsCost, setValue]);
@@ -229,7 +234,7 @@ export default function ProductForm({ id, initialData, initialRates }: ProductFo
 
         // Sync expenses/incomes logic (same as old ProductEditForm)
         const initialIncomeMap = new Map(
-          (initialData?.incomes || []).map((i: any) => [i.id, i])
+          (initialData?.incomes || []).map((i: any) => [i.id, i]),
         );
         for (const inc of values.incomes) {
           if (inc.id && initialIncomeMap.has(inc.id)) {
@@ -260,7 +265,7 @@ export default function ProductForm({ id, initialData, initialRates }: ProductFo
         }
 
         const initialExpenseMap = new Map(
-          (initialData?.expenses || []).map((e: any) => [e.id, e])
+          (initialData?.expenses || []).map((e: any) => [e.id, e]),
         );
         for (const exp of values.expenses) {
           if (exp.id && initialExpenseMap.has(exp.id)) {
@@ -329,17 +334,21 @@ export default function ProductForm({ id, initialData, initialRates }: ProductFo
           watch={watch}
         />
 
-        {/* Archive Checkbox */}
         {id && (
           <div className="flex items-center gap-2 p-4 border rounded-md bg-muted/30">
             <input
               type="checkbox"
               id="archive"
               className="w-4 h-4 rounded"
-              checked={watch("archive") !== null && watch("archive") !== undefined}
+              checked={
+                watch("archive") !== null && watch("archive") !== undefined
+              }
               onChange={(e) => setValue("archive", e.target.checked ? 1 : null)}
             />
-            <label htmlFor="archive" className="text-sm font-medium cursor-pointer">
+            <label
+              htmlFor="archive"
+              className="text-sm font-medium cursor-pointer"
+            >
               Переместить в архив
             </label>
           </div>
@@ -353,7 +362,6 @@ export default function ProductForm({ id, initialData, initialRates }: ProductFo
           setValue={setValue}
         />
 
-        {/* Financial Summary */}
         <div className="overflow-x-auto">
           <div className="flex items-center justify-between mb-2">
             <label className="text-sm font-medium">Финансовый расчет</label>
@@ -366,7 +374,9 @@ export default function ProductForm({ id, initialData, initialRates }: ProductFo
               </p>
             </div>
             <div className="p-3 border rounded-md min-w-0">
-              <p className="text-xs sm:text-sm text-gray-600">Закупочная цена (UAH)</p>
+              <p className="text-xs sm:text-sm text-gray-600">
+                Закупочная цена (UAH)
+              </p>
               <div className="w-full justify-between">
                 <p className="text-base sm:text-lg font-semibold break-words">
                   {purchaseUnitCostUAH.toFixed(2)} ₴
@@ -377,13 +387,17 @@ export default function ProductForm({ id, initialData, initialRates }: ProductFo
               </div>
             </div>
             <div className="p-3 border rounded-md min-w-0">
-              <p className="text-xs sm:text-sm text-gray-600">Доход (текущий)</p>
+              <p className="text-xs sm:text-sm text-gray-600">
+                Доход (текущий)
+              </p>
               <p className="text-base sm:text-lg font-semibold break-words">
                 {computedIncome.toFixed(2)} ₴
               </p>
             </div>
             <div className="p-3 border rounded-md min-w-0">
-              <p className="text-xs sm:text-sm text-gray-600">Рассчитанный расход</p>
+              <p className="text-xs sm:text-sm text-gray-600">
+                Рассчитанный расход
+              </p>
               <p className="text-base sm:text-lg font-semibold break-words">
                 {totalCalculatedCosts.toFixed(2)} ₴
               </p>
@@ -401,7 +415,7 @@ export default function ProductForm({ id, initialData, initialRates }: ProductFo
                 {potentialProfit.toFixed(2)} ₴
               </p>
             </div>
-             <div className="p-3 border rounded-md bg-green-50/50 dark:bg-green-900/20 col-span-1 sm:col-span-2 lg:col-span-4 min-w-0">
+            <div className="p-3 border rounded-md bg-green-50/50 dark:bg-green-900/20 col-span-1 sm:col-span-2 lg:col-span-4 min-w-0">
               <p className="text-xs sm:text-sm text-gray-600 font-medium break-words">
                 Моржа (на {sells || 0} шт из {purchased || 0} шт)
               </p>
@@ -417,7 +431,6 @@ export default function ProductForm({ id, initialData, initialRates }: ProductFo
           </div>
         </div>
 
-        {/* Expenses List (Editable) */}
         <div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
             <label className="text-sm font-medium">Расходы (Делатизация)</label>
@@ -471,8 +484,8 @@ export default function ProductForm({ id, initialData, initialRates }: ProductFo
             {isSubmitting
               ? "Сохранение..."
               : id
-              ? "Сохранить изменения"
-              : "Создать товар"}
+                ? "Сохранить изменения"
+                : "Создать товар"}
           </Button>
           {id && (
             <Button
