@@ -14,13 +14,17 @@ interface DashboardClientProps {
   globalRate?: number;
 }
 
-export function DashboardClient({ initialProducts, globalRate }: DashboardClientProps) {
+export function DashboardClient({
+  initialProducts,
+  globalRate,
+}: DashboardClientProps) {
   const router = useRouter();
   const [products, setProducts] = useState<ProductUI[]>(initialProducts);
-  const [selectedIds, setSelectedIds] = useState<Set<string | number>>(new Set());
+  const [selectedIds, setSelectedIds] = useState<Set<string | number>>(
+    new Set(),
+  );
   const [activeTab, setActiveTab] = useState<"active" | "archive">("active");
 
-  // Re-select all when tab changes or products change
   useEffect(() => {
     const filteredIds = products
       .filter((p) => (activeTab === "active" ? !p.archive : p.archive))
@@ -80,13 +84,13 @@ export function DashboardClient({ initialProducts, globalRate }: DashboardClient
   };
 
   const filteredProducts = products.filter((p) =>
-    activeTab === "active" ? !p.archive : p.archive
+    activeTab === "active" ? !p.archive : p.archive,
   );
 
   const selectedProducts = filteredProducts.filter((p) =>
-    selectedIds.has(p.id)
+    selectedIds.has(p.id),
   );
-  
+
   const totalSpent = selectedProducts.reduce((sum, p) => sum + p.spent, 0);
   const totalIncome = selectedProducts.reduce((sum, p) => sum + p.income, 0);
 
@@ -110,7 +114,6 @@ export function DashboardClient({ initialProducts, globalRate }: DashboardClient
         hasSelection={selectedIds.size > 0}
       />
 
-      {/* Tabs */}
       <div className="glass p-1.5 rounded-2xl flex gap-1 w-fit mb-6">
         <button
           onClick={() => setActiveTab("active")}
@@ -154,8 +157,7 @@ export function DashboardClient({ initialProducts, globalRate }: DashboardClient
               onClick={bulkArchive}
               className="glass border-none rounded-xl font-bold flex items-center gap-2 hover:bg-destructive/10 hover:text-destructive transition-all"
             >
-              <Archive className="w-4 h-4" />
-              В архив ({selectedIds.size})
+              <Archive className="w-4 h-4" />В архив ({selectedIds.size})
             </Button>
           ) : (
             <Button

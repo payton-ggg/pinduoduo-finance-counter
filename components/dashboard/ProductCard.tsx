@@ -1,7 +1,6 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { useEffect, useState } from "react";
 import {
   TrendingUp,
   TrendingDown,
@@ -73,14 +72,13 @@ export function ProductCard({
           loading="lazy"
           className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-110"
           onError={(e) => {
-            (e.target as HTMLImageElement).src = "https://placehold.co/400x300?text=No+Image";
+            (e.target as HTMLImageElement).src =
+              "https://placehold.co/400x300?text=No+Image";
           }}
         />
-        
-        {/* Futuristic Gradient Overlay */}
+
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-40 group-hover:opacity-60 transition-opacity duration-500" />
 
-        {/* Selection Checkbox */}
         {onToggle && (
           <div
             onClick={handleSelection}
@@ -99,10 +97,16 @@ export function ProductCard({
         )}
 
         <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10">
-          <div className={`flex items-center gap-1 sm:gap-1.5 rounded-xl sm:rounded-2xl px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-black text-white shadow-xl backdrop-blur-xl border border-white/20 ${
-            balance >= 0 ? "bg-green-500/80" : "bg-red-500/80"
-          }`}>
-            {balance >= 0 ? <TrendingUp className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> : <TrendingDown className="h-3 w-3 sm:h-3.5 sm:w-3.5" />}
+          <div
+            className={`flex items-center gap-1 sm:gap-1.5 rounded-xl sm:rounded-2xl px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-black text-white shadow-xl backdrop-blur-xl border border-white/20 ${
+              balance >= 0 ? "bg-green-500/80" : "bg-red-500/80"
+            }`}
+          >
+            {balance >= 0 ? (
+              <TrendingUp className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+            ) : (
+              <TrendingDown className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+            )}
             {balance.toFixed(0)} ₴
           </div>
         </div>
@@ -133,40 +137,63 @@ export function ProductCard({
           {/* Main Stats Grid */}
           <div className="grid grid-cols-2 gap-2 p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-foreground/[0.03] border border-foreground/[0.05]">
             <div className="space-y-0.5">
-              <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-muted-foreground font-bold">Расход</span>
-              <p className="font-black text-xs sm:text-sm text-foreground">{product.spent.toFixed(1)} ₴</p>
+              <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-muted-foreground font-bold">
+                Расход
+              </span>
+              <p className="font-black text-xs sm:text-sm text-foreground">
+                {product.spent.toFixed(1)} ₴
+              </p>
             </div>
             <div className="space-y-0.5 text-right border-l border-foreground/10 pl-2">
-              <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-muted-foreground font-bold">Доход</span>
-              <p className="font-black text-xs sm:text-sm text-foreground">{product.income.toFixed(1)} ₴</p>
+              <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-muted-foreground font-bold">
+                Доход
+              </span>
+              <p className="font-black text-xs sm:text-sm text-foreground">
+                {product.income.toFixed(1)} ₴
+              </p>
             </div>
           </div>
 
-          {/* Profit Badges */}
           <div className="space-y-1.5 sm:space-y-2">
             {(product.totalPurchased || 0) > 0 && (
               <div className="flex justify-between items-center px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-primary/5 border border-primary/10">
-                <span className="text-[9px] sm:text-[10px] font-bold text-primary/70 uppercase">Прогноз</span>
-                <span className={`text-[11px] sm:text-xs font-black ${projectedProfit >= 0 ? "text-primary" : "text-destructive"}`}>
-                  {projectedProfit > 0 ? "+" : ""}{projectedProfit.toFixed(0)} ₴
+                <span className="text-[9px] sm:text-[10px] font-bold text-primary/70 uppercase">
+                  Прогноз
+                </span>
+                <span
+                  className={`text-[11px] sm:text-xs font-black ${projectedProfit >= 0 ? "text-primary" : "text-destructive"}`}
+                >
+                  {projectedProfit > 0 ? "+" : ""}
+                  {projectedProfit.toFixed(0)} ₴
                 </span>
               </div>
             )}
 
             <div className="flex justify-between items-center px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-foreground/[0.03] border border-foreground/[0.05]">
-              <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground uppercase">Моржа</span>
-              <span className={`text-[11px] sm:text-xs font-black ${margin >= 0 ? "text-primary" : "text-destructive"}`}>
+              <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground uppercase">
+                Моржа
+              </span>
+              <span
+                className={`text-[11px] sm:text-xs font-black ${margin >= 0 ? "text-primary" : "text-destructive"}`}
+              >
                 {margin.toFixed(0)} ₴
               </span>
             </div>
           </div>
         </div>
 
-        {/* Floating Details */}
         {(product.shippingUA || product.managementUAH) && (
           <div className="flex flex-wrap gap-x-3 gap-y-1 text-[9px] sm:text-[10px] font-bold text-muted-foreground/60 pt-2 border-t border-foreground/5">
-            {product.shippingUA && <span className="flex items-center gap-1">📦 {product.shippingUA}₴</span>}
-            {product.managementUAH && <span className="flex items-center gap-1">⚙️ {product.managementUAH}₴</span>}
+            {product.shippingUA && (
+              <span className="flex items-center gap-1">
+                📦 {product.shippingUA}₴
+              </span>
+            )}
+            {product.managementUAH && (
+              <span className="flex items-center gap-1">
+                ⚙️ {product.managementUAH}₴
+              </span>
+            )}
           </div>
         )}
       </CardContent>
