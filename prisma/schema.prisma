@@ -9,7 +9,7 @@ generator client {
 }
 
 model Product {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   name      String
   images    String[] // массив ссылок на фото
   olxUrl    String?
@@ -44,7 +44,7 @@ model Product {
 
 
 model Expense {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   productId String
   product   Product  @relation(fields: [productId], references: [id])
   amount    Float
@@ -53,7 +53,7 @@ model Expense {
 }
 
 model Income {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   productId String
   product   Product  @relation(fields: [productId], references: [id])
   amount    Float
