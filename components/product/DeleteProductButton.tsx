@@ -16,8 +16,7 @@ export function DeleteProductButton({ id }: { id: string }) {
 
         return res;
       }
-      router.push("/");
-      router.refresh();
+      window.location.href = "/";
     } catch (e) {
       console.error(e);
       alert("Ошибка при удалении продукта");

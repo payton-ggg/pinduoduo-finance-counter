@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 import { ModeToggle } from "@/components/ui/mode-toggle";
 
 type HeaderProps = {
@@ -56,12 +56,24 @@ export function Header({
           </div>
         </div>
 
-        <Button
-          className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl font-black px-6 h-11 shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
-          onClick={onAdd}
-        >
-          <Plus className="w-5 h-5" /> Добавить товар
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => window.location.reload()}
+            className="glass rounded-xl border-none hover:bg-primary/20 transition-all h-11 w-11 flex items-center justify-center group"
+            title="Обновить данные"
+          >
+            <RefreshCw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
+          </Button>
+
+          <Button
+            className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl font-black px-6 h-11 shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
+            onClick={onAdd}
+          >
+            <Plus className="w-5 h-5" /> Добавить товар
+          </Button>
+        </div>
       </div>
     </div>
   );

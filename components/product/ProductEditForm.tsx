@@ -239,8 +239,7 @@ export function ProductEditForm({ id, initialData }: ProductEditFormProps) {
         body: JSON.stringify({ id: leftId }),
       });
     }
-    router.push("/");
-    router.refresh();
+    window.location.href = "/";
   };
 
   return (

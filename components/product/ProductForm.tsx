@@ -312,8 +312,7 @@ export default function ProductForm({
         if (!res.ok) throw new Error("Failed to create product");
       }
 
-      router.push("/");
-      router.refresh();
+      window.location.href = "/";
       if (!id) reset();
     } catch (err) {
       console.error(err);
