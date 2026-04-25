@@ -36,6 +36,66 @@
   --radius-xl: calc(var(--radius) + 4px);
 
   --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+  --color-ink-black-50: var(--ink-black-50);
+  --color-ink-black-100: var(--ink-black-100);
+  --color-ink-black-200: var(--ink-black-200);
+  --color-ink-black-300: var(--ink-black-300);
+  --color-ink-black-400: var(--ink-black-400);
+  --color-ink-black-500: var(--ink-black-500);
+  --color-ink-black-600: var(--ink-black-600);
+  --color-ink-black-700: var(--ink-black-700);
+  --color-ink-black-800: var(--ink-black-800);
+  --color-ink-black-900: var(--ink-black-900);
+  --color-ink-black-950: var(--ink-black-950);
+
+  --color-yale-blue-50: var(--yale-blue-50);
+  --color-yale-blue-100: var(--yale-blue-100);
+  --color-yale-blue-200: var(--yale-blue-200);
+  --color-yale-blue-300: var(--yale-blue-300);
+  --color-yale-blue-400: var(--yale-blue-400);
+  --color-yale-blue-500: var(--yale-blue-500);
+  --color-yale-blue-600: var(--yale-blue-600);
+  --color-yale-blue-700: var(--yale-blue-700);
+  --color-yale-blue-800: var(--yale-blue-800);
+  --color-yale-blue-900: var(--yale-blue-900);
+  --color-yale-blue-950: var(--yale-blue-950);
+
+  --color-blush-pop-50: var(--blush-pop-50);
+  --color-blush-pop-100: var(--blush-pop-100);
+  --color-blush-pop-200: var(--blush-pop-200);
+  --color-blush-pop-300: var(--blush-pop-300);
+  --color-blush-pop-400: var(--blush-pop-400);
+  --color-blush-pop-500: var(--blush-pop-500);
+  --color-blush-pop-600: var(--blush-pop-600);
+  --color-blush-pop-700: var(--blush-pop-700);
+  --color-blush-pop-800: var(--blush-pop-800);
+  --color-blush-pop-900: var(--blush-pop-900);
+  --color-blush-pop-950: var(--blush-pop-950);
+
+  --color-porcelain-50: var(--porcelain-50);
+  --color-porcelain-100: var(--porcelain-100);
+  --color-porcelain-200: var(--porcelain-200);
+  --color-porcelain-300: var(--porcelain-300);
+  --color-porcelain-400: var(--porcelain-400);
+  --color-porcelain-500: var(--porcelain-500);
+  --color-porcelain-600: var(--porcelain-600);
+  --color-porcelain-700: var(--porcelain-700);
+  --color-porcelain-800: var(--porcelain-800);
+  --color-porcelain-900: var(--porcelain-900);
+  --color-porcelain-950: var(--porcelain-950);
+
+  --color-dry-sage-50: var(--dry-sage-50);
+  --color-dry-sage-100: var(--dry-sage-100);
+  --color-dry-sage-200: var(--dry-sage-200);
+  --color-dry-sage-300: var(--dry-sage-300);
+  --color-dry-sage-400: var(--dry-sage-400);
+  --color-dry-sage-500: var(--dry-sage-500);
+  --color-dry-sage-600: var(--dry-sage-600);
+  --color-dry-sage-700: var(--dry-sage-700);
+  --color-dry-sage-800: var(--dry-sage-800);
+  --color-dry-sage-900: var(--dry-sage-900);
+  --color-dry-sage-950: var(--dry-sage-950);
 }
 
 :root {
@@ -159,6 +219,67 @@
   --cool-steel-800: #2b323b;
   --cool-steel-900: #15191e;
   --cool-steel-950: #0f1215;
+  
+  /* Extra Theme Colors */
+  --ink-black-50: #edf3f8;
+  --ink-black-100: #dbe7f0;
+  --ink-black-200: #b6cee2;
+  --ink-black-300: #92b6d3;
+  --ink-black-400: #6d9dc5;
+  --ink-black-500: #4985b6;
+  --ink-black-600: #3a6a92;
+  --ink-black-700: #2c506d;
+  --ink-black-800: #1d3549;
+  --ink-black-900: #0f1b24;
+  --ink-black-950: #0a131a;
+
+  --yale-blue-50: #eef2f6;
+  --yale-blue-100: #dde4ee;
+  --yale-blue-200: #bcc9dc;
+  --yale-blue-300: #9aaecb;
+  --yale-blue-400: #7894ba;
+  --yale-blue-500: #5779a8;
+  --yale-blue-600: #456187;
+  --yale-blue-700: #344865;
+  --yale-blue-800: #233043;
+  --yale-blue-900: #111822;
+  --yale-blue-950: #0c1118;
+
+  --blush-pop-50: #f9ebf4;
+  --blush-pop-100: #f4d7e8;
+  --blush-pop-200: #e8b0d2;
+  --blush-pop-300: #dd88bb;
+  --blush-pop-400: #d161a4;
+  --blush-pop-500: #c6398e;
+  --blush-pop-600: #9e2e71;
+  --blush-pop-700: #772255;
+  --blush-pop-800: #4f1739;
+  --blush-pop-900: #280b1c;
+  --blush-pop-950: #1c0814;
+
+  --porcelain-50: #f1f5f0;
+  --porcelain-100: #e3eae1;
+  --porcelain-200: #c6d6c2;
+  --porcelain-300: #aac1a4;
+  --porcelain-400: #8dac86;
+  --porcelain-500: #719867;
+  --porcelain-600: #5a7953;
+  --porcelain-700: #445b3e;
+  --porcelain-800: #2d3d29;
+  --porcelain-900: #171e15;
+  --porcelain-950: #10150e;
+
+  --dry-sage-50: #f5f7ee;
+  --dry-sage-100: #eaeedd;
+  --dry-sage-200: #d6deba;
+  --dry-sage-300: #c1cd98;
+  --dry-sage-400: #acbd75;
+  --dry-sage-500: #97ac53;
+  --dry-sage-600: #798a42;
+  --dry-sage-700: #5b6732;
+  --dry-sage-800: #3d4521;
+  --dry-sage-900: #1e2211;
+  --dry-sage-950: #15180c;
 
   /* Theme Mapping */
   --radius: 1rem;
@@ -239,6 +360,30 @@
   --ring: var(--moss-green-500);
 }
 
+.modern {
+  --background: var(--ink-black-50);
+  --foreground: var(--ink-black-950);
+  
+  --card: rgba(255, 255, 255, 0.8);
+  --card-foreground: var(--ink-black-950);
+  
+  --primary: var(--ink-black-600);
+  --primary-foreground: var(--ink-black-50);
+  
+  --secondary: var(--yale-blue-100);
+  --secondary-foreground: var(--yale-blue-900);
+  
+  --muted: var(--ink-black-100);
+  --muted-foreground: var(--ink-black-600);
+  
+  --accent: var(--blush-pop-200);
+  --accent-foreground: var(--blush-pop-900);
+  
+  --border: var(--ink-black-200);
+  --input: var(--ink-black-200);
+  --ring: var(--ink-black-500);
+}
+
 
 @layer base {
   * {
@@ -271,6 +416,16 @@
       radial-gradient(at 100% 100%, var(--cool-steel-100) 0px, transparent 50%),
       radial-gradient(at 0% 100%, var(--light-green-50) 0px, transparent 50%);
     background-color: var(--moss-green-50);
+    background-attachment: fixed;
+  }
+
+  .modern body {
+    background-image: 
+      radial-gradient(at 0% 0%, var(--ink-black-100) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, var(--yale-blue-100) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, var(--blush-pop-100) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, var(--porcelain-100) 0px, transparent 50%);
+    background-color: var(--ink-black-50);
     background-attachment: fixed;
   }
 }

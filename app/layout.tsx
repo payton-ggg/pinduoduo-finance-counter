@@ -48,7 +48,7 @@ export default function RootLayout({
           defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
-          themes={["light", "dark", "green"]}
+          themes={["light", "dark", "green", "modern"]}
         >
           <div className="w-full max-w-full mx-auto px-2 sm:px-4">
             {children}

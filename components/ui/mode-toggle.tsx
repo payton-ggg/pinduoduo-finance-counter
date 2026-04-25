@@ -34,6 +34,9 @@ export function ModeToggle() {
         <DropdownMenuItem onClick={() => setTheme("green")}>
           Green
         </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("modern")}>
+          Modern Ink
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme("system")}>
           System
         </DropdownMenuItem>
