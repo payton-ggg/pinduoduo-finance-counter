@@ -3,10 +3,13 @@ import { DashboardClient } from "@/components/dashboard/DashboardClient";
 import type { ProductUI } from "@/components/dashboard/ProductCard";
 import { getExchangeRates } from "@/lib/rates";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function Dashboard() {
   const rates = await getExchangeRates();
   const rate = rates.cny;
-  
+
   const data = await prisma.product.findMany({
     include: {
       expenses: true,
@@ -19,16 +22,18 @@ export default async function Dashboard() {
 
   const mapped: ProductUI[] = data.map((p: any) => {
     const actualRateCNY = p.rateCNY || rate;
-    const unitCost = (p.priceCNY || 0) * (actualRateCNY > 0 ? actualRateCNY : 1);
+    const unitCost =
+      (p.priceCNY || 0) * (actualRateCNY > 0 ? actualRateCNY : 1);
     const goodsCost = unitCost * (p.purchasedCount || 0);
 
     const spent =
-      goodsCost +
-      (Number(p.shippingUA) || 0) +
-      (Number(p.managementUAH) || 0);
+      goodsCost + (Number(p.shippingUA) || 0) + (Number(p.managementUAH) || 0);
 
     const income = Array.isArray(p.incomes)
-      ? p.incomes.reduce((sum: number, i: any) => sum + (Number(i.amount) || 0), 0)
+      ? p.incomes.reduce(
+          (sum: number, i: any) => sum + (Number(i.amount) || 0),
+          0,
+        )
       : 0;
 
     const img =

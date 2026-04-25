@@ -60,7 +60,7 @@ export function DashboardClient({
         }),
       });
       // We could re-fetch here or just update local state
-      router.refresh();
+      window.location.reload();
     } catch (err) {
       console.error("Failed to archive products", err);
     }
@@ -77,7 +77,7 @@ export function DashboardClient({
           archive: null,
         }),
       });
-      router.refresh();
+      window.location.reload();
     } catch (err) {
       console.error("Failed to unarchive products", err);
     }

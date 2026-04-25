@@ -1,4 +1,6 @@
 import { prisma } from "@/lib/prisma";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 import ProductForm from "@/components/product/ProductForm";
 import { DeleteProductButton } from "@/components/product/DeleteProductButton";
 import { notFound } from "next/navigation";

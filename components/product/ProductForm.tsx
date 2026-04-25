@@ -165,38 +165,34 @@ export default function ProductForm({
 
   // Auto-sync calculated income/expense to form arrays
   useEffect(() => {
-    if (computedIncome > 0) {
-      setValue(
-        "incomes",
-        [
-          {
-            amount: Number.isFinite(computedIncome)
-              ? Number(computedIncome.toFixed(2))
-              : 0,
-          },
-        ],
-        { shouldDirty: true },
-      );
-    }
+    setValue(
+      "incomes",
+      [
+        {
+          amount: Number.isFinite(computedIncome)
+            ? Number(computedIncome.toFixed(2))
+            : 0,
+        },
+      ],
+      { shouldDirty: true },
+    );
   }, [computedIncome, setValue]);
 
   // Sync ONLY the goods cost to the 'expenses' array
   // Shipping and Management are separate fields
   useEffect(() => {
-    if (totalGoodsCost > 0) {
-      setValue(
-        "expenses",
-        [
-          {
-            amount: Number.isFinite(totalGoodsCost)
-              ? Number(totalGoodsCost.toFixed(2))
-              : 0,
-            type: "Закупка",
-          },
-        ],
-        { shouldDirty: true },
-      );
-    }
+    setValue(
+      "expenses",
+      [
+        {
+          amount: Number.isFinite(totalGoodsCost)
+            ? Number(totalGoodsCost.toFixed(2))
+            : 0,
+          type: "Закупка",
+        },
+      ],
+      { shouldDirty: true },
+    );
   }, [totalGoodsCost, setValue]);
 
   const onSubmit = async (values: FormValues) => {
@@ -312,8 +308,7 @@ export default function ProductForm({
         if (!res.ok) throw new Error("Failed to create product");
       }
 
-      router.push("/");
-      router.refresh();
+      window.location.href = "/";
       if (!id) reset();
     } catch (err) {
       console.error(err);
