@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BasicFields } from "./BasicFields";
 import { ImagesFieldArray } from "./ImagesFieldArray";
+import { Calculator, RefreshCw } from "lucide-react";
 
 type FormValues = {
   name: string;
@@ -103,31 +104,24 @@ export default function ProductForm({
   useEffect(() => {
     const fetchRates = async () => {
       try {
-        if (!initialData?.rateCNY) {
-          if (initialRates?.cny) {
+        if (!initialData?.rateCNY || !initialData?.rateUSD) {
+          if (initialRates?.cny && !initialData?.rateCNY) {
             setValue("rateCNY", initialRates.cny);
-          } else {
-            const resCNY = await fetch(
-              "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=CNY&json",
-            );
-            const dataCNY = await resCNY.json();
-            if (dataCNY && dataCNY.length > 0) {
-              setValue("rateCNY", Number(dataCNY[0].rate));
-            }
           }
-        }
-
-        if (!initialData?.rateUSD) {
-          if (initialRates?.usd) {
+          if (initialRates?.usd && !initialData?.rateUSD) {
             setValue("rateUSD", initialRates.usd);
-          } else {
-            const resUSD = await fetch(
-              "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=USD&json",
-            );
-            const dataUSD = await resUSD.json();
-            if (dataUSD && dataUSD.length > 0) {
-              setValue("rateUSD", Number(dataUSD[0].rate));
-            }
+          }
+
+          if (
+            (!initialData?.rateCNY && !initialRates?.cny) ||
+            (!initialData?.rateUSD && !initialRates?.usd)
+          ) {
+            const res = await fetch("/api/rates");
+            const data = await res.json();
+            if (data.cny && !initialData?.rateCNY && !initialRates?.cny)
+              setValue("rateCNY", data.cny);
+            if (data.usd && !initialData?.rateUSD && !initialRates?.usd)
+              setValue("rateUSD", data.usd);
           }
         }
       } catch (error) {
@@ -163,8 +157,7 @@ export default function ProductForm({
   const potentialProfit = potentialTotalRevenue - totalCalculatedCosts;
   const margin = computedIncome - totalCalculatedCosts;
 
-  // Auto-sync calculated income/expense to form arrays
-  useEffect(() => {
+  const syncIncomes = () => {
     setValue(
       "incomes",
       [
@@ -176,11 +169,9 @@ export default function ProductForm({
       ],
       { shouldDirty: true },
     );
-  }, [computedIncome, setValue]);
+  };
 
-  // Sync ONLY the goods cost to the 'expenses' array
-  // Shipping and Management are separate fields
-  useEffect(() => {
+  const syncExpenses = () => {
     setValue(
       "expenses",
       [
@@ -193,6 +184,17 @@ export default function ProductForm({
       ],
       { shouldDirty: true },
     );
+  };
+
+  // Auto-sync calculated income/expense to form arrays
+  useEffect(() => {
+    syncIncomes();
+  }, [computedIncome, setValue]);
+
+  // Sync ONLY the goods cost to the 'expenses' array
+  // Shipping and Management are separate fields
+  useEffect(() => {
+    syncExpenses();
   }, [totalGoodsCost, setValue]);
 
   const onSubmit = async (values: FormValues) => {
@@ -360,6 +362,28 @@ export default function ProductForm({
         <div className="overflow-x-auto">
           <div className="flex items-center justify-between mb-2">
             <label className="text-sm font-medium">Финансовый расчет</label>
+            <div className="flex gap-1">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={syncIncomes}
+                title="Пересчитать доход"
+              >
+                <Calculator className="h-3 w-3" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={syncExpenses}
+                title="Пересчитать расход"
+              >
+                <RefreshCw className="h-3 w-3" />
+              </Button>
+            </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div className="p-3 border rounded-md min-w-0">
@@ -428,7 +452,21 @@ export default function ProductForm({
 
         <div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
-            <label className="text-sm font-medium">Расходы (Делатизация)</label>
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium">
+                Расходы (Делатизация)
+              </label>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={syncExpenses}
+                title="Пересчитать закупку"
+              >
+                <Calculator className="h-3 w-3" />
+              </Button>
+            </div>
             <Button
               type="button"
               variant="outline"
