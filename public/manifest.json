@@ -37,7 +37,7 @@
       "url": "/product",
       "icons": [
         {
-          "src": "/icon-192x192.svg",
+          "src": "/icons.png",
           "sizes": "192x192"
         }
       ]
