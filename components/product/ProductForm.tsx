@@ -397,7 +397,7 @@ export default function ProductForm({
                 Закупочная цена (UAH)
               </p>
               <div className="w-full justify-between">
-                <p className="text-base sm:text-lg font-semibold break-words">
+                <p className="text-base sm:text-lg font-semibold wrap-break-word">
                   {purchaseUnitCostUAH.toFixed(2)} ₴
                 </p>
                 <p className="text-xs sm:text-sm text-muted-foreground break-words">
