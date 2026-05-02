@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   FieldErrors,
   UseFormRegister,
   UseFormSetValue,
   UseFormWatch,
 } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import { RefreshCw, Calculator } from "lucide-react";
 
 type FormValues = {
   name: string;
@@ -46,8 +48,23 @@ export function BasicFields({
   const shippingType = watch("shippingType") || "air";
   const customShippingRate = watch("customShippingRate");
 
-  useEffect(() => {
-    // We only calculate shipping if we have rateUSD, weight, and count
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const fetchRates = async () => {
+    setIsRefreshing(true);
+    try {
+      const res = await fetch("/api/rates");
+      const data = await res.json();
+      if (data.cny) setValue("rateCNY", data.cny);
+      if (data.usd) setValue("rateUSD", data.usd);
+    } catch (error) {
+      console.error("Failed to refresh rates", error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const calculateShipping = () => {
     if (weight && purchasedCount && rateUSD) {
       let ratePerKgUSD = 0;
       switch (shippingType) {
@@ -66,6 +83,11 @@ export function BasicFields({
       const shippingCostUAH = shippingCostUSD * rateUSD;
       setValue("shippingUA", parseFloat(shippingCostUAH.toFixed(2)));
     }
+  };
+
+  useEffect(() => {
+    // We only calculate shipping if we have rateUSD, weight, and count
+    calculateShipping();
   }, [weight, purchasedCount, rateUSD, shippingType, customShippingRate, setValue]);
   return (
     <div className="space-y-4">
@@ -85,8 +107,18 @@ export function BasicFields({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">
+          <label className="block text-sm font-medium mb-1 flex items-center justify-between">
             Курс (CNY - UAH) 🇨🇳
+            <Button 
+              type="button" 
+              variant="ghost" 
+              size="icon" 
+              className="h-6 w-6" 
+              onClick={fetchRates}
+              disabled={isRefreshing}
+            >
+              <RefreshCw className={`h-3 w-3 ${isRefreshing ? "animate-spin" : ""}`} />
+            </Button>
           </label>
           <input
             type="number"
@@ -97,8 +129,18 @@ export function BasicFields({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">
+          <label className="block text-sm font-medium mb-1 flex items-center justify-between">
             Курс (USD - UAH) 🇺🇸
+            <Button 
+              type="button" 
+              variant="ghost" 
+              size="icon" 
+              className="h-6 w-6" 
+              onClick={fetchRates}
+              disabled={isRefreshing}
+            >
+              <RefreshCw className={`h-3 w-3 ${isRefreshing ? "animate-spin" : ""}`} />
+            </Button>
           </label>
           <input
             type="number"
@@ -183,8 +225,17 @@ export function BasicFields({
         )}
 
         <div className={shippingType !== "custom" ? "sm:col-span-1 lg:col-span-2" : ""}>
-          <label className="block text-sm font-medium mb-1">
+          <label className="block text-sm font-medium mb-1 flex items-center justify-between">
             Цена доставки (₴) - Авто/Руч.
+            <Button 
+              type="button" 
+              variant="ghost" 
+              size="icon" 
+              className="h-6 w-6" 
+              onClick={calculateShipping}
+            >
+              <Calculator className="h-3 w-3" />
+            </Button>
           </label>
           <input
             type="number"
