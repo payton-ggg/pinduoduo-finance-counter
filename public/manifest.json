@@ -34,13 +34,7 @@
       "name": "Добавить товар",
       "short_name": "Новый товар",
       "description": "Быстро добавить новый товар",
-      "url": "/product",
-      "icons": [
-        {
-          "src": "/icons.png",
-          "sizes": "192x192"
-        }
-      ]
+      "url": "/product"
     }
   ]
 }
