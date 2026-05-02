@@ -388,7 +388,7 @@ export default function ProductForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div className="p-3 border rounded-md min-w-0">
               <p className="text-xs sm:text-sm text-gray-600">Курс CNY → UAH</p>
-              <p className="text-base sm:text-lg font-semibold break-words">
+              <p className="text-base sm:text-lg font-semibold wrap-break-word">
                 {rateCNY > 0 ? rateCNY.toFixed(2) : "—"}
               </p>
             </div>
