@@ -69,16 +69,16 @@ export function BasicFields({
       let ratePerKgUSD = 0;
       switch (shippingType) {
         case "air":
-          ratePerKgUSD = 18.1;
+          ratePerKgUSD = 18.3;
           break;
         case "sea":
-          ratePerKgUSD = 6.4;
+          ratePerKgUSD = 7.1;
           break;
         case "custom":
           ratePerKgUSD = customShippingRate || 0;
           break;
       }
-      
+
       const shippingCostUSD = (weight / 1000) * purchasedCount * ratePerKgUSD;
       const shippingCostUAH = shippingCostUSD * rateUSD;
       setValue("shippingUA", parseFloat(shippingCostUAH.toFixed(2)));
@@ -88,7 +88,14 @@ export function BasicFields({
   useEffect(() => {
     // We only calculate shipping if we have rateUSD, weight, and count
     calculateShipping();
-  }, [weight, purchasedCount, rateUSD, shippingType, customShippingRate, setValue]);
+  }, [
+    weight,
+    purchasedCount,
+    rateUSD,
+    shippingType,
+    customShippingRate,
+    setValue,
+  ]);
   return (
     <div className="space-y-4">
       <div>
@@ -109,15 +116,17 @@ export function BasicFields({
         <div>
           <label className="block text-sm font-medium mb-1 flex items-center justify-between">
             Курс (CNY - UAH) 🇨🇳
-            <Button 
-              type="button" 
-              variant="ghost" 
-              size="icon" 
-              className="h-6 w-6" 
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
               onClick={fetchRates}
               disabled={isRefreshing}
             >
-              <RefreshCw className={`h-3 w-3 ${isRefreshing ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`h-3 w-3 ${isRefreshing ? "animate-spin" : ""}`}
+              />
             </Button>
           </label>
           <input
@@ -131,15 +140,17 @@ export function BasicFields({
         <div>
           <label className="block text-sm font-medium mb-1 flex items-center justify-between">
             Курс (USD - UAH) 🇺🇸
-            <Button 
-              type="button" 
-              variant="ghost" 
-              size="icon" 
-              className="h-6 w-6" 
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
               onClick={fetchRates}
               disabled={isRefreshing}
             >
-              <RefreshCw className={`h-3 w-3 ${isRefreshing ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`h-3 w-3 ${isRefreshing ? "animate-spin" : ""}`}
+              />
             </Button>
           </label>
           <input
@@ -193,9 +204,7 @@ export function BasicFields({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Тип доставки
-          </label>
+          <label className="block text-sm font-medium mb-1">Тип доставки</label>
           <select
             className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-background"
             {...register("shippingType")}
@@ -205,33 +214,37 @@ export function BasicFields({
             <option value="custom">Своя цена / кг</option>
           </select>
         </div>
-        
+
         {shippingType === "custom" && (
-           <div>
-             <label className="block text-sm font-medium mb-1">
-               Своя цена ($)
-             </label>
-             <input
-               type="number"
-               step="0.01"
-               className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-               {...register("customShippingRate", {
-                 valueAsNumber: true,
-                 min: { value: 0, message: ">= 0" },
-               })}
-               placeholder="Например: 10.5"
-             />
-           </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Своя цена ($)
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              {...register("customShippingRate", {
+                valueAsNumber: true,
+                min: { value: 0, message: ">= 0" },
+              })}
+              placeholder="Например: 10.5"
+            />
+          </div>
         )}
 
-        <div className={shippingType !== "custom" ? "sm:col-span-1 lg:col-span-2" : ""}>
+        <div
+          className={
+            shippingType !== "custom" ? "sm:col-span-1 lg:col-span-2" : ""
+          }
+        >
           <label className="block text-sm font-medium mb-1 flex items-center justify-between">
             Цена доставки (₴) - Авто/Руч.
-            <Button 
-              type="button" 
-              variant="ghost" 
-              size="icon" 
-              className="h-6 w-6" 
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
               onClick={calculateShipping}
             >
               <Calculator className="h-3 w-3" />
