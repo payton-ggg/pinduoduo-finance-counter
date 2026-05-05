@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "./Header";
 import { Summary } from "./Summary";
@@ -162,14 +162,46 @@ export function DashboardClient({
     selectedIds.has(p.id),
   );
 
-  const totalSpent = selectedProducts.reduce((sum, p) => sum + p.spent, 0);
-  const totalIncome = selectedProducts.reduce((sum, p) => sum + p.income, 0);
+  const summaryProducts =
+    selectedFolderId && selectedFolderId !== "__none__"
+      ? filteredProducts
+      : selectedProducts;
 
-  const totalProjectedRevenue = selectedProducts.reduce((sum, p) => {
+  const totalSpent = summaryProducts.reduce((sum, p) => sum + p.spent, 0);
+  const totalIncome = summaryProducts.reduce((sum, p) => sum + p.income, 0);
+
+  const totalProjectedRevenue = summaryProducts.reduce((sum, p) => {
     return sum + (p.totalPurchased || 0) * (p.priceInUA || 0);
   }, 0);
 
   const totalProjectedProfit = totalProjectedRevenue - totalSpent;
+
+  const folderOrder: (string | null)[] = [
+    null,
+    "__none__",
+    ...folders.map((f) => f.id),
+  ];
+
+  const swipeFolder = useCallback(
+    (direction: "left" | "right") => {
+      const currentIdx = folderOrder.indexOf(selectedFolderId);
+      const nextIdx =
+        direction === "left"
+          ? Math.min(currentIdx + 1, folderOrder.length - 1)
+          : Math.max(currentIdx - 1, 0);
+      if (nextIdx !== currentIdx) {
+        setSelectedFolderId(folderOrder[nextIdx] ?? null);
+      }
+    },
+    [folderOrder, selectedFolderId],
+  );
+
+  const currentFolderName =
+    selectedFolderId === null
+      ? "Все"
+      : selectedFolderId === "__none__"
+        ? "Без папки"
+        : folders.find((f) => f.id === selectedFolderId)?.name ?? "";
 
   useEffect(() => {
     setProducts(initialProducts);
@@ -277,7 +309,9 @@ export function DashboardClient({
         totalIncome={Number(totalIncome.toFixed(2))}
         totalProjectedRevenue={Number(totalProjectedRevenue.toFixed(2))}
         totalProjectedProfit={Number(totalProjectedProfit.toFixed(2))}
-        variationsCount={selectedProducts.length}
+        variationsCount={summaryProducts.length}
+        folderName={currentFolderName}
+        onSwipe={swipeFolder}
       />
 
       {/* Bulk Actions */}

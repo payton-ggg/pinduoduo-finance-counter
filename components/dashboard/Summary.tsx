@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import {
   Wallet,
@@ -6,6 +6,9 @@ import {
   TrendingUp,
   Package,
   Sparkles,
+  ChevronLeft,
+  ChevronRight,
+  FolderOpen,
 } from "lucide-react";
 
 type SummaryProps = {
@@ -14,6 +17,8 @@ type SummaryProps = {
   totalProjectedRevenue: number;
   totalProjectedProfit: number;
   variationsCount: number;
+  folderName?: string;
+  onSwipe?: (direction: "left" | "right") => void;
 };
 
 export function Summary({
@@ -22,12 +27,60 @@ export function Summary({
   totalProjectedRevenue,
   totalProjectedProfit,
   variationsCount,
+  folderName,
+  onSwipe,
 }: SummaryProps) {
   const [showGross, setShowGross] = useState(false);
   const profit = totalIncome - totalSpent;
 
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      if (touchStartX.current === null || touchStartY.current === null || !onSwipe) return;
+      const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+      const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+      touchStartX.current = null;
+      touchStartY.current = null;
+      if (Math.abs(deltaX) < 50 || Math.abs(deltaY) > Math.abs(deltaX)) return;
+      onSwipe(deltaX < 0 ? "left" : "right");
+    },
+    [onSwipe],
+  );
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6">
+    <div className="mb-6">
+      {folderName && (
+        <div className="flex items-center justify-center gap-2 mb-3 sm:hidden">
+          <button
+            onClick={() => onSwipe?.("right")}
+            className="p-1.5 rounded-lg text-muted-foreground hover:bg-foreground/5 active:bg-foreground/10 transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-primary/10 text-primary text-xs font-bold">
+            <FolderOpen className="w-3.5 h-3.5" />
+            {folderName}
+          </div>
+          <button
+            onClick={() => onSwipe?.("left")}
+            className="p-1.5 rounded-lg text-muted-foreground hover:bg-foreground/5 active:bg-foreground/10 transition-colors"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+      <div
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
       <Card className="p-5 glass-card flex flex-col justify-between space-y-3">
         <div className="flex items-center justify-between text-muted-foreground/80">
           <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
@@ -114,6 +167,7 @@ export function Summary({
           {variationsCount}
         </div>
       </Card>
+      </div>
     </div>
   );
 }
