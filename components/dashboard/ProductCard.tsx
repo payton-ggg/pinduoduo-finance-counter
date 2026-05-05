@@ -23,6 +23,8 @@ export type ProductUI = {
   archive?: number | null;
   rateCNY?: number;
   rateUSD?: number;
+  folderId?: string | null;
+  folderName?: string | null;
 };
 
 type ProductCardProps = {
@@ -77,7 +79,7 @@ export function ProductCard({
           }}
         />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-40 group-hover:opacity-60 transition-opacity duration-500" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-40 group-hover:opacity-60 transition-opacity duration-500" />
 
         {onToggle && (
           <div
@@ -135,7 +137,7 @@ export function ProductCard({
 
         <div className="mt-auto space-y-2.5 sm:space-y-3">
           {/* Main Stats Grid */}
-          <div className="grid grid-cols-2 gap-2 p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-foreground/[0.03] border border-foreground/[0.05]">
+          <div className="grid grid-cols-2 gap-2 p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-foreground/3 border border-foreground/5">
             <div className="space-y-0.5">
               <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-muted-foreground font-bold">
                 Расход
@@ -169,7 +171,7 @@ export function ProductCard({
               </div>
             )}
 
-            <div className="flex justify-between items-center px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-foreground/[0.03] border border-foreground/[0.05]">
+            <div className="flex justify-between items-center px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-foreground/3 border border-foreground/5">
               <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground uppercase">
                 Моржа
               </span>

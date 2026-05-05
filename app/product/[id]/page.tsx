@@ -20,6 +20,7 @@ export default async function ProductId({
       include: {
         expenses: true,
         incomes: true,
+        folder: true,
       },
     })
   ]);

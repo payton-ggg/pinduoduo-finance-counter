@@ -9,7 +9,7 @@ export async function GET(
   try {
     const product = await prisma.product.findUnique({
       where: { id },
-      include: { incomes: true, expenses: true },
+      include: { incomes: true, expenses: true, folder: true },
     });
     if (!product) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -70,6 +70,7 @@ export async function PATCH(
         shippingType: data.shippingType,
         // @ts-ignore: Need to run prisma generate
         customShippingRate: data.customShippingRate,
+        folderId: data.folderId !== undefined ? (data.folderId || null) : undefined,
       },
     });
     return NextResponse.json(updated);

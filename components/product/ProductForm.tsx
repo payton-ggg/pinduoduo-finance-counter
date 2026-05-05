@@ -29,6 +29,7 @@ type FormValues = {
   shippingType?: "air" | "sea" | "custom";
   customShippingRate?: number;
   archive?: number | null;
+  folderId?: string | null;
 };
 
 type ProductFormProps = {
@@ -77,6 +78,7 @@ export default function ProductForm({
     shippingType: initialData?.shippingType ?? "air",
     customShippingRate: initialData?.customShippingRate ?? undefined,
     archive: initialData?.archive ?? null,
+    folderId: initialData?.folderId ?? null,
   };
 
   const {

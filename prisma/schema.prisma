@@ -37,11 +37,21 @@ model Product {
   equipment String?
   archive   Int? // null = not archived, any value = archived
 
+  folderId  String?
+  folder    Folder?   @relation(fields: [folderId], references: [id])
+
   expenses  Expense[]
   incomes   Income[]
   createdAt DateTime @default(now())
 }
 
+
+model Folder {
+  id        String    @id @default(uuid())
+  name      String
+  createdAt DateTime  @default(now())
+  products  Product[]
+}
 
 model Expense {
   id        String   @id @default(uuid())

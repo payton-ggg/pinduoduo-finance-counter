@@ -7,7 +7,13 @@ import { Summary } from "./Summary";
 import { ProductGrid } from "./ProductGrid";
 import type { ProductUI } from "./ProductCard";
 import { Button } from "@/components/ui/button";
-import { Archive, Package } from "lucide-react";
+import { Archive, Package, FolderOpen, Plus, X, FolderInput } from "lucide-react";
+
+type FolderItem = {
+  id: string;
+  name: string;
+  _count: { products: number };
+};
 
 interface DashboardClientProps {
   initialProducts: ProductUI[];
@@ -24,6 +30,23 @@ export function DashboardClient({
     new Set(),
   );
   const [activeTab, setActiveTab] = useState<"active" | "archive">("active");
+  const [folders, setFolders] = useState<FolderItem[]>([]);
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
+  const [showFolderDropdown, setShowFolderDropdown] = useState(false);
+
+  const fetchFolders = async () => {
+    try {
+      const res = await fetch("/api/folders");
+      const data = await res.json();
+      setFolders(data);
+    } catch (err) {
+      console.error("Failed to fetch folders", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchFolders();
+  }, []);
 
   useEffect(() => {
     const filteredIds = products
@@ -59,7 +82,6 @@ export function DashboardClient({
           archive: 1,
         }),
       });
-      // We could re-fetch here or just update local state
       window.location.reload();
     } catch (err) {
       console.error("Failed to archive products", err);
@@ -83,9 +105,63 @@ export function DashboardClient({
     }
   };
 
-  const filteredProducts = products.filter((p) =>
-    activeTab === "active" ? !p.archive : p.archive,
-  );
+  const bulkMoveToFolder = async (folderId: string | null) => {
+    if (selectedIds.size === 0) return;
+    try {
+      await fetch("/api/products/bulk-folder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ids: Array.from(selectedIds),
+          folderId,
+        }),
+      });
+      window.location.reload();
+    } catch (err) {
+      console.error("Failed to move products to folder", err);
+    }
+  };
+
+  const createFolder = async () => {
+    const name = prompt("Название папки:");
+    if (!name || name.trim().length === 0) return;
+    try {
+      await fetch("/api/folders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim() }),
+      });
+      await fetchFolders();
+    } catch (err) {
+      console.error("Failed to create folder", err);
+    }
+  };
+
+  const deleteFolder = async (folderId: string) => {
+    if (!confirm("Удалить папку? Товары останутся без папки.")) return;
+    try {
+      await fetch("/api/folders", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: folderId }),
+      });
+      if (selectedFolderId === folderId) {
+        setSelectedFolderId(null);
+      }
+      await fetchFolders();
+      window.location.reload();
+    } catch (err) {
+      console.error("Failed to delete folder", err);
+    }
+  };
+
+  const filteredProducts = products.filter((p) => {
+    const matchesTab = activeTab === "active" ? !p.archive : p.archive;
+    if (!matchesTab) return false;
+    if (selectedFolderId === null) return true;
+    if (selectedFolderId === "__none__") return !p.folderId;
+    return p.folderId === selectedFolderId;
+  });
 
   const selectedProducts = filteredProducts.filter((p) =>
     selectedIds.has(p.id),
@@ -100,10 +176,13 @@ export function DashboardClient({
 
   const totalProjectedProfit = totalProjectedRevenue - totalSpent;
 
-  // Update local state when initialProducts changes (from server refresh)
   useEffect(() => {
     setProducts(initialProducts);
   }, [initialProducts]);
+
+  const tabProducts = products.filter((p) =>
+    activeTab === "active" ? !p.archive : p.archive,
+  );
 
   return (
     <div className="py-4 space-y-4">
@@ -139,6 +218,65 @@ export function DashboardClient({
         </button>
       </div>
 
+      {/* Folder Filter */}
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          onClick={() => setSelectedFolderId(null)}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 ${
+            selectedFolderId === null
+              ? "bg-primary text-primary-foreground shadow-md"
+              : "bg-foreground/5 text-muted-foreground hover:bg-foreground/10"
+          }`}
+        >
+          <FolderOpen className="w-3.5 h-3.5" />
+          Все ({tabProducts.length})
+        </button>
+        <button
+          onClick={() => setSelectedFolderId("__none__")}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 ${
+            selectedFolderId === "__none__"
+              ? "bg-primary text-primary-foreground shadow-md"
+              : "bg-foreground/5 text-muted-foreground hover:bg-foreground/10"
+          }`}
+        >
+          Без папки ({tabProducts.filter((p) => !p.folderId).length})
+        </button>
+        {folders.map((folder) => {
+          const count = tabProducts.filter((p) => p.folderId === folder.id).length;
+          return (
+            <div key={folder.id} className="flex items-center gap-0.5">
+              <button
+                onClick={() => setSelectedFolderId(folder.id)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-l-xl text-xs font-bold transition-all duration-200 ${
+                  selectedFolderId === folder.id
+                    ? "bg-primary text-primary-foreground shadow-md"
+                    : "bg-foreground/5 text-muted-foreground hover:bg-foreground/10"
+                }`}
+              >
+                <FolderOpen className="w-3.5 h-3.5" />
+                {folder.name} ({count})
+              </button>
+              <button
+                onClick={() => deleteFolder(folder.id)}
+                className={`px-1.5 py-1.5 rounded-r-xl text-xs transition-all duration-200 hover:bg-destructive/20 hover:text-destructive ${
+                  selectedFolderId === folder.id
+                    ? "bg-primary/80 text-primary-foreground"
+                    : "bg-foreground/5 text-muted-foreground"
+                }`}
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          );
+        })}
+        <button
+          onClick={createFolder}
+          className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-muted-foreground bg-foreground/5 hover:bg-foreground/10 transition-all duration-200"
+        >
+          <Plus className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
       <Summary
         totalSpent={Number(totalSpent.toFixed(2))}
         totalIncome={Number(totalIncome.toFixed(2))}
@@ -149,7 +287,7 @@ export function DashboardClient({
 
       {/* Bulk Actions */}
       {selectedIds.size > 0 && (
-        <div className="flex animate-in fade-in slide-in-from-top-2 duration-500">
+        <div className="flex flex-wrap gap-2 animate-in fade-in slide-in-from-top-2 duration-500">
           {activeTab === "active" ? (
             <Button
               variant="outline"
@@ -170,6 +308,50 @@ export function DashboardClient({
               Вернуть ({selectedIds.size})
             </Button>
           )}
+
+          {/* Move to Folder */}
+          <div className="relative">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowFolderDropdown(!showFolderDropdown)}
+              className="glass border-none rounded-xl font-bold flex items-center gap-2 hover:bg-primary/20 transition-all"
+            >
+              <FolderInput className="w-4 h-4" />
+              В папку ({selectedIds.size})
+            </Button>
+            {showFolderDropdown && (
+              <div className="absolute top-full left-0 mt-1 z-50 min-w-[180px] bg-background border rounded-xl shadow-xl p-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
+                <button
+                  onClick={() => {
+                    bulkMoveToFolder(null);
+                    setShowFolderDropdown(false);
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium hover:bg-foreground/5 transition-colors"
+                >
+                  Без папки
+                </button>
+                {folders.map((folder) => (
+                  <button
+                    key={folder.id}
+                    onClick={() => {
+                      bulkMoveToFolder(folder.id);
+                      setShowFolderDropdown(false);
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium hover:bg-foreground/5 transition-colors flex items-center gap-2"
+                  >
+                    <FolderOpen className="w-3.5 h-3.5 text-muted-foreground" />
+                    {folder.name}
+                  </button>
+                ))}
+                {folders.length === 0 && (
+                  <p className="px-3 py-2 text-sm text-muted-foreground italic">
+                    Нет папок
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       )}
 

@@ -6,6 +6,7 @@ export async function GET() {
     include: {
       expenses: true,
       incomes: true,
+      folder: true,
     },
   });
   return NextResponse.json(products);
@@ -51,6 +52,7 @@ export async function POST(req: Request) {
       shippingType: data.shippingType,
       // @ts-ignore: Need to run prisma generate
       customShippingRate: data.customShippingRate,
+      folderId: data.folderId || null,
       expenses: {
         create: data.shippingUA
           ? [{ amount: data.shippingUA, type: "Shipping" }]

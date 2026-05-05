@@ -14,6 +14,7 @@ export default async function Dashboard() {
     include: {
       expenses: true,
       incomes: true,
+      folder: true,
     },
     orderBy: {
       createdAt: "desc",
@@ -55,6 +56,8 @@ export default async function Dashboard() {
       archive: p.archive,
       rateCNY: p.rateCNY,
       rateUSD: p.rateUSD,
+      folderId: p.folderId,
+      folderName: p.folder?.name,
     } as ProductUI;
   });
 
