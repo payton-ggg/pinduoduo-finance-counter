@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { DashboardClient } from "@/components/dashboard/DashboardClient";
 import type { ProductUI } from "@/components/dashboard/ProductCard";
 import { getExchangeRates } from "@/lib/rates";
+import { AuthGate } from "@/components/auth/AuthGate";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -62,8 +63,10 @@ export default async function Dashboard() {
   });
 
   return (
-    <div className="container mx-auto">
-      <DashboardClient initialProducts={mapped} globalRate={rate} />
-    </div>
+    <AuthGate>
+      <div className="container mx-auto">
+        <DashboardClient initialProducts={mapped} globalRate={rate} />
+      </div>
+    </AuthGate>
   );
 }
