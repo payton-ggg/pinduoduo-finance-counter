@@ -168,44 +168,28 @@ export default function ProductForm({
   const margin = computedIncome - totalCalculatedCosts;
 
   const syncIncomes = () => {
-    setValue(
-      "incomes",
-      [
-        {
-          amount: Number.isFinite(computedIncome)
-            ? Number(computedIncome.toFixed(2))
-            : 0,
-        },
-      ],
-      { shouldDirty: true },
-    );
+    const amount = Number.isFinite(computedIncome)
+      ? Number(computedIncome.toFixed(2))
+      : 0;
+    setValue("incomes", [{ amount }], { shouldDirty: true });
   };
 
   const syncExpenses = () => {
-    setValue(
-      "expenses",
-      [
-        {
-          amount: Number.isFinite(totalGoodsCost)
-            ? Number(totalGoodsCost.toFixed(2))
-            : 0,
-          type: "Закупка",
-        },
-      ],
-      { shouldDirty: true },
-    );
+    const currentExpenses = watch("expenses") || [];
+    const purchaseIdx = currentExpenses.findIndex((e) => e.type === "Закупка");
+    const amount = Number.isFinite(totalGoodsCost)
+      ? Number(totalGoodsCost.toFixed(2))
+      : 0;
+
+    if (purchaseIdx > -1) {
+      setValue(`expenses.${purchaseIdx}.amount`, amount, { shouldDirty: true });
+    } else {
+      appendExpense({ amount, type: "Закупка" });
+    }
   };
 
   // Auto-sync calculated income/expense to form arrays
-  useEffect(() => {
-    syncIncomes();
-  }, [computedIncome, setValue]);
 
-  // Sync ONLY the goods cost to the 'expenses' array
-  // Shipping and Management are separate fields
-  useEffect(() => {
-    syncExpenses();
-  }, [totalGoodsCost, setValue]);
 
   const onSubmit = async (values: FormValues) => {
     const payloadStart = {
@@ -397,21 +381,21 @@ export default function ProductForm({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6"
+                className="h-6 w-6 text-muted-foreground hover:text-primary transition-colors"
                 onClick={syncIncomes}
                 title="Пересчитать доход"
               >
-                <Calculator className="h-3 w-3" />
+                <Calculator className="h-3.5 w-3.5" />
               </Button>
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6"
+                className="h-6 w-6 text-muted-foreground hover:text-primary transition-colors"
                 onClick={syncExpenses}
                 title="Пересчитать расход"
               >
-                <RefreshCw className="h-3 w-3" />
+                <RefreshCw className="h-3.5 w-3.5" />
               </Button>
             </div>
           </div>
@@ -482,7 +466,7 @@ export default function ProductForm({
 
         <div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between gap-2 w-full">
               <label className="text-sm font-medium">
                 Расходы (Делатизация)
               </label>
@@ -490,11 +474,11 @@ export default function ProductForm({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6"
+                className="h-6 w-6 text-muted-foreground hover:text-primary transition-colors"
                 onClick={syncExpenses}
                 title="Пересчитать закупку"
               >
-                <Calculator className="h-3 w-3" />
+                <Calculator className="h-3.5 w-3.5" />
               </Button>
             </div>
             <Button

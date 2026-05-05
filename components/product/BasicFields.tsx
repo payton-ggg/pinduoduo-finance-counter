@@ -277,8 +277,6 @@ export function BasicFields({
         </div>
       </div>
 
-      <div></div>
-
       <div>
         <label className="block text-sm font-medium mb-1">Ссылка OLX</label>
         <input
