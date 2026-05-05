@@ -43,7 +43,6 @@ export function BasicFields({
 }: BasicFieldsProps) {
   const weight = watch("weight");
   const purchasedCount = watch("purchasedCount");
-  const rateCNY = watch("rateCNY");
   const rateUSD = watch("rateUSD");
   const shippingType = watch("shippingType") || "air";
   const customShippingRate = watch("customShippingRate");
@@ -114,7 +113,7 @@ export function BasicFields({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1 flex items-center justify-between">
+          <label className="block text-sm font-medium mb-1 items-center justify-between">
             Курс (CNY - UAH) 🇨🇳
             <Button
               type="button"
@@ -138,7 +137,7 @@ export function BasicFields({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1 flex items-center justify-between">
+          <label className="block text-sm font-medium mb-1 items-center justify-between">
             Курс (USD - UAH) 🇺🇸
             <Button
               type="button"
@@ -209,8 +208,8 @@ export function BasicFields({
             className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-background"
             {...register("shippingType")}
           >
-            <option value="air">Авиа (18.1$ / кг)</option>
-            <option value="sea">Море (6.4$ / кг)</option>
+            <option value="air">Авиа (18.3$ / кг)</option>
+            <option value="sea">Море (7.1$ / кг)</option>
             <option value="custom">Своя цена / кг</option>
           </select>
         </div>
@@ -238,7 +237,7 @@ export function BasicFields({
             shippingType !== "custom" ? "sm:col-span-1 lg:col-span-2" : ""
           }
         >
-          <label className="block text-sm font-medium mb-1 flex items-center justify-between">
+          <label className="block text-sm font-medium mb-1 items-center justify-between">
             Цена доставки (₴) - Авто/Руч.
             <Button
               type="button"

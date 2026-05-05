@@ -63,9 +63,7 @@ export function ProductCard({
 
   return (
     <Card
-      className={`group overflow-hidden glass-card h-full flex flex-col border-none shadow-lg transition-all duration-300 ${
-        isSelected === false ? "opacity-60 grayscale-[0.5]" : ""
-      }`}
+      className={`group overflow-hidden glass-card h-full flex flex-col border-none shadow-lg transition-all duration-300`}
     >
       <div className="relative aspect-square w-full overflow-hidden bg-muted/20">
         <img

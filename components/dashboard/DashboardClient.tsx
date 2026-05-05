@@ -48,12 +48,7 @@ export function DashboardClient({
     fetchFolders();
   }, []);
 
-  useEffect(() => {
-    const filteredIds = products
-      .filter((p) => (activeTab === "active" ? !p.archive : p.archive))
-      .map((p) => p.id);
-    setSelectedIds(new Set(filteredIds));
-  }, [activeTab, products]);
+
 
   const toggleSelection = (id: string | number) => {
     const newSet = new Set(selectedIds);
