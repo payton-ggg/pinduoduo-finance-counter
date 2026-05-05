@@ -17,7 +17,11 @@ export const metadata: Metadata = {
   title: "Pinduoduo",
   description: "Pinduoduo - это платформа для продажи товаров на OLX и 拼多多",
   icons: {
-    icon: "/icons.png",
+    icon: [
+      { url: "/icons.svg", type: "image/svg+xml" },
+      { url: "/icons.png", type: "image/png" },
+    ],
+    apple: "/icons.png",
   },
 };
 
@@ -33,8 +37,11 @@ export default function RootLayout({
         <meta name="theme-color" content="#000000" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="PDD Dashboard" />
+        <meta name="apple-mobile-web-app-title" content="Pinduoduo dashboard" />
         <link rel="apple-touch-icon" href="/icons.png" />
+        <link rel="icon" href="/icons.svg" type="image/svg+xml" />
+        <link rel="icon" href="/icons.png" type="image/png" sizes="32x32" />
+        <link rel="icon" href="/icons.png" type="image/png" sizes="16x16" />
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1, viewport-fit=cover"
