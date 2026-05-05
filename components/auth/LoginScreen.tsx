@@ -62,25 +62,8 @@ export function LoginScreen({ onSuccess }: LoginScreenProps) {
       </div>
 
       <div
-        className={`relative w-full max-w-md mx-4 ${shaking ? "animate-bounce" : ""}`}
-        style={
-          shaking
-            ? {
-                animation:
-                  "shake 0.5s cubic-bezier(.36,.07,.19,.97) both",
-              }
-            : {}
-        }
+        className={`relative w-full max-w-md mx-4 ${shaking ? "login-shake" : ""}`}
       >
-        <style>{`
-          @keyframes shake {
-            10%, 90% { transform: translateX(-2px); }
-            20%, 80% { transform: translateX(4px); }
-            30%, 50%, 70% { transform: translateX(-6px); }
-            40%, 60% { transform: translateX(6px); }
-          }
-        `}</style>
-
         {/* Card */}
         <div className="glass-card p-8 sm:p-10 space-y-8">
           {/* Header */}

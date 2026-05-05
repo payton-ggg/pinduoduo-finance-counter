@@ -449,11 +449,20 @@
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
+
 .glass-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   border-color: rgba(255, 255, 255, 0.25);
 }
 
+@keyframes shake {
+  10%, 90% { transform: translateX(-2px); }
+  20%, 80% { transform: translateX(4px); }
+  30%, 50%, 70% { transform: translateX(-6px); }
+  40%, 60% { transform: translateX(6px); }
+}
 
-
+.login-shake {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
