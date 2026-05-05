@@ -225,7 +225,7 @@ export function DashboardClient({
         hasSelection={selectedIds.size > 0}
       />
 
-      <div className="glass p-1.5 rounded-2xl flex gap-1 w-fit mb-6">
+      <div className="glass max-lg:hidden p-1.5 rounded-2xl flex gap-1 w-fit mb-6">
         <button
           onClick={() => setActiveTab("active")}
           className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-black transition-all duration-300 ${

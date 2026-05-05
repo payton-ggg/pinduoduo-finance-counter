@@ -64,7 +64,7 @@ export function Header({
             className="glass rounded-xl border-none hover:bg-primary/20 transition-all h-10 sm:h-11 w-10 sm:w-11 shrink-0 flex items-center justify-center group"
             title="Обновить данные"
           >
-            <RefreshCw className="w-4 h-4 sm:w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
+            <RefreshCw className="w-4 h-4 sm:w-5 group-hover:rotate-180 transition-transform duration-500" />
           </Button>
 
           <Button
