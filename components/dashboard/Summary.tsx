@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import {
   Wallet,
@@ -35,41 +35,139 @@ export function Summary({
 
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
+  const touchDeltaX = useRef(0);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [slideClass, setSlideClass] = useState("");
+  const [dragOffset, setDragOffset] = useState(0);
+  const isDragging = useRef(false);
+  const prevFolderName = useRef(folderName);
+
+  useEffect(() => {
+    if (prevFolderName.current !== folderName && !isDragging.current) {
+      prevFolderName.current = folderName;
+    }
+  }, [folderName]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
+    touchDeltaX.current = 0;
+    isDragging.current = false;
+    setSlideClass("");
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const dx = e.touches[0].clientX - touchStartX.current;
+    const dy = e.touches[0].clientY - touchStartY.current;
+    if (!isDragging.current && Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
+      isDragging.current = true;
+    }
+    if (isDragging.current) {
+      touchDeltaX.current = dx;
+      setDragOffset(dx * 0.4);
+    }
   }, []);
 
   const handleTouchEnd = useCallback(
     (e: React.TouchEvent) => {
-      if (touchStartX.current === null || touchStartY.current === null || !onSwipe) return;
+      const wasDragging = isDragging.current;
+      isDragging.current = false;
+
+      if (touchStartX.current === null || touchStartY.current === null || !onSwipe) {
+        setDragOffset(0);
+        return;
+      }
       const deltaX = e.changedTouches[0].clientX - touchStartX.current;
       const deltaY = e.changedTouches[0].clientY - touchStartY.current;
       touchStartX.current = null;
       touchStartY.current = null;
-      if (Math.abs(deltaX) < 50 || Math.abs(deltaY) > Math.abs(deltaX)) return;
-      onSwipe(deltaX < 0 ? "left" : "right");
+
+      if (Math.abs(deltaX) < 50 || Math.abs(deltaY) > Math.abs(deltaX)) {
+        setDragOffset(0);
+        return;
+      }
+
+      const direction = deltaX < 0 ? "left" : "right";
+      setSlideClass(
+        direction === "left"
+          ? "animate-slide-out-left"
+          : "animate-slide-out-right",
+      );
+
+      setTimeout(() => {
+        onSwipe(direction);
+        setDragOffset(0);
+        setSlideClass(
+          direction === "left"
+            ? "animate-slide-in-right"
+            : "animate-slide-in-left",
+        );
+        setTimeout(() => setSlideClass(""), 250);
+      }, 150);
+    },
+    [onSwipe],
+  );
+
+  const handleChevron = useCallback(
+    (direction: "left" | "right") => {
+      if (!onSwipe) return;
+      setSlideClass(
+        direction === "left"
+          ? "animate-slide-out-left"
+          : "animate-slide-out-right",
+      );
+      setTimeout(() => {
+        onSwipe(direction);
+        setSlideClass(
+          direction === "left"
+            ? "animate-slide-in-right"
+            : "animate-slide-in-left",
+        );
+        setTimeout(() => setSlideClass(""), 250);
+      }, 150);
     },
     [onSwipe],
   );
 
   return (
-    <div className="mb-6">
+    <div className="mb-6 overflow-hidden">
+      <style>{`
+        @keyframes slideOutLeft {
+          from { transform: translateX(0); opacity: 1; }
+          to { transform: translateX(-60px); opacity: 0; }
+        }
+        @keyframes slideOutRight {
+          from { transform: translateX(0); opacity: 1; }
+          to { transform: translateX(60px); opacity: 0; }
+        }
+        @keyframes slideInLeft {
+          from { transform: translateX(-60px); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideInRight {
+          from { transform: translateX(60px); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        .animate-slide-out-left { animation: slideOutLeft 150ms ease-in forwards; }
+        .animate-slide-out-right { animation: slideOutRight 150ms ease-in forwards; }
+        .animate-slide-in-left { animation: slideInLeft 250ms ease-out forwards; }
+        .animate-slide-in-right { animation: slideInRight 250ms ease-out forwards; }
+      `}</style>
       {folderName && (
         <div className="flex items-center justify-center gap-2 mb-3 sm:hidden">
           <button
-            onClick={() => onSwipe?.("right")}
+            onClick={() => handleChevron("right")}
             className="p-1.5 rounded-lg text-muted-foreground hover:bg-foreground/5 active:bg-foreground/10 transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-primary/10 text-primary text-xs font-bold">
+          <div className={`flex items-center gap-1.5 px-3 py-1 rounded-xl bg-primary/10 text-primary text-xs font-bold transition-transform ${slideClass}`}>
             <FolderOpen className="w-3.5 h-3.5" />
             {folderName}
           </div>
           <button
-            onClick={() => onSwipe?.("left")}
+            onClick={() => handleChevron("left")}
             className="p-1.5 rounded-lg text-muted-foreground hover:bg-foreground/5 active:bg-foreground/10 transition-colors"
           >
             <ChevronRight className="w-4 h-4" />
@@ -77,8 +175,11 @@ export function Summary({
         </div>
       )}
       <div
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4"
+        ref={gridRef}
+        className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 ${slideClass}`}
+        style={dragOffset ? { transform: `translateX(${dragOffset}px)`, opacity: Math.max(0.3, 1 - Math.abs(dragOffset) / 200) } : undefined}
         onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
       <Card className="p-5 glass-card flex flex-col justify-between space-y-3">
