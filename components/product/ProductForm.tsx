@@ -44,6 +44,14 @@ export default function ProductForm({
   initialRates,
 }: ProductFormProps) {
   const router = useRouter();
+  const [folders, setFolders] = useState<{ id: string; name: string }[]>([]);
+
+  useEffect(() => {
+    fetch("/api/folders")
+      .then((res) => res.json())
+      .then((data) => setFolders(data))
+      .catch(() => {});
+  }, []);
 
   const normalizedImages: { url: string }[] = Array.isArray(initialData?.images)
     ? initialData.images.map((img: any) =>
@@ -217,6 +225,7 @@ export default function ProductForm({
       rateUSD: values.rateUSD ?? null,
       shippingType: values.shippingType || null,
       customShippingRate: values.customShippingRate ?? null,
+      folderId: values.folderId || null,
       images: (values.images || [])
         .map((i) => i.url.trim())
         .filter((u) => u.length > 0),
@@ -333,6 +342,25 @@ export default function ProductForm({
           watch={watch}
         />
 
+        <div className="p-4 border rounded-md bg-muted/30">
+          <label htmlFor="folderId" className="text-sm font-medium block mb-2">
+            Папка
+          </label>
+          <select
+            id="folderId"
+            className="w-full border rounded p-2 text-sm bg-background"
+            value={watch("folderId") ?? ""}
+            onChange={(e) => setValue("folderId", e.target.value || null)}
+          >
+            <option value="">Без папки</option>
+            {folders.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {id && (
           <div className="flex items-center gap-2 p-4 border rounded-md bg-muted/30">
             <input
@@ -402,7 +430,7 @@ export default function ProductForm({
                 <p className="text-base sm:text-lg font-semibold wrap-break-word">
                   {purchaseUnitCostUAH.toFixed(2)} ₴
                 </p>
-                <p className="text-xs sm:text-sm text-muted-foreground break-words">
+                <p className="text-xs sm:text-sm text-muted-foreground wrap-break-word">
                   (Всего: {totalGoodsCost.toFixed(2)} ₴)
                 </p>
               </div>
@@ -411,7 +439,7 @@ export default function ProductForm({
               <p className="text-xs sm:text-sm text-gray-600">
                 Доход (текущий)
               </p>
-              <p className="text-base sm:text-lg font-semibold break-words">
+              <p className="text-base sm:text-lg font-semibold wrap-break-word">
                 {computedIncome.toFixed(2)} ₴
               </p>
             </div>
@@ -419,17 +447,17 @@ export default function ProductForm({
               <p className="text-xs sm:text-sm text-gray-600">
                 Рассчитанный расход
               </p>
-              <p className="text-base sm:text-lg font-semibold break-words">
+              <p className="text-base sm:text-lg font-semibold wrap-break-word">
                 {totalCalculatedCosts.toFixed(2)} ₴
               </p>
             </div>
             <div className="p-3 border rounded-md bg-green-50/50 dark:bg-green-900/20 col-span-1 sm:col-span-2 lg:col-span-4 min-w-0">
-              <p className="text-xs sm:text-sm text-gray-600 font-medium break-words">
+              <p className="text-xs sm:text-sm text-gray-600 font-medium wrap-break-word">
                 Прогноз чистой прибыли (если продать всё, {purchased || 0} шт)
               </p>
               <p
                 suppressHydrationWarning={true}
-                className={`text-lg sm:text-xl font-bold break-words ${
+                className={`text-lg sm:text-xl font-bold wrap-break-word ${
                   potentialProfit >= 0 ? "text-green-600" : "text-red-600"
                 }`}
               >
@@ -437,12 +465,12 @@ export default function ProductForm({
               </p>
             </div>
             <div className="p-3 border rounded-md bg-green-50/50 dark:bg-green-900/20 col-span-1 sm:col-span-2 lg:col-span-4 min-w-0">
-              <p className="text-xs sm:text-sm text-gray-600 font-medium break-words">
+              <p className="text-xs sm:text-sm text-gray-600 font-medium wrap-break-word">
                 Моржа (на {sells || 0} шт из {purchased || 0} шт)
               </p>
               <p
                 suppressHydrationWarning={true}
-                className={`text-lg sm:text-xl font-bold break-words ${
+                className={`text-lg sm:text-xl font-bold wrap-break-word ${
                   potentialProfit >= 0 ? "text-green-600" : "text-red-600"
                 }`}
               >
