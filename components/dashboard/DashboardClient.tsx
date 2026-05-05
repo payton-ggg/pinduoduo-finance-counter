@@ -7,7 +7,14 @@ import { Summary } from "./Summary";
 import { ProductGrid } from "./ProductGrid";
 import type { ProductUI } from "./ProductCard";
 import { Button } from "@/components/ui/button";
-import { Archive, Package, FolderOpen, Plus, X, FolderInput } from "lucide-react";
+import {
+  Archive,
+  Package,
+  FolderOpen,
+  Plus,
+  X,
+  FolderInput,
+} from "lucide-react";
 
 type FolderItem = {
   id: string;
@@ -27,7 +34,7 @@ export function DashboardClient({
   const router = useRouter();
   const [products, setProducts] = useState<ProductUI[]>(initialProducts);
   const [selectedIds, setSelectedIds] = useState<Set<string | number>>(
-    new Set(),
+    () => new Set(initialProducts.map((p) => p.id)),
   );
   const [activeTab, setActiveTab] = useState<"active" | "archive">("active");
   const [folders, setFolders] = useState<FolderItem[]>([]);
@@ -47,8 +54,6 @@ export function DashboardClient({
   useEffect(() => {
     fetchFolders();
   }, []);
-
-
 
   const toggleSelection = (id: string | number) => {
     const newSet = new Set(selectedIds);
@@ -201,7 +206,7 @@ export function DashboardClient({
       ? "Все"
       : selectedFolderId === "__none__"
         ? "Без папки"
-        : folders.find((f) => f.id === selectedFolderId)?.name ?? "";
+        : (folders.find((f) => f.id === selectedFolderId)?.name ?? "");
 
   useEffect(() => {
     setProducts(initialProducts);
@@ -269,7 +274,9 @@ export function DashboardClient({
           Без папки ({tabProducts.filter((p) => !p.folderId).length})
         </button>
         {folders.map((folder) => {
-          const count = tabProducts.filter((p) => p.folderId === folder.id).length;
+          const count = tabProducts.filter(
+            (p) => p.folderId === folder.id,
+          ).length;
           return (
             <div key={folder.id} className="flex items-center gap-0.5">
               <button
@@ -346,8 +353,7 @@ export function DashboardClient({
               onClick={() => setShowFolderDropdown(!showFolderDropdown)}
               className="glass border-none rounded-xl font-bold flex items-center gap-2 hover:bg-primary/20 transition-all"
             >
-              <FolderInput className="w-4 h-4" />
-              В папку ({selectedIds.size})
+              <FolderInput className="w-4 h-4" />В папку ({selectedIds.size})
             </Button>
             {showFolderDropdown && (
               <div className="absolute top-full left-0 mt-1 z-50 min-w-[180px] bg-background border rounded-xl shadow-xl p-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
