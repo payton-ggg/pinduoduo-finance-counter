@@ -287,29 +287,68 @@ export function DashboardClient({
           const count = tabProducts.filter(
             (p) => p.folderId === folder.id,
           ).length;
+          const isActive = selectedFolderId === folder.id;
+          const isEditing = editingFolderId === folder.id;
           return (
             <div key={folder.id} className="flex items-center gap-0.5">
-              <button
-                onClick={() => setSelectedFolderId(folder.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-l-xl text-xs font-bold transition-all duration-200 ${
-                  selectedFolderId === folder.id
-                    ? "bg-primary text-primary-foreground shadow-md"
-                    : "bg-foreground/5 text-muted-foreground hover:bg-foreground/10"
-                }`}
-              >
-                <FolderOpen className="w-3.5 h-3.5" />
-                {folder.name} ({count})
-              </button>
-              <button
-                onClick={() => deleteFolder(folder.id)}
-                className={`px-1.5 py-1.5 rounded-r-xl text-xs transition-all duration-200 hover:bg-destructive/20 hover:text-destructive ${
-                  selectedFolderId === folder.id
-                    ? "bg-primary/80 text-primary-foreground"
-                    : "bg-foreground/5 text-muted-foreground"
-                }`}
-              >
-                <X className="w-3 h-3" />
-              </button>
+              {isEditing ? (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    renameFolder(folder.id, editingFolderName);
+                  }}
+                  className="flex items-center gap-0.5"
+                >
+                  <input
+                    autoFocus
+                    value={editingFolderName}
+                    onChange={(e) => setEditingFolderName(e.target.value)}
+                    onBlur={() => renameFolder(folder.id, editingFolderName)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape") setEditingFolderId(null);
+                    }}
+                    className="w-24 px-2 py-1 rounded-l-xl text-xs font-bold bg-primary text-primary-foreground outline-none border border-primary-foreground/20"
+                  />
+                  <button
+                    type="submit"
+                    className="px-1.5 py-1.5 rounded-r-xl text-xs bg-primary/80 text-primary-foreground hover:bg-primary transition-all duration-200"
+                  >
+                    <Check className="w-3 h-3" />
+                  </button>
+                </form>
+              ) : (
+                <>
+                  <button
+                    onClick={() => {
+                      if (isActive) {
+                        setEditingFolderId(folder.id);
+                        setEditingFolderName(folder.name);
+                      } else {
+                        setSelectedFolderId(folder.id);
+                      }
+                    }}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-l-xl text-xs font-bold transition-all duration-200 ${
+                      isActive
+                        ? "bg-primary text-primary-foreground shadow-md"
+                        : "bg-foreground/5 text-muted-foreground hover:bg-foreground/10"
+                    }`}
+                  >
+                    <FolderOpen className="w-3.5 h-3.5" />
+                    {folder.name} ({count})
+                    {isActive && <Pencil className="w-3 h-3 opacity-60" />}
+                  </button>
+                  <button
+                    onClick={() => deleteFolder(folder.id)}
+                    className={`px-1.5 py-1.5 rounded-r-xl text-xs transition-all duration-200 hover:bg-destructive/20 hover:text-destructive ${
+                      isActive
+                        ? "bg-primary/80 text-primary-foreground"
+                        : "bg-foreground/5 text-muted-foreground"
+                    }`}
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </>
+              )}
             </div>
           );
         })}
