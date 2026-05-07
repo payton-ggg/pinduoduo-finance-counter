@@ -22,6 +22,18 @@ export async function POST(req: Request) {
   return NextResponse.json(folder);
 }
 
+export async function PATCH(req: Request) {
+  const { id, name } = await req.json();
+  if (!id || !name || typeof name !== "string" || name.trim().length === 0) {
+    return NextResponse.json({ error: "ID and name are required" }, { status: 400 });
+  }
+  const folder = await prisma.folder.update({
+    where: { id },
+    data: { name: name.trim() },
+  });
+  return NextResponse.json(folder);
+}
+
 export async function DELETE(req: Request) {
   const { id } = await req.json();
   if (!id) {

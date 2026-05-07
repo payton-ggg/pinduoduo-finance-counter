@@ -40,6 +40,8 @@ export function DashboardClient({
   const [folders, setFolders] = useState<FolderItem[]>([]);
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [showFolderDropdown, setShowFolderDropdown] = useState(false);
+  const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
+  const [editingFolderName, setEditingFolderName] = useState("");
 
   const fetchFolders = async () => {
     try {
@@ -153,6 +155,25 @@ export function DashboardClient({
     } catch (err) {
       console.error("Failed to delete folder", err);
     }
+  };
+
+  const renameFolder = async (folderId: string, newName: string) => {
+    const trimmed = newName.trim();
+    if (!trimmed) {
+      setEditingFolderId(null);
+      return;
+    }
+    try {
+      await fetch("/api/folders", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: folderId, name: trimmed }),
+      });
+      await fetchFolders();
+    } catch (err) {
+      console.error("Failed to rename folder", err);
+    }
+    setEditingFolderId(null);
   };
 
   const filteredProducts = products.filter((p) => {
