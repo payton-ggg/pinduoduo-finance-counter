@@ -337,50 +337,62 @@
 }
 
 .green {
-  --background: var(--moss-green-50);
-  --foreground: var(--moss-green-950);
+  --background: #0a1a0d;
+  --foreground: #e0f5e0;
 
-  --card: rgba(255, 255, 255, 0.8);
-  --card-foreground: var(--moss-green-950);
+  --card: rgba(16, 32, 18, 0.75);
+  --card-foreground: #e0f5e0;
 
-  --primary: var(--moss-green-600);
-  --primary-foreground: var(--moss-green-50);
+  --popover: #0f2413;
+  --popover-foreground: #e0f5e0;
 
-  --secondary: var(--cool-steel-100);
-  --secondary-foreground: var(--cool-steel-900);
+  --primary: var(--moss-green-500);
+  --primary-foreground: #0a1a0d;
 
-  --muted: var(--moss-green-100);
-  --muted-foreground: var(--moss-green-600);
+  --secondary: #1a2e1d;
+  --secondary-foreground: #c8e6c8;
 
-  --accent: var(--light-green-200);
-  --accent-foreground: var(--light-green-900);
+  --muted: #132516;
+  --muted-foreground: var(--moss-green-400);
 
-  --border: var(--moss-green-200);
-  --input: var(--moss-green-200);
+  --accent: var(--light-green-800);
+  --accent-foreground: var(--light-green-100);
+
+  --destructive: #ef4444;
+  --destructive-foreground: #f8fafc;
+
+  --border: #1e3a22;
+  --input: #1e3a22;
   --ring: var(--moss-green-500);
 }
 
 .modern {
-  --background: var(--ink-black-50);
-  --foreground: var(--ink-black-950);
+  --background: #080d12;
+  --foreground: #dbe7f0;
 
-  --card: rgba(255, 255, 255, 0.8);
-  --card-foreground: var(--ink-black-950);
+  --card: rgba(14, 22, 30, 0.75);
+  --card-foreground: #dbe7f0;
 
-  --primary: var(--ink-black-600);
-  --primary-foreground: var(--ink-black-50);
+  --popover: #0c1620;
+  --popover-foreground: #dbe7f0;
 
-  --secondary: var(--yale-blue-100);
-  --secondary-foreground: var(--yale-blue-900);
+  --primary: var(--ink-black-500);
+  --primary-foreground: #080d12;
 
-  --muted: var(--ink-black-100);
-  --muted-foreground: var(--ink-black-600);
+  --secondary: #111e2b;
+  --secondary-foreground: var(--yale-blue-200);
 
-  --accent: var(--blush-pop-200);
-  --accent-foreground: var(--blush-pop-900);
+  --muted: #0e1820;
+  --muted-foreground: var(--ink-black-400);
 
-  --border: var(--ink-black-200);
-  --input: var(--ink-black-200);
+  --accent: var(--blush-pop-700);
+  --accent-foreground: var(--blush-pop-100);
+
+  --destructive: #ef4444;
+  --destructive-foreground: #f8fafc;
+
+  --border: #162436;
+  --input: #162436;
   --ring: var(--ink-black-500);
 }
 
@@ -422,11 +434,11 @@
 
   .green body {
     background-image:
-      radial-gradient(at 0% 0%, var(--light-green-100) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, var(--moss-green-100) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, var(--cool-steel-100) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, var(--light-green-50) 0px, transparent 50%);
-    background-color: var(--moss-green-50);
+      radial-gradient(at 0% 0%, rgba(84, 193, 62, 0.12) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(18, 241, 14, 0.08) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(50, 116, 37, 0.1) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, rgba(67, 154, 50, 0.1) 0px, transparent 50%);
+    background-color: #0a1a0d;
     background-attachment: fixed;
   }
 
