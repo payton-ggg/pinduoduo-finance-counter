@@ -444,11 +444,11 @@
 
   .modern body {
     background-image:
-      radial-gradient(at 0% 0%, var(--ink-black-100) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, var(--yale-blue-100) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, var(--blush-pop-100) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, var(--porcelain-100) 0px, transparent 50%);
-    background-color: var(--ink-black-50);
+      radial-gradient(at 0% 0%, rgba(73, 133, 182, 0.12) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(87, 121, 168, 0.1) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(198, 57, 142, 0.08) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, rgba(113, 152, 103, 0.08) 0px, transparent 50%);
+    background-color: #080d12;
     background-attachment: fixed;
   }
 }
