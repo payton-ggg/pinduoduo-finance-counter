@@ -60,7 +60,11 @@ export function Summary({
     if (touchStartX.current === null || touchStartY.current === null) return;
     const dx = e.touches[0].clientX - touchStartX.current;
     const dy = e.touches[0].clientY - touchStartY.current;
-    if (!isDragging.current && Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
+    if (
+      !isDragging.current &&
+      Math.abs(dx) > 10 &&
+      Math.abs(dx) > Math.abs(dy)
+    ) {
       isDragging.current = true;
     }
     if (isDragging.current) {
@@ -74,7 +78,11 @@ export function Summary({
       const wasDragging = isDragging.current;
       isDragging.current = false;
 
-      if (touchStartX.current === null || touchStartY.current === null || !onSwipe) {
+      if (
+        touchStartX.current === null ||
+        touchStartY.current === null ||
+        !onSwipe
+      ) {
         setDragOffset(0);
         return;
       }
@@ -131,7 +139,7 @@ export function Summary({
   );
 
   return (
-    <div className="mb-6 overflow-hidden">
+    <div className="mb-6 overflow-hidden py-5 rounded-xl">
       <style>{`
         @keyframes slideOutLeft {
           from { transform: translateX(0); opacity: 1; }
@@ -162,7 +170,9 @@ export function Summary({
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <div className={`flex items-center gap-1.5 px-3 py-1 rounded-xl bg-primary/10 text-primary text-xs font-bold transition-transform ${slideClass}`}>
+          <div
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-xl bg-primary/10 text-primary text-xs font-bold transition-transform ${slideClass}`}
+          >
             <FolderOpen className="w-3.5 h-3.5" />
             {folderName}
           </div>
@@ -177,97 +187,104 @@ export function Summary({
       <div
         ref={gridRef}
         className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 ${slideClass}`}
-        style={dragOffset ? { transform: `translateX(${dragOffset}px)`, opacity: Math.max(0.3, 1 - Math.abs(dragOffset) / 200) } : undefined}
+        style={
+          dragOffset
+            ? {
+                transform: `translateX(${dragOffset}px)`,
+                opacity: Math.max(0.3, 1 - Math.abs(dragOffset) / 200),
+              }
+            : undefined
+        }
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-      <Card className="p-5 glass-card flex flex-col justify-between space-y-3">
-        <div className="flex items-center justify-between text-muted-foreground/80">
-          <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
-            Расходы
-          </span>
-          <div className="p-2 bg-red-500/10 rounded-xl">
-            <TrendingDown className="h-5 w-5 text-red-500" />
+        <Card className="p-5 glass-card flex flex-col justify-between space-y-3">
+          <div className="flex items-center justify-between text-muted-foreground/80">
+            <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
+              Расходы
+            </span>
+            <div className="p-2 bg-red-500/10 rounded-xl">
+              <TrendingDown className="h-5 w-5 text-red-500" />
+            </div>
           </div>
-        </div>
-        <div className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
-          {totalSpent.toLocaleString()}{" "}
-          <span className="text-sm font-medium text-muted-foreground">₴</span>
-        </div>
-      </Card>
+          <div className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
+            {totalSpent.toLocaleString()}{" "}
+            <span className="text-sm font-medium text-muted-foreground">₴</span>
+          </div>
+        </Card>
 
-      <Card className="p-5 glass-card flex flex-col justify-between space-y-3">
-        <div className="flex items-center justify-between text-muted-foreground/80">
-          <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
-            Доходы
-          </span>
-          <div className="p-2 bg-green-500/10 rounded-xl">
-            <TrendingUp className="h-5 w-5 text-green-500" />
+        <Card className="p-5 glass-card flex flex-col justify-between space-y-3">
+          <div className="flex items-center justify-between text-muted-foreground/80">
+            <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
+              Доходы
+            </span>
+            <div className="p-2 bg-green-500/10 rounded-xl">
+              <TrendingUp className="h-5 w-5 text-green-500" />
+            </div>
           </div>
-        </div>
-        <div className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
-          {totalIncome.toLocaleString()}{" "}
-          <span className="text-sm font-medium text-muted-foreground">₴</span>
-        </div>
-      </Card>
+          <div className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
+            {totalIncome.toLocaleString()}{" "}
+            <span className="text-sm font-medium text-muted-foreground">₴</span>
+          </div>
+        </Card>
 
-      <Card className="p-5 glass-card flex flex-col justify-between space-y-3 relative overflow-hidden group">
-        <div className="absolute -top-3 -left-4 w-120 h-120 bg-primary/5 group-hover:bg-primary/10 transition-colors" />
-        <div className="flex items-center justify-between text-primary relative z-10">
-          <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
-            Прибыль
-          </span>
-          <div className="p-2 bg-primary/10 rounded-xl">
-            <Wallet className="h-5 w-5" />
+        <Card className="p-5 glass-card flex flex-col justify-between space-y-3 relative overflow-hidden group">
+          <div className="absolute -top-3 -left-4 w-120 h-120 bg-primary/5 group-hover:bg-primary/10 transition-colors" />
+          <div className="flex items-center justify-between text-primary relative z-10">
+            <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
+              Прибыль
+            </span>
+            <div className="p-2 bg-primary/10 rounded-xl">
+              <Wallet className="h-5 w-5" />
+            </div>
           </div>
-        </div>
-        <div
-          className={`text-xl sm:text-2xl font-black tracking-tight relative z-10 ${
-            profit >= 0 ? "text-primary" : "text-destructive"
-          }`}
+          <div
+            className={`text-xl sm:text-2xl font-black tracking-tight relative z-10 ${
+              profit >= 0 ? "text-primary" : "text-destructive"
+            }`}
+          >
+            {profit.toLocaleString()}{" "}
+            <span className="text-sm font-medium opacity-70">₴</span>
+          </div>
+        </Card>
+
+        <Card
+          onClick={() => setShowGross(!showGross)}
+          className="p-5 glass-card flex flex-col justify-between space-y-3 cursor-pointer group hover:border-primary/40 relative overflow-hidden"
         >
-          {profit.toLocaleString()}{" "}
-          <span className="text-sm font-medium opacity-70">₴</span>
-        </div>
-      </Card>
-
-      <Card
-        onClick={() => setShowGross(!showGross)}
-        className="p-5 glass-card flex flex-col justify-between space-y-3 cursor-pointer group hover:border-primary/40 relative overflow-hidden"
-      >
-        <div className="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Sparkles className="w-3 h-3 text-primary animate-pulse" />
-        </div>
-        <div className="flex items-center justify-between text-primary">
-          <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
-            Прогноз {showGross ? "(Грязными)" : "(Чистыми)"}
-          </span>
-          <div className="p-2 bg-primary/10 rounded-xl transition-transform group-hover:rotate-12">
-            <TrendingUp className="h-5 w-5" />
+          <div className="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Sparkles className="w-3 h-3 text-primary animate-pulse" />
           </div>
-        </div>
-        <div className="text-xl sm:text-2xl font-black tracking-tight text-primary">
-          {showGross
-            ? totalProjectedRevenue.toLocaleString()
-            : totalProjectedProfit.toLocaleString()}{" "}
-          <span className="text-sm font-medium opacity-70">₴</span>
-        </div>
-      </Card>
-
-      <Card className="p-5 glass-card flex flex-col justify-between space-y-3">
-        <div className="flex items-center justify-between text-muted-foreground/80">
-          <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
-            Товары
-          </span>
-          <div className="p-2 bg-blue-500/10 rounded-xl">
-            <Package className="h-5 w-5 text-blue-500" />
+          <div className="flex items-center justify-between text-primary">
+            <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
+              Прогноз {showGross ? "(Грязными)" : "(Чистыми)"}
+            </span>
+            <div className="p-2 bg-primary/10 rounded-xl transition-transform group-hover:rotate-12">
+              <TrendingUp className="h-5 w-5" />
+            </div>
           </div>
-        </div>
-        <div className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
-          {variationsCount}
-        </div>
-      </Card>
+          <div className="text-xl sm:text-2xl font-black tracking-tight text-primary">
+            {showGross
+              ? totalProjectedRevenue.toLocaleString()
+              : totalProjectedProfit.toLocaleString()}{" "}
+            <span className="text-sm font-medium opacity-70">₴</span>
+          </div>
+        </Card>
+
+        <Card className="p-5 glass-card flex flex-col justify-between space-y-3">
+          <div className="flex items-center justify-between text-muted-foreground/80">
+            <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
+              Товары
+            </span>
+            <div className="p-2 bg-blue-500/10 rounded-xl">
+              <Package className="h-5 w-5 text-blue-500" />
+            </div>
+          </div>
+          <div className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
+            {variationsCount}
+          </div>
+        </Card>
       </div>
     </div>
   );

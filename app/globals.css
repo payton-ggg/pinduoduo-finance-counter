@@ -4,29 +4,29 @@
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  
+
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-  
+
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  
+
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-  
+
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-  
+
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
-  
+
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  
+
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
-  
+
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
 
@@ -219,7 +219,7 @@
   --cool-steel-800: #2b323b;
   --cool-steel-900: #15191e;
   --cool-steel-950: #0f1215;
-  
+
   /* Extra Theme Colors */
   --ink-black-50: #edf3f8;
   --ink-black-100: #dbe7f0;
@@ -285,28 +285,28 @@
   --radius: 1rem;
   --background: #f0f1f4;
   --foreground: #0f1114;
-  
+
   --card: rgba(255, 255, 255, 0.7);
   --card-foreground: #0f1114;
-  
+
   --popover: #ffffff;
   --popover-foreground: #0f1114;
-  
+
   --primary: #4a6782;
   --primary-foreground: #eff2f6;
-  
+
   --secondary: #c5c8d3;
   --secondary-foreground: #16181d;
-  
+
   --muted: #e2e4e9;
   --muted-foreground: #585f74;
-  
+
   --accent: #d0c4d4;
   --accent-foreground: #1b151e;
-  
+
   --destructive: #ef4444;
   --destructive-foreground: #f8fafc;
-  
+
   --border: #c5c8d3;
   --input: #c5c8d3;
   --ring: #69a1c9;
@@ -315,22 +315,22 @@
 .dark {
   --background: #0f1114;
   --foreground: #f0f1f4;
-  
+
   --card: rgba(22, 24, 29, 0.7);
   --card-foreground: #f0f1f4;
-  
+
   --primary: #69a1c9;
   --primary-foreground: #09131a;
-  
+
   --secondary: #2c2f3a;
   --secondary-foreground: #f0f1f4;
-  
+
   --muted: #16181d;
   --muted-foreground: #8b92a7;
-  
+
   --accent: #524059;
   --accent-foreground: #f3f0f4;
-  
+
   --border: #2c2f3a;
   --input: #2c2f3a;
   --ring: #366e96;
@@ -339,22 +339,22 @@
 .green {
   --background: var(--moss-green-50);
   --foreground: var(--moss-green-950);
-  
+
   --card: rgba(255, 255, 255, 0.8);
   --card-foreground: var(--moss-green-950);
-  
+
   --primary: var(--moss-green-600);
   --primary-foreground: var(--moss-green-50);
-  
+
   --secondary: var(--cool-steel-100);
   --secondary-foreground: var(--cool-steel-900);
-  
+
   --muted: var(--moss-green-100);
   --muted-foreground: var(--moss-green-600);
-  
+
   --accent: var(--light-green-200);
   --accent-foreground: var(--light-green-900);
-  
+
   --border: var(--moss-green-200);
   --input: var(--moss-green-200);
   --ring: var(--moss-green-500);
@@ -363,27 +363,26 @@
 .modern {
   --background: var(--ink-black-50);
   --foreground: var(--ink-black-950);
-  
+
   --card: rgba(255, 255, 255, 0.8);
   --card-foreground: var(--ink-black-950);
-  
+
   --primary: var(--ink-black-600);
   --primary-foreground: var(--ink-black-50);
-  
+
   --secondary: var(--yale-blue-100);
   --secondary-foreground: var(--yale-blue-900);
-  
+
   --muted: var(--ink-black-100);
   --muted-foreground: var(--ink-black-600);
-  
+
   --accent: var(--blush-pop-200);
   --accent-foreground: var(--blush-pop-900);
-  
+
   --border: var(--ink-black-200);
   --input: var(--ink-black-200);
   --ring: var(--ink-black-500);
 }
-
 
 @layer base {
   * {
@@ -391,26 +390,38 @@
   }
   body {
     @apply bg-background text-foreground min-h-screen transition-colors duration-500;
-    background-image: 
+    background-image:
       radial-gradient(at 0% 0%, var(--pale-sky-100) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, var(--vintage-grape-100) 0px, transparent 50%),
+      radial-gradient(
+        at 100% 0%,
+        var(--vintage-grape-100) 0px,
+        transparent 50%
+      ),
       radial-gradient(at 100% 100%, var(--ash-grey-100) 0px, transparent 50%),
       radial-gradient(at 0% 100%, var(--steel-blue-100) 0px, transparent 50%);
     background-attachment: fixed;
   }
-  
+
   .dark body {
-    background-image: 
+    background-image:
       radial-gradient(at 0% 0%, rgba(68, 137, 187, 0.15) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, rgba(136, 107, 148, 0.15) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, rgba(115, 140, 119, 0.1) 0px, transparent 50%),
+      radial-gradient(
+        at 100% 0%,
+        rgba(136, 107, 148, 0.15) 0px,
+        transparent 50%
+      ),
+      radial-gradient(
+        at 100% 100%,
+        rgba(115, 140, 119, 0.1) 0px,
+        transparent 50%
+      ),
       radial-gradient(at 0% 100%, rgba(93, 129, 162, 0.1) 0px, transparent 50%);
     background-color: #0f1114;
     background-attachment: fixed;
   }
 
   .green body {
-    background-image: 
+    background-image:
       radial-gradient(at 0% 0%, var(--light-green-100) 0px, transparent 50%),
       radial-gradient(at 100% 0%, var(--moss-green-100) 0px, transparent 50%),
       radial-gradient(at 100% 100%, var(--cool-steel-100) 0px, transparent 50%),
@@ -420,7 +431,7 @@
   }
 
   .modern body {
-    background-image: 
+    background-image:
       radial-gradient(at 0% 0%, var(--ink-black-100) 0px, transparent 50%),
       radial-gradient(at 100% 0%, var(--yale-blue-100) 0px, transparent 50%),
       radial-gradient(at 100% 100%, var(--blush-pop-100) 0px, transparent 50%),
@@ -435,7 +446,11 @@
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.05)
+  );
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
@@ -443,26 +458,42 @@
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.05)
+  );
   border-radius: 1.5rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
-
 .glass-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
   border-color: rgba(255, 255, 255, 0.25);
 }
 
 @keyframes shake {
-  10%, 90% { transform: translateX(-2px); }
-  20%, 80% { transform: translateX(4px); }
-  30%, 50%, 70% { transform: translateX(-6px); }
-  40%, 60% { transform: translateX(6px); }
+  10%,
+  90% {
+    transform: translateX(-2px);
+  }
+  20%,
+  80% {
+    transform: translateX(4px);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translateX(-6px);
+  }
+  40%,
+  60% {
+    transform: translateX(6px);
+  }
 }
 
 .login-shake {
-  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }

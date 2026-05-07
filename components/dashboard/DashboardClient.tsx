@@ -167,10 +167,7 @@ export function DashboardClient({
     selectedIds.has(p.id),
   );
 
-  const summaryProducts =
-    selectedFolderId && selectedFolderId !== "__none__"
-      ? filteredProducts
-      : selectedProducts;
+  const summaryProducts = selectedProducts;
 
   const totalSpent = summaryProducts.reduce((sum, p) => sum + p.spent, 0);
   const totalIncome = summaryProducts.reduce((sum, p) => sum + p.income, 0);
@@ -263,16 +260,6 @@ export function DashboardClient({
           <FolderOpen className="w-3.5 h-3.5" />
           Все ({tabProducts.length})
         </button>
-        <button
-          onClick={() => setSelectedFolderId("__none__")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 ${
-            selectedFolderId === "__none__"
-              ? "bg-primary text-primary-foreground shadow-md"
-              : "bg-foreground/5 text-muted-foreground hover:bg-foreground/10"
-          }`}
-        >
-          Без папки ({tabProducts.filter((p) => !p.folderId).length})
-        </button>
         {folders.map((folder) => {
           const count = tabProducts.filter(
             (p) => p.folderId === folder.id,
@@ -303,6 +290,16 @@ export function DashboardClient({
             </div>
           );
         })}
+        <button
+          onClick={() => setSelectedFolderId("__none__")}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 ${
+            selectedFolderId === "__none__"
+              ? "bg-primary text-primary-foreground shadow-md"
+              : "bg-foreground/5 text-muted-foreground hover:bg-foreground/10"
+          }`}
+        >
+          Без папки ({tabProducts.filter((p) => !p.folderId).length})
+        </button>
         <button
           onClick={createFolder}
           className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-muted-foreground bg-foreground/5 hover:bg-foreground/10 transition-all duration-200"
