@@ -14,6 +14,8 @@ import {
   Plus,
   X,
   FolderInput,
+  Pencil,
+  Check,
 } from "lucide-react";
 
 type FolderItem = {
