@@ -171,9 +171,16 @@ export function Summary({
 
     for (const item of available) {
       if (deficit <= 0) break;
-      const needToSell = Math.min(item.remaining, Math.ceil(deficit / item.price));
+      const needToSell = Math.min(
+        item.remaining,
+        Math.ceil(deficit / item.price),
+      );
       if (needToSell > 0) {
-        plan.push({ name: item.name, count: needToSell, total: needToSell * item.price });
+        plan.push({
+          name: item.name,
+          count: needToSell,
+          total: needToSell * item.price,
+        });
         deficit -= needToSell * item.price;
       }
     }
@@ -278,7 +285,7 @@ export function Summary({
           </div>
         </Card>
 
-        <Card 
+        <Card
           onClick={() => {
             if (profit < 0) setShowBreakEven(!showBreakEven);
           }}
@@ -308,9 +315,19 @@ export function Summary({
                 {breakEvenPlan?.plan.length ? (
                   <div className="space-y-1.5 pr-1 flex-1">
                     {breakEvenPlan.plan.slice(0, 3).map((item, idx) => (
-                      <div key={idx} className="flex justify-between items-center text-sm sm:text-base">
-                        <span className="truncate max-w-[140px] sm:max-w-[160px] mr-2 text-muted-foreground" title={item.name}>{item.name}:</span>
-                        <span className="whitespace-nowrap font-black text-primary">{item.count} шт</span>
+                      <div
+                        key={idx}
+                        className="flex justify-between items-center text-sm sm:text-base"
+                      >
+                        <span
+                          className="truncate max-w-[140px] sm:max-w-[160px] mr-2 text-muted-foreground"
+                          title={item.name}
+                        >
+                          {item.name}:
+                        </span>
+                        <span className="whitespace-nowrap font-black text-primary">
+                          {item.count} шт
+                        </span>
                       </div>
                     ))}
                     {breakEvenPlan.plan.length > 3 && (
@@ -320,12 +337,15 @@ export function Summary({
                     )}
                     {breakEvenPlan.remainingDeficit > 0 ? (
                       <div className="text-destructive text-xs font-bold mt-1 border-t border-destructive/20 pt-1 leading-tight">
-                        Не хватит, останется {breakEvenPlan.remainingDeficit.toLocaleString()} ₴
+                        Не хватит, останется{" "}
+                        {breakEvenPlan.remainingDeficit.toLocaleString()} ₴
                       </div>
                     ) : (
                       <div className="text-green-500 text-xs font-bold mt-1 border-t border-green-500/20 pt-1 flex justify-between">
                         <span>Остаток после:</span>
-                        <span>+{breakEvenPlan.finalProfit.toLocaleString()} ₴</span>
+                        <span>
+                          +{breakEvenPlan.finalProfit.toLocaleString()} ₴
+                        </span>
                       </div>
                     )}
                   </div>
