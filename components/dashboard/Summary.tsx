@@ -181,6 +181,7 @@ export function Summary({
     return {
       plan,
       remainingDeficit: deficit > 0 ? deficit : 0,
+      finalProfit: deficit <= 0 ? Math.abs(deficit) : 0,
     };
   };
 
@@ -303,13 +304,13 @@ export function Summary({
                 <span className="text-sm font-medium opacity-70">₴</span>
               </div>
             ) : (
-              <div className="text-sm text-foreground/90 font-medium h-[32px] sm:h-[36px] overflow-y-auto custom-scrollbar">
+              <div className="text-sm text-foreground/90 font-medium h-[40px] sm:h-[48px] overflow-y-auto custom-scrollbar flex flex-col">
                 {breakEvenPlan?.plan.length ? (
-                  <div className="space-y-1 pr-1">
+                  <div className="space-y-1.5 pr-1 flex-1">
                     {breakEvenPlan.plan.slice(0, 3).map((item, idx) => (
-                      <div key={idx} className="flex justify-between text-xs">
-                        <span className="truncate max-w-[120px] mr-2" title={item.name}>{item.name}:</span>
-                        <span className="whitespace-nowrap font-bold text-primary">{item.count} шт</span>
+                      <div key={idx} className="flex justify-between items-center text-sm sm:text-base">
+                        <span className="truncate max-w-[140px] sm:max-w-[160px] mr-2 text-muted-foreground" title={item.name}>{item.name}:</span>
+                        <span className="whitespace-nowrap font-black text-primary">{item.count} шт</span>
                       </div>
                     ))}
                     {breakEvenPlan.plan.length > 3 && (
@@ -317,15 +318,20 @@ export function Summary({
                         + еще {breakEvenPlan.plan.length - 3} тов.
                       </div>
                     )}
-                    {breakEvenPlan.remainingDeficit > 0 && (
-                      <div className="text-destructive text-[10px] mt-1 border-t border-destructive/20 pt-1 leading-tight">
-                        Не хватит товара, останется {breakEvenPlan.remainingDeficit.toLocaleString()} ₴
+                    {breakEvenPlan.remainingDeficit > 0 ? (
+                      <div className="text-destructive text-xs font-bold mt-1 border-t border-destructive/20 pt-1 leading-tight">
+                        Не хватит, останется {breakEvenPlan.remainingDeficit.toLocaleString()} ₴
+                      </div>
+                    ) : (
+                      <div className="text-green-500 text-xs font-bold mt-1 border-t border-green-500/20 pt-1 flex justify-between">
+                        <span>Остаток после:</span>
+                        <span>+{breakEvenPlan.finalProfit.toLocaleString()} ₴</span>
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div className="text-destructive text-xs">
-                    Нет товаров для продажи
+                  <div className="text-destructive text-sm font-bold">
+                    Нет товаров
                   </div>
                 )}
               </div>

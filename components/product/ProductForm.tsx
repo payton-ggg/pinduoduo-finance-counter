@@ -523,18 +523,61 @@ export default function ProductForm({
                 {potentialProfit.toFixed(2)} ₴
               </p>
             </div>
-            <div className="p-3 border rounded-md bg-green-50/50 dark:bg-green-900/20 col-span-1 sm:col-span-2 lg:col-span-4 min-w-0">
-              <p className="text-xs sm:text-sm text-gray-600 font-medium wrap-break-word">
-                Моржа (на {sells || 0} шт из {purchased || 0} шт)
-              </p>
-              <p
-                suppressHydrationWarning={true}
-                className={`text-lg sm:text-xl font-bold wrap-break-word ${
-                  potentialProfit >= 0 ? "text-green-600" : "text-red-600"
-                }`}
-              >
-                {margin.toFixed(2)} ₴
-              </p>
+            <div className={`p-3 border rounded-md relative col-span-1 sm:col-span-2 lg:col-span-4 min-w-0 ${margin >= 0 ? "bg-green-50/50 dark:bg-green-900/20" : "bg-orange-50/50 dark:bg-orange-900/20"}`}>
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-xs sm:text-sm text-gray-600 font-medium wrap-break-word mb-1">
+                    Моржа (на {sells || 0} шт из {purchased || 0} шт)
+                  </p>
+                  <p
+                    suppressHydrationWarning={true}
+                    className={`text-lg sm:text-xl font-bold wrap-break-word ${
+                      margin >= 0 ? "text-green-600" : "text-orange-600"
+                    }`}
+                  >
+                    {margin >= 0 ? "+" : ""}
+                    {margin.toFixed(2)} ₴
+                  </p>
+                </div>
+                {margin < 0 && sellingPriceUAH > 0 && (
+                  <div className="text-right flex flex-col justify-end">
+                    {(() => {
+                      const deficit = Math.abs(margin);
+                      const itemsToBreakEven = Math.ceil(deficit / sellingPriceUAH);
+                      const remainingStock = (purchased || 0) - (sells || 0);
+                      const canBreakEven = itemsToBreakEven <= remainingStock;
+                      const finalProfit = (itemsToBreakEven * sellingPriceUAH) - deficit;
+                      
+                      if (!canBreakEven) {
+                        return (
+                          <div className="bg-red-100/50 dark:bg-red-900/30 p-2 rounded-lg border border-red-200 dark:border-red-800/50 mt-1">
+                            <p className="text-xs font-bold text-red-600 dark:text-red-400">
+                              Не хватит товара
+                            </p>
+                            <p className="text-[10px] text-red-500/80">Останется: {(potentialProfit).toFixed(2)} ₴</p>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div className="bg-orange-100/50 dark:bg-orange-900/30 p-2 rounded-lg border border-orange-200 dark:border-orange-800/50 mt-1">
+                          <p className="text-[10px] sm:text-xs font-medium text-orange-800 dark:text-orange-300">
+                            Выход в ноль:
+                          </p>
+                          <p className="text-sm sm:text-base font-black text-orange-600 dark:text-orange-400">
+                            {itemsToBreakEven} шт
+                          </p>
+                          {finalProfit > 0 && (
+                            <p className="text-[9px] sm:text-[10px] font-bold text-green-600 dark:text-green-400 mt-0.5">
+                              И будет +{finalProfit.toFixed(2)} ₴
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

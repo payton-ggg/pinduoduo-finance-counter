@@ -131,20 +131,61 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
           </p>
         </Card>
         <Card
-          className={`p-5 border-2 ${margin >= 0 ? "border-green-500/30 bg-green-50/50 dark:bg-green-950/20" : "border-red-500/30 bg-red-50/50 dark:bg-red-950/20"}`}
+          className={`p-5 border-2 relative ${margin >= 0 ? "border-green-500/30 bg-green-50/50 dark:bg-green-950/20" : "border-orange-500/30 bg-orange-50/50 dark:bg-orange-950/20"}`}
         >
-          <div className="flex items-center gap-2 mb-1">
-            <BarChart3 className="h-5 w-5 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground font-medium">
-              Маржа ({sells} из {purchased} шт)
-            </p>
+          <div className="flex justify-between items-start">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <BarChart3 className="h-5 w-5 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground font-medium">
+                  Маржа ({sells} из {purchased} шт)
+                </p>
+              </div>
+              <p
+                className={`text-3xl font-bold ${margin >= 0 ? "text-green-600" : "text-orange-600"}`}
+              >
+                {margin >= 0 ? "+" : ""}
+                {margin.toFixed(2)} ₴
+              </p>
+            </div>
+            {margin < 0 && priceInUA > 0 && (
+              <div className="text-right flex flex-col justify-end h-full">
+                {(() => {
+                  const deficit = Math.abs(margin);
+                  const itemsToBreakEven = Math.ceil(deficit / priceInUA);
+                  const canBreakEven = itemsToBreakEven <= remainingStock;
+                  const finalProfit = (itemsToBreakEven * priceInUA) - deficit;
+                  
+                  if (!canBreakEven) {
+                    return (
+                      <div className="bg-red-100/50 dark:bg-red-900/30 p-2 rounded-lg border border-red-200 dark:border-red-800/50 mt-2">
+                        <p className="text-xs font-bold text-red-600 dark:text-red-400">
+                          Не хватит товара
+                        </p>
+                        <p className="text-[10px] text-red-500/80">Останется: {(potentialProfit).toFixed(2)} ₴</p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="bg-orange-100/50 dark:bg-orange-900/30 p-2 rounded-lg border border-orange-200 dark:border-orange-800/50 mt-2">
+                      <p className="text-xs font-medium text-orange-800 dark:text-orange-300">
+                        Выход в ноль:
+                      </p>
+                      <p className="text-base font-black text-orange-600 dark:text-orange-400">
+                        {itemsToBreakEven} шт
+                      </p>
+                      {finalProfit > 0 && (
+                        <p className="text-[10px] font-bold text-green-600 dark:text-green-400 mt-0.5">
+                          И будет +{finalProfit.toFixed(2)} ₴
+                        </p>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
           </div>
-          <p
-            className={`text-3xl font-bold ${margin >= 0 ? "text-green-600" : "text-red-600"}`}
-          >
-            {margin >= 0 ? "+" : ""}
-            {margin.toFixed(2)} ₴
-          </p>
         </Card>
       </div>
 
