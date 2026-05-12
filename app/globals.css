@@ -96,6 +96,66 @@
   --color-dry-sage-800: var(--dry-sage-800);
   --color-dry-sage-900: var(--dry-sage-900);
   --color-dry-sage-950: var(--dry-sage-950);
+
+  --color-honeydew-50: var(--honeydew-50);
+  --color-honeydew-100: var(--honeydew-100);
+  --color-honeydew-200: var(--honeydew-200);
+  --color-honeydew-300: var(--honeydew-300);
+  --color-honeydew-400: var(--honeydew-400);
+  --color-honeydew-500: var(--honeydew-500);
+  --color-honeydew-600: var(--honeydew-600);
+  --color-honeydew-700: var(--honeydew-700);
+  --color-honeydew-800: var(--honeydew-800);
+  --color-honeydew-900: var(--honeydew-900);
+  --color-honeydew-950: var(--honeydew-950);
+
+  --color-fresh-sky-50: var(--fresh-sky-50);
+  --color-fresh-sky-100: var(--fresh-sky-100);
+  --color-fresh-sky-200: var(--fresh-sky-200);
+  --color-fresh-sky-300: var(--fresh-sky-300);
+  --color-fresh-sky-400: var(--fresh-sky-400);
+  --color-fresh-sky-500: var(--fresh-sky-500);
+  --color-fresh-sky-600: var(--fresh-sky-600);
+  --color-fresh-sky-700: var(--fresh-sky-700);
+  --color-fresh-sky-800: var(--fresh-sky-800);
+  --color-fresh-sky-900: var(--fresh-sky-900);
+  --color-fresh-sky-950: var(--fresh-sky-950);
+
+  --color-vanilla-custard-50: var(--vanilla-custard-50);
+  --color-vanilla-custard-100: var(--vanilla-custard-100);
+  --color-vanilla-custard-200: var(--vanilla-custard-200);
+  --color-vanilla-custard-300: var(--vanilla-custard-300);
+  --color-vanilla-custard-400: var(--vanilla-custard-400);
+  --color-vanilla-custard-500: var(--vanilla-custard-500);
+  --color-vanilla-custard-600: var(--vanilla-custard-600);
+  --color-vanilla-custard-700: var(--vanilla-custard-700);
+  --color-vanilla-custard-800: var(--vanilla-custard-800);
+  --color-vanilla-custard-900: var(--vanilla-custard-900);
+  --color-vanilla-custard-950: var(--vanilla-custard-950);
+
+  --color-tangerine-dream-50: var(--tangerine-dream-50);
+  --color-tangerine-dream-100: var(--tangerine-dream-100);
+  --color-tangerine-dream-200: var(--tangerine-dream-200);
+  --color-tangerine-dream-300: var(--tangerine-dream-300);
+  --color-tangerine-dream-400: var(--tangerine-dream-400);
+  --color-tangerine-dream-500: var(--tangerine-dream-500);
+  --color-tangerine-dream-600: var(--tangerine-dream-600);
+  --color-tangerine-dream-700: var(--tangerine-dream-700);
+  --color-tangerine-dream-800: var(--tangerine-dream-800);
+  --color-tangerine-dream-900: var(--tangerine-dream-900);
+  --color-tangerine-dream-950: var(--tangerine-dream-950);
+
+  --color-sandy-brown-50: var(--sandy-brown-50);
+  --color-sandy-brown-100: var(--sandy-brown-100);
+  --color-sandy-brown-200: var(--sandy-brown-200);
+  --color-sandy-brown-300: var(--sandy-brown-300);
+  --color-sandy-brown-400: var(--sandy-brown-400);
+  --color-sandy-brown-500: var(--sandy-brown-500);
+  --color-sandy-brown-600: var(--sandy-brown-600);
+  --color-sandy-brown-700: var(--sandy-brown-700);
+  --color-sandy-brown-800: var(--sandy-brown-800);
+  --color-sandy-brown-900: var(--sandy-brown-900);
+  --color-sandy-brown-950: var(--sandy-brown-950);
 }
 
 :root {
@@ -281,6 +341,66 @@
   --dry-sage-900: #1e2211;
   --dry-sage-950: #15180c;
 
+  --honeydew-50: #f1f5ef;
+  --honeydew-100: #e2ebe0;
+  --honeydew-200: #c5d7c1;
+  --honeydew-300: #a8c3a2;
+  --honeydew-400: #8caf83;
+  --honeydew-500: #6f9c63;
+  --honeydew-600: #597c50;
+  --honeydew-700: #425d3c;
+  --honeydew-800: #2c3e28;
+  --honeydew-900: #161f14;
+  --honeydew-950: #0f160e;
+
+  --fresh-sky-50: #e5f9ff;
+  --fresh-sky-100: #ccf2ff;
+  --fresh-sky-200: #99e6ff;
+  --fresh-sky-300: #66d9ff;
+  --fresh-sky-400: #33ccff;
+  --fresh-sky-500: #00bfff;
+  --fresh-sky-600: #0099cc;
+  --fresh-sky-700: #007399;
+  --fresh-sky-800: #004d66;
+  --fresh-sky-900: #002633;
+  --fresh-sky-950: #001b24;
+
+  --vanilla-custard-50: #fbf7ea;
+  --vanilla-custard-100: #f7f0d4;
+  --vanilla-custard-200: #eee1aa;
+  --vanilla-custard-300: #e6d17f;
+  --vanilla-custard-400: #ddc255;
+  --vanilla-custard-500: #d5b32a;
+  --vanilla-custard-600: #aa8f22;
+  --vanilla-custard-700: #806b19;
+  --vanilla-custard-800: #554811;
+  --vanilla-custard-900: #2b2408;
+  --vanilla-custard-950: #1e1906;
+
+  --tangerine-dream-50: #feefe7;
+  --tangerine-dream-100: #fcdfcf;
+  --tangerine-dream-200: #f9be9f;
+  --tangerine-dream-300: #f79e6e;
+  --tangerine-dream-400: #f47e3e;
+  --tangerine-dream-500: #f15d0e;
+  --tangerine-dream-600: #c14b0b;
+  --tangerine-dream-700: #913808;
+  --tangerine-dream-800: #602506;
+  --tangerine-dream-900: #301303;
+  --tangerine-dream-950: #220d02;
+
+  --sandy-brown-50: #fff1e5;
+  --sandy-brown-100: #ffe4cc;
+  --sandy-brown-200: #ffc999;
+  --sandy-brown-300: #ffad66;
+  --sandy-brown-400: #ff9233;
+  --sandy-brown-500: #ff7700;
+  --sandy-brown-600: #cc5f00;
+  --sandy-brown-700: #994700;
+  --sandy-brown-800: #663000;
+  --sandy-brown-900: #331800;
+  --sandy-brown-950: #241100;
+
   /* Theme Mapping */
   --radius: 1rem;
   --background: #f0f1f4;
@@ -396,6 +516,36 @@
   --ring: var(--ink-black-500);
 }
 
+.fresh-sky {
+  --background: var(--fresh-sky-50);
+  --foreground: var(--fresh-sky-950);
+
+  --card: rgba(255, 255, 255, 0.7);
+  --card-foreground: var(--fresh-sky-950);
+
+  --popover: #ffffff;
+  --popover-foreground: var(--fresh-sky-950);
+
+  --primary: var(--tangerine-dream-500);
+  --primary-foreground: #ffffff;
+
+  --secondary: var(--fresh-sky-200);
+  --secondary-foreground: var(--fresh-sky-900);
+
+  --muted: var(--fresh-sky-100);
+  --muted-foreground: var(--fresh-sky-700);
+
+  --accent: var(--vanilla-custard-200);
+  --accent-foreground: var(--vanilla-custard-900);
+
+  --destructive: #ef4444;
+  --destructive-foreground: #f8fafc;
+
+  --border: var(--fresh-sky-200);
+  --input: var(--fresh-sky-200);
+  --ring: var(--fresh-sky-400);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -449,6 +599,16 @@
       radial-gradient(at 100% 100%, rgba(198, 57, 142, 0.08) 0px, transparent 50%),
       radial-gradient(at 0% 100%, rgba(113, 152, 103, 0.08) 0px, transparent 50%);
     background-color: #080d12;
+    background-attachment: fixed;
+  }
+
+  .fresh-sky body {
+    background-image:
+      radial-gradient(at 0% 0%, rgba(0, 191, 255, 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(241, 93, 14, 0.1) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(213, 179, 42, 0.15) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, rgba(111, 156, 99, 0.15) 0px, transparent 50%);
+    background-color: var(--fresh-sky-50);
     background-attachment: fixed;
   }
 }
