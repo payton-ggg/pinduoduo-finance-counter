@@ -371,11 +371,11 @@ export default function ProductForm({
           формы. Фотографии затронуты не будут.
         </p>
         <div className="flex flex-col sm:flex-row gap-3">
-          <Textarea
+          <textarea
             placeholder="Например: Это наушники Airpods Pro 2 с гироскопом, без шумодава, на чипе airoha, цена на пиндуодуо 150 юаней, вес 250г..."
             value={aiText}
             onChange={(e) => setAiText(e.target.value)}
-            className="flex-1 bg-white dark:bg-gray-950 resize-none"
+            className="flex-1 border rounded-md p-2 bg-white dark:bg-gray-950 resize-none text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             rows={3}
           />
           <Button
