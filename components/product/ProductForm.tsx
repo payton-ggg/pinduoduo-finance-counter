@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BasicFields } from "./BasicFields";
 import { ImagesFieldArray } from "./ImagesFieldArray";
-import { Calculator, RefreshCw } from "lucide-react";
+import { Calculator, RefreshCw, Bot, Loader2 } from "lucide-react";
 
 type FormValues = {
   name: string;
@@ -45,6 +45,8 @@ export default function ProductForm({
 }: ProductFormProps) {
   const router = useRouter();
   const [folders, setFolders] = useState<{ id: string; name: string }[]>([]);
+  const [aiText, setAiText] = useState("");
+  const [isAiLoading, setIsAiLoading] = useState(false);
 
   useEffect(() => {
     fetch("/api/folders")
@@ -190,6 +192,46 @@ export default function ProductForm({
 
   // Auto-sync calculated income/expense to form arrays
 
+  const handleAiFill = async () => {
+    if (!aiText.trim()) return;
+    setIsAiLoading(true);
+    try {
+      const res = await fetch("/api/ai/parse", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: aiText }),
+      });
+      const data = await res.json();
+      if (data.error) {
+        alert("Ошибка AI: " + data.error);
+        return;
+      }
+
+      if (data.warning) {
+        console.warn(data.warning);
+      }
+
+      const parsed = data.data;
+      if (parsed) {
+        Object.keys(parsed).forEach((key) => {
+          if (
+            parsed[key] !== null &&
+            parsed[key] !== undefined &&
+            key !== "images"
+          ) {
+            setValue(key as keyof FormValues, parsed[key], {
+              shouldDirty: true,
+            });
+          }
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Не удалось обработать текст с помощью AI");
+    } finally {
+      setIsAiLoading(false);
+    }
+  };
 
   const onSubmit = async (values: FormValues) => {
     const payloadStart = {
@@ -318,6 +360,39 @@ export default function ProductForm({
       <h1 className="text-xl font-bold mb-4">
         {id ? "Edit Product" : "Create Product"}
       </h1>
+
+      <div className="mb-6 p-4 border border-blue-200 bg-blue-50/30 rounded-lg dark:border-blue-900 dark:bg-blue-900/10">
+        <label className="flex items-center gap-2 text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
+          <Bot className="w-5 h-5" />
+          Автозаполнение через ИИ (io.net)
+        </label>
+        <p className="text-xs text-blue-600 dark:text-blue-400 mb-3">
+          Опишите товар текстом, и ИИ автоматически заполнит все нужные поля
+          формы. Фотографии затронуты не будут.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Textarea
+            placeholder="Например: Это наушники Airpods Pro 2 с гироскопом, без шумодава, на чипе airoha, цена на пиндуодуо 150 юаней, вес 250г..."
+            value={aiText}
+            onChange={(e) => setAiText(e.target.value)}
+            className="flex-1 bg-white dark:bg-gray-950 resize-none"
+            rows={3}
+          />
+          <Button
+            type="button"
+            onClick={handleAiFill}
+            disabled={isAiLoading || !aiText.trim()}
+            className="sm:w-32 bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            {isAiLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              "Заполнить"
+            )}
+          </Button>
+        </div>
+      </div>
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <BasicFields
           register={register}

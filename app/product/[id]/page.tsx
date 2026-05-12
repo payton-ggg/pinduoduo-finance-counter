@@ -1,8 +1,7 @@
 import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
-import ProductForm from "@/components/product/ProductForm";
-import { DeleteProductButton } from "@/components/product/DeleteProductButton";
+import { ProductPageClient } from "@/components/product/ProductPageClient";
 import { notFound } from "next/navigation";
 import { getExchangeRates } from "@/lib/rates";
 
@@ -12,7 +11,7 @@ export default async function ProductId({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  
+
   const [rates, product] = await Promise.all([
     getExchangeRates(),
     prisma.product.findUnique({
@@ -22,7 +21,7 @@ export default async function ProductId({
         incomes: true,
         folder: true,
       },
-    })
+    }),
   ]);
 
   if (!product) {
@@ -30,14 +29,10 @@ export default async function ProductId({
   }
 
   return (
-    <div className="max-w-3xl mx-auto py-8 px-4 sm:px-0">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl sm:text-3xl font-bold">
-          Редактирование продукта
-        </h1>
-        <DeleteProductButton id={id} />
-      </div>
-      <ProductForm id={id} initialData={product} initialRates={rates} />
-    </div>
+    <ProductPageClient
+      id={id}
+      product={JSON.parse(JSON.stringify(product))}
+      rates={rates}
+    />
   );
 }
