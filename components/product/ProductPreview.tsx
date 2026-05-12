@@ -23,9 +23,9 @@ type ProductPreviewProps = {
 
 export function ProductPreview({ data, rates }: ProductPreviewProps) {
   const images: string[] = Array.isArray(data?.images)
-    ? data.images.map((img: any) =>
-        typeof img === "string" ? img : img?.url ?? "",
-      ).filter(Boolean)
+    ? data.images
+        .map((img: any) => (typeof img === "string" ? img : (img?.url ?? "")))
+        .filter(Boolean)
     : [];
 
   const rateCNY = data?.rateCNY || rates?.cny || 0;
@@ -54,10 +54,18 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
         : "Авиа (18.3$/кг)";
 
   const flags = [
-    { key: "workModalWindowIOS", label: "Модальное окно iOS", value: data?.workModalWindowIOS },
+    {
+      key: "workModalWindowIOS",
+      label: "Модальное окно iOS",
+      value: data?.workModalWindowIOS,
+    },
     { key: "soundReducer", label: "Шумоподавление", value: data?.soundReducer },
     { key: "sensesOfEar", label: "Датчик уха", value: data?.sensesOfEar },
-    { key: "wirelessCharger", label: "Беспроводная зарядка", value: data?.wirelessCharger },
+    {
+      key: "wirelessCharger",
+      label: "Беспроводная зарядка",
+      value: data?.wirelessCharger,
+    },
     { key: "gyroscope", label: "Гироскоп", value: data?.gyroscope },
   ];
 
@@ -72,7 +80,7 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
               key={i}
               src={url}
               alt={`${data?.name || "Product"} ${i + 1}`}
-              className="h-48 w-48 object-cover rounded-xl border shadow-sm flex-shrink-0"
+              className="h-48 w-48 object-cover rounded-xl border shadow-sm shrink-0"
             />
           ))}
         </div>
@@ -169,10 +177,7 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
             value={`${shippingUA.toFixed(2)} ₴`}
             sub={shippingLabel}
           />
-          <InfoRow
-            label="Управление"
-            value={`${managementUAH.toFixed(2)} ₴`}
-          />
+          <InfoRow label="Управление" value={`${managementUAH.toFixed(2)} ₴`} />
         </div>
       </Card>
 
@@ -279,7 +284,10 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
 
       {data?.folder && (
         <div className="text-sm text-muted-foreground">
-          Папка: <span className="font-medium text-foreground">{data.folder.name}</span>
+          Папка:{" "}
+          <span className="font-medium text-foreground">
+            {data.folder.name}
+          </span>
         </div>
       )}
 
@@ -295,7 +303,9 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
                 className="flex items-center justify-between py-2 border-b last:border-0"
               >
                 <span className="text-sm">{exp.type || "Без типа"}</span>
-                <span className="font-semibold">{Number(exp.amount).toFixed(2)} ₴</span>
+                <span className="font-semibold">
+                  {Number(exp.amount).toFixed(2)} ₴
+                </span>
               </div>
             ))}
           </div>

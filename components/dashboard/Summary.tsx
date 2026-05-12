@@ -10,6 +10,7 @@ import {
   ChevronRight,
   FolderOpen,
 } from "lucide-react";
+import type { ProductUI } from "./ProductCard";
 
 type SummaryProps = {
   totalSpent: number;
@@ -19,6 +20,7 @@ type SummaryProps = {
   variationsCount: number;
   folderName?: string;
   onSwipe?: (direction: "left" | "right") => void;
+  products?: ProductUI[];
 };
 
 export function Summary({
@@ -29,8 +31,10 @@ export function Summary({
   variationsCount,
   folderName,
   onSwipe,
+  products,
 }: SummaryProps) {
   const [showGross, setShowGross] = useState(false);
+  const [showBreakEven, setShowBreakEven] = useState(false);
   const profit = totalIncome - totalSpent;
 
   const touchStartX = useRef<number | null>(null);
@@ -138,6 +142,50 @@ export function Summary({
     [onSwipe],
   );
 
+  const getBreakEvenPlan = () => {
+    if (profit >= 0 || !products || products.length === 0) return null;
+
+    let deficit = Math.abs(profit);
+    const plan: { name: string; count: number; total: number }[] = [];
+
+    const available = products
+      .filter((p) => {
+        const price = p.priceInUA || 0;
+        if (price <= 0) return false;
+        const sold = Math.floor(p.income / price);
+        const stock = p.totalPurchased || 0;
+        return stock > sold;
+      })
+      .map((p) => {
+        const price = p.priceInUA || 0;
+        const sold = Math.floor(p.income / price);
+        const stock = p.totalPurchased || 0;
+        return {
+          id: p.id,
+          name: p.name,
+          price,
+          remaining: stock - sold,
+        };
+      })
+      .sort((a, b) => b.price - a.price);
+
+    for (const item of available) {
+      if (deficit <= 0) break;
+      const needToSell = Math.min(item.remaining, Math.ceil(deficit / item.price));
+      if (needToSell > 0) {
+        plan.push({ name: item.name, count: needToSell, total: needToSell * item.price });
+        deficit -= needToSell * item.price;
+      }
+    }
+
+    return {
+      plan,
+      remainingDeficit: deficit > 0 ? deficit : 0,
+    };
+  };
+
+  const breakEvenPlan = getBreakEvenPlan();
+
   return (
     <div className="mb-6 overflow-hidden py-5 rounded-xl">
       <style>{`
@@ -229,23 +277,59 @@ export function Summary({
           </div>
         </Card>
 
-        <Card className="p-5 glass-card flex flex-col justify-between space-y-3 relative overflow-hidden group">
+        <Card 
+          onClick={() => {
+            if (profit < 0) setShowBreakEven(!showBreakEven);
+          }}
+          className={`p-5 glass-card flex flex-col justify-between space-y-3 relative overflow-hidden group ${profit < 0 ? "cursor-pointer hover:border-primary/40" : ""}`}
+        >
           <div className="absolute -top-3 -left-4 w-120 h-120 bg-primary/5 group-hover:bg-primary/10 transition-colors" />
           <div className="flex items-center justify-between text-primary relative z-10">
             <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
-              Прибыль
+              {showBreakEven && profit < 0 ? "Выход в ноль" : "Прибыль"}
             </span>
             <div className="p-2 bg-primary/10 rounded-xl">
               <Wallet className="h-5 w-5" />
             </div>
           </div>
-          <div
-            className={`text-xl sm:text-2xl font-black tracking-tight relative z-10 ${
-              profit >= 0 ? "text-primary" : "text-destructive"
-            }`}
-          >
-            {profit.toLocaleString()}{" "}
-            <span className="text-sm font-medium opacity-70">₴</span>
+          <div className="relative z-10">
+            {!showBreakEven || profit >= 0 ? (
+              <div
+                className={`text-xl sm:text-2xl font-black tracking-tight ${
+                  profit >= 0 ? "text-primary" : "text-destructive"
+                }`}
+              >
+                {profit.toLocaleString()}{" "}
+                <span className="text-sm font-medium opacity-70">₴</span>
+              </div>
+            ) : (
+              <div className="text-sm text-foreground/90 font-medium h-[32px] sm:h-[36px] overflow-y-auto custom-scrollbar">
+                {breakEvenPlan?.plan.length ? (
+                  <div className="space-y-1 pr-1">
+                    {breakEvenPlan.plan.slice(0, 3).map((item, idx) => (
+                      <div key={idx} className="flex justify-between text-xs">
+                        <span className="truncate max-w-[120px] mr-2" title={item.name}>{item.name}:</span>
+                        <span className="whitespace-nowrap font-bold text-primary">{item.count} шт</span>
+                      </div>
+                    ))}
+                    {breakEvenPlan.plan.length > 3 && (
+                      <div className="text-xs text-muted-foreground italic">
+                        + еще {breakEvenPlan.plan.length - 3} тов.
+                      </div>
+                    )}
+                    {breakEvenPlan.remainingDeficit > 0 && (
+                      <div className="text-destructive text-[10px] mt-1 border-t border-destructive/20 pt-1 leading-tight">
+                        Не хватит товара, останется {breakEvenPlan.remainingDeficit.toLocaleString()} ₴
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-destructive text-xs">
+                    Нет товаров для продажи
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </Card>
 

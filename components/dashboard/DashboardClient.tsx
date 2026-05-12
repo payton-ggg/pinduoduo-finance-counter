@@ -489,6 +489,7 @@ export function DashboardClient({
         variationsCount={summaryProducts.length}
         folderName={currentFolderName}
         onSwipe={swipeFolder}
+        products={summaryProducts}
       />
 
       {/* Bulk Actions */}
