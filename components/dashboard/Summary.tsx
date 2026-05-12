@@ -9,6 +9,7 @@ import {
   ChevronLeft,
   ChevronRight,
   FolderOpen,
+  X,
 } from "lucide-react";
 import type { ProductUI } from "./ProductCard";
 
@@ -35,6 +36,7 @@ export function Summary({
 }: SummaryProps) {
   const [showGross, setShowGross] = useState(false);
   const [showBreakEven, setShowBreakEven] = useState(false);
+  const [showOptionsModal, setShowOptionsModal] = useState(false);
   const profit = totalIncome - totalSpent;
 
   const touchStartX = useRef<number | null>(null);
@@ -194,6 +196,62 @@ export function Summary({
 
   const breakEvenPlan = getBreakEvenPlan();
 
+  const getAlternativePlans = () => {
+    if (profit >= 0 || !products || products.length === 0) return [];
+    
+    let deficit = Math.abs(profit);
+    const options: { type: string, title: string, items: {name: string, count: number}[], profit: number }[] = [];
+
+    if (breakEvenPlan && breakEvenPlan.remainingDeficit <= 0) {
+      options.push({
+        type: "mix",
+        title: "Сборный микс (Оптимальный)",
+        items: breakEvenPlan.plan,
+        profit: breakEvenPlan.finalProfit,
+      });
+    }
+
+    const available = products
+      .filter((p) => {
+        const price = p.priceInUA || 0;
+        if (price <= 0) return false;
+        const sold = Math.floor(p.income / price);
+        const stock = p.totalPurchased || 0;
+        return stock > sold;
+      })
+      .map((p) => {
+        const price = p.priceInUA || 0;
+        const sold = Math.floor(p.income / price);
+        const stock = p.totalPurchased || 0;
+        return {
+          name: p.name,
+          price,
+          remaining: stock - sold,
+        };
+      });
+
+    for (const p of available) {
+      const need = Math.ceil(deficit / p.price);
+      if (need <= p.remaining) {
+        options.push({
+          type: "single",
+          title: `Только ${p.name}`,
+          items: [{ name: p.name, count: need }],
+          profit: (need * p.price) - deficit,
+        });
+      }
+    }
+
+    options.sort((a, b) => {
+      const aCount = a.items.reduce((sum, i) => sum + i.count, 0);
+      const bCount = b.items.reduce((sum, i) => sum + i.count, 0);
+      if (aCount !== bCount) return aCount - bCount;
+      return b.profit - a.profit;
+    });
+
+    return options.slice(0, 10);
+  };
+
   return (
     <div className="mb-6 overflow-hidden py-5 rounded-xl">
       <style>{`
@@ -348,6 +406,12 @@ export function Summary({
                         </span>
                       </div>
                     )}
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setShowOptionsModal(true); }}
+                      className="w-full mt-2 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold rounded-lg transition-colors border border-primary/20"
+                    >
+                      Показать 10 лучших вариантов
+                    </button>
                   </div>
                 ) : (
                   <div className="text-destructive text-sm font-bold">
@@ -396,6 +460,50 @@ export function Summary({
           </div>
         </Card>
       </div>
+
+      {showOptionsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setShowOptionsModal(false)}>
+          <div className="bg-background border border-border shadow-2xl rounded-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-4 border-b">
+              <h2 className="text-lg font-black flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-primary" />
+                Топ 10 вариантов выхода в ноль
+              </h2>
+              <button onClick={() => setShowOptionsModal(false)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4 overflow-y-auto space-y-3 custom-scrollbar">
+              {getAlternativePlans().length > 0 ? getAlternativePlans().map((opt, i) => (
+                <div key={i} className="p-3 rounded-xl border bg-card hover:bg-muted/30 transition-colors">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-bold text-sm text-foreground flex items-center gap-2">
+                      <div className="bg-primary text-primary-foreground text-xs w-5 h-5 rounded-full flex items-center justify-center shadow-md">{i + 1}</div>
+                      {opt.title}
+                    </h3>
+                    <div className="text-right pl-2">
+                      <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest mb-0.5">Чистыми после:</p>
+                      <p className="text-sm font-black text-green-500">+{opt.profit.toLocaleString()} ₴</p>
+                    </div>
+                  </div>
+                  <div className="space-y-1.5 bg-foreground/5 p-2.5 rounded-lg">
+                    {opt.items.map((item, j) => (
+                      <div key={j} className="flex justify-between text-xs sm:text-sm items-center">
+                        <span className="truncate mr-2 text-muted-foreground">{item.name}</span>
+                        <span className="font-bold whitespace-nowrap bg-background px-2 py-0.5 rounded-md border border-border/50">{item.count} шт</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )) : (
+                <div className="text-center p-6 text-muted-foreground">
+                  Нет доступных вариантов для выхода в ноль (не хватает остатков).
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
