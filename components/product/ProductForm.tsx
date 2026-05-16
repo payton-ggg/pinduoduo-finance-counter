@@ -161,10 +161,13 @@ export default function ProductForm({
   // Total cost of purchasing the goods (without shipping/management)
   const totalGoodsCost = (Number(purchased) || 0) * purchaseUnitCostUAH;
 
-  const actualNetPrice = netPrice || (sellingPriceUAH > 0 ? sellingPriceUAH * 0.98 - 20 : 0);
+  const actualNetPrice =
+    netPrice || (sellingPriceUAH > 0 ? sellingPriceUAH * 0.98 - 20 : 0);
 
   const netIncome = (Number(sells) || 0) * actualNetPrice;
-  const totalCommission = (Number(sells) || 0) * (sellingPriceUAH > 0 ? sellingPriceUAH - actualNetPrice : 0);
+  const totalCommission =
+    (Number(sells) || 0) *
+    (sellingPriceUAH > 0 ? sellingPriceUAH - actualNetPrice : 0);
 
   // Expenses for the summary/profit calculation (Includes everything)
   const totalCalculatedCosts =
@@ -536,7 +539,9 @@ export default function ProductForm({
                 {potentialProfit.toFixed(2)} ₴
               </p>
             </div>
-            <div className={`p-3 border rounded-md relative col-span-1 sm:col-span-2 lg:col-span-4 min-w-0 ${margin >= 0 ? "bg-green-50/50 dark:bg-green-900/20" : "bg-orange-50/50 dark:bg-orange-900/20"}`}>
+            <div
+              className={`p-3 border rounded-md relative col-span-1 sm:col-span-2 lg:col-span-4 min-w-0 ${margin >= 0 ? "bg-green-50/50 dark:bg-green-900/20" : "bg-orange-50/50 dark:bg-orange-900/20"}`}
+            >
               <div className="flex justify-between items-start">
                 <div>
                   <p className="text-xs sm:text-sm text-gray-600 font-medium wrap-break-word mb-1">
@@ -556,18 +561,23 @@ export default function ProductForm({
                   <div className="text-right flex flex-col justify-end">
                     {(() => {
                       const deficit = Math.abs(margin);
-                      const itemsToBreakEven = Math.ceil(deficit / sellingPriceUAH);
+                      const itemsToBreakEven = Math.ceil(
+                        deficit / actualNetPrice,
+                      );
                       const remainingStock = (purchased || 0) - (sells || 0);
                       const canBreakEven = itemsToBreakEven <= remainingStock;
-                      const finalProfit = (itemsToBreakEven * sellingPriceUAH) - deficit;
-                      
+                      const finalProfit =
+                        itemsToBreakEven * actualNetPrice - deficit;
+
                       if (!canBreakEven) {
                         return (
                           <div className="bg-red-100/50 dark:bg-red-900/30 p-2 rounded-lg border border-red-200 dark:border-red-800/50 mt-1">
                             <p className="text-xs font-bold text-red-600 dark:text-red-400">
                               Не хватит товара
                             </p>
-                            <p className="text-[10px] text-red-500/80">Останется: {(potentialProfit).toFixed(2)} ₴</p>
+                            <p className="text-[10px] text-red-500/80">
+                              Останется: {potentialProfit.toFixed(2)} ₴
+                            </p>
                           </div>
                         );
                       }

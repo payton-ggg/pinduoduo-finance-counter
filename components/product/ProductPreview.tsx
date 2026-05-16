@@ -39,7 +39,8 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
 
   const purchaseUnitCostUAH = priceCNY * (rateCNY > 0 ? rateCNY : 1);
   const totalGoodsCost = purchased * purchaseUnitCostUAH;
-  const actualNetPrice = data?.netPrice || (priceInUA > 0 ? priceInUA * 0.98 - 20 : 0);
+  const actualNetPrice =
+    data?.netPrice || (priceInUA > 0 ? priceInUA * 0.98 - 20 : 0);
 
   const computedIncome = sells * actualNetPrice;
   const totalCalculatedCosts = totalGoodsCost + shippingUA + managementUAH;
@@ -155,17 +156,20 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
               <div className="text-right flex flex-col justify-end h-full">
                 {(() => {
                   const deficit = Math.abs(margin);
-                  const itemsToBreakEven = Math.ceil(deficit / priceInUA);
+                  const itemsToBreakEven = Math.ceil(deficit / actualNetPrice);
                   const canBreakEven = itemsToBreakEven <= remainingStock;
-                  const finalProfit = (itemsToBreakEven * priceInUA) - deficit;
-                  
+                  const finalProfit =
+                    itemsToBreakEven * actualNetPrice - deficit;
+
                   if (!canBreakEven) {
                     return (
                       <div className="bg-red-100/50 dark:bg-red-900/30 p-2 rounded-lg border border-red-200 dark:border-red-800/50 mt-2">
                         <p className="text-xs font-bold text-red-600 dark:text-red-400">
                           Не хватит товара
                         </p>
-                        <p className="text-[10px] text-red-500/80">Останется: {(potentialProfit).toFixed(2)} ₴</p>
+                        <p className="text-[10px] text-red-500/80">
+                          Останется: {potentialProfit.toFixed(2)} ₴
+                        </p>
                       </div>
                     );
                   }
