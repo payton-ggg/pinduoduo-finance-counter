@@ -18,6 +18,7 @@ model Product {
   shippingUA Float?
   managementUAH Float?
   priceInUA Float?
+  netPrice  Float?
   rateCNY   Float?
   rateUSD   Float?
   shippingType String?

@@ -61,6 +61,8 @@ export async function PATCH(
         chip: data.chip,
         equipment: data.equipment,
         priceInUA: data.priceInUA,
+        // @ts-ignore: Need to run prisma generate
+        netPrice: data.netPrice !== undefined ? data.netPrice : undefined,
         archive: data.archive,
         // @ts-ignore: Need to run prisma generate
         rateCNY: data.rateCNY,

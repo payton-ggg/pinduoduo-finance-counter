@@ -16,6 +16,7 @@ type FormValues = {
   shippingUA?: number;
   managementUAH?: number;
   priceInUA?: number;
+  netPrice?: number;
   olxUrl?: string;
   pinduoduoUrl?: string;
   chip?: string;
@@ -95,6 +96,21 @@ export function BasicFields({
     customShippingRate,
     setValue,
   ]);
+
+  const priceInUA = watch("priceInUA");
+  const netPrice = watch("netPrice");
+
+  useEffect(() => {
+    // Auto-calculate netPrice if priceInUA changes and netPrice is not manually set, or simply update it
+    if (priceInUA && priceInUA > 0) {
+      const calculatedNet = priceInUA * 0.98 - 20;
+      // We will sync it automatically to save time, but allow manual edits if needed?
+      // Actually, if they added netPrice as a field, let's just let it be calculated automatically unless they want to type it.
+      // A better UX: auto-calculate but let them edit. Let's just calculate it directly if they change priceInUA.
+      // To avoid infinite loops or overwriting manual inputs, we'll just leave it up to the form logic or calculate it here.
+    }
+  }, [priceInUA]);
+
   return (
     <div className="space-y-4">
       <div>
@@ -195,8 +211,31 @@ export function BasicFields({
             {...register("priceInUA", {
               valueAsNumber: true,
               min: { value: 0, message: "Должна быть >= 0" },
+              onChange: (e) => {
+                const val = parseFloat(e.target.value);
+                if (val > 0) {
+                  setValue("netPrice", parseFloat((val * 0.98 - 20).toFixed(2)), { shouldDirty: true });
+                }
+              }
             })}
             placeholder="Цена за единицу"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Цена чистыми (netPrice) (₴)
+          </label>
+          <input
+            type="number"
+            step="0.01"
+            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            {...register("netPrice", {
+              valueAsNumber: true,
+            })}
+            placeholder="После вычета комиссии"
           />
         </div>
       </div>

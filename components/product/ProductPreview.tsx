@@ -39,12 +39,12 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
 
   const purchaseUnitCostUAH = priceCNY * (rateCNY > 0 ? rateCNY : 1);
   const totalGoodsCost = purchased * purchaseUnitCostUAH;
-  const totalCommission = sells > 0 ? sells * (priceInUA * 0.02 + 20) : 0;
-  const computedIncome = sells * priceInUA - totalCommission;
+  const actualNetPrice = data?.netPrice || (priceInUA > 0 ? priceInUA * 0.98 - 20 : 0);
+
+  const computedIncome = sells * actualNetPrice;
   const totalCalculatedCosts = totalGoodsCost + shippingUA + managementUAH;
 
-  const totalPotentialCommission = purchased > 0 ? purchased * (priceInUA * 0.02 + 20) : 0;
-  const potentialTotalRevenue = purchased * priceInUA - totalPotentialCommission;
+  const potentialTotalRevenue = purchased * actualNetPrice;
   const potentialProfit = potentialTotalRevenue - totalCalculatedCosts;
   const margin = computedIncome - totalCalculatedCosts;
   const remainingStock = purchased - sells;

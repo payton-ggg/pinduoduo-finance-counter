@@ -22,6 +22,7 @@ type FormValues = {
   purchasedCount?: number;
   chip?: string;
   priceInUA?: number;
+  netPrice?: number;
   incomes: { id?: string; amount: number }[];
   expenses: { id?: string; amount: number; type: string }[];
   rateCNY?: number;
@@ -74,6 +75,7 @@ export default function ProductForm({
     purchasedCount: initialData?.purchasedCount ?? undefined,
     chip: initialData?.chip ?? "",
     priceInUA: initialData?.priceInUA ?? undefined,
+    netPrice: initialData?.netPrice ?? undefined,
     incomes: (initialData?.incomes || []).map((i: any) => ({
       id: i.id,
       amount: i.amount,
@@ -149,6 +151,7 @@ export default function ProductForm({
   const priceInUA = watch("priceInUA");
   const shippingUA = watch("shippingUA");
   const managementUAH = watch("managementUAH");
+  const netPrice = watch("netPrice");
   const rateCNY = watch("rateCNY") || 0;
 
   const purchaseUnitCostUAH =
@@ -158,22 +161,17 @@ export default function ProductForm({
   // Total cost of purchasing the goods (without shipping/management)
   const totalGoodsCost = (Number(purchased) || 0) * purchaseUnitCostUAH;
 
-  const computedIncome = (Number(sells) || 0) * sellingPriceUAH;
-  const totalCommission = (Number(sells) || 0) > 0 
-    ? (Number(sells) || 0) * (sellingPriceUAH * 0.02 + 20) 
-    : 0;
-  const netIncome = computedIncome - totalCommission;
+  const actualNetPrice = netPrice || (sellingPriceUAH > 0 ? sellingPriceUAH * 0.98 - 20 : 0);
+
+  const netIncome = (Number(sells) || 0) * actualNetPrice;
+  const totalCommission = (Number(sells) || 0) * (sellingPriceUAH > 0 ? sellingPriceUAH - actualNetPrice : 0);
 
   // Expenses for the summary/profit calculation (Includes everything)
   const totalCalculatedCosts =
     totalGoodsCost + (Number(shippingUA) || 0) + (Number(managementUAH) || 0);
 
   // Potential (Projected) Profit Calculation
-  const potentialTotalRevenue = (Number(purchased) || 0) * sellingPriceUAH;
-  const totalPotentialCommission = (Number(purchased) || 0) > 0 
-    ? (Number(purchased) || 0) * (sellingPriceUAH * 0.02 + 20) 
-    : 0;
-  const netPotentialRevenue = potentialTotalRevenue - totalPotentialCommission;
+  const netPotentialRevenue = (Number(purchased) || 0) * actualNetPrice;
 
   const potentialProfit = netPotentialRevenue - totalCalculatedCosts;
   const margin = netIncome - totalCalculatedCosts;
@@ -249,6 +247,7 @@ export default function ProductForm({
       shippingUA: values.shippingUA ?? null,
       managementUAH: values.managementUAH ?? null,
       priceInUA: values.priceInUA ?? null,
+      netPrice: values.netPrice ?? null,
       olxUrl: values.olxUrl || null,
       pinduoduoUrl: values.pinduoduoUrl || null,
       weight: values.weight ?? null,

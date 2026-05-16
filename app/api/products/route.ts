@@ -45,6 +45,8 @@ export async function POST(req: Request) {
       equipment: data.equipment,
       priceInUA: data.priceInUA,
       // @ts-ignore: Need to run prisma generate
+      netPrice: data.netPrice,
+      // @ts-ignore: Need to run prisma generate
       rateCNY: data.rateCNY,
       // @ts-ignore: Need to run prisma generate
       rateUSD: data.rateUSD,

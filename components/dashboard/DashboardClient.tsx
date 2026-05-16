@@ -352,11 +352,8 @@ export function DashboardClient({
   const totalIncome = summaryProducts.reduce((sum, p) => sum + p.income, 0);
 
   const totalProjectedRevenue = summaryProducts.reduce((sum, p) => {
-    const revenue = (p.totalPurchased || 0) * (p.priceInUA || 0);
-    const commission = (p.totalPurchased || 0) > 0 
-      ? (p.totalPurchased || 0) * ((p.priceInUA || 0) * 0.02 + 20)
-      : 0;
-    return sum + (revenue - commission);
+    const actualNetPrice = p.netPrice || ((p.priceInUA || 0) > 0 ? (p.priceInUA || 0) * 0.98 - 20 : 0);
+    return sum + (p.totalPurchased || 0) * actualNetPrice;
   }, 0);
 
   const totalProjectedProfit = totalProjectedRevenue - totalSpent;
