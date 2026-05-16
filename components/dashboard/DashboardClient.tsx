@@ -180,7 +180,9 @@ export function DashboardClient({
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 5 },
+    }),
   );
 
   const handleDragEnd = useCallback(
@@ -352,7 +354,9 @@ export function DashboardClient({
   const totalIncome = summaryProducts.reduce((sum, p) => sum + p.income, 0);
 
   const totalProjectedRevenue = summaryProducts.reduce((sum, p) => {
-    const actualNetPrice = p.netPrice || ((p.priceInUA || 0) > 0 ? (p.priceInUA || 0) * 0.98 - 20 : 0);
+    const actualNetPrice =
+      p.netPrice ||
+      ((p.priceInUA || 0) > 0 ? (p.priceInUA || 0) * 0.98 - 20 : 0);
     return sum + (p.totalPurchased || 0) * actualNetPrice;
   }, 0);
 
@@ -360,8 +364,8 @@ export function DashboardClient({
 
   const folderOrder: (string | null)[] = [
     null,
-    "__none__",
     ...folders.map((f) => f.id),
+    "__none__",
   ];
 
   const swipeFolder = useCallback(
@@ -440,8 +444,15 @@ export function DashboardClient({
           <FolderOpen className="w-3.5 h-3.5" />
           Все ({tabProducts.length})
         </button>
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={folders.map((f) => f.id)} strategy={horizontalListSortingStrategy}>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={folders.map((f) => f.id)}
+            strategy={horizontalListSortingStrategy}
+          >
             {folders.map((folder) => {
               const count = tabProducts.filter(
                 (p) => p.folderId === folder.id,
@@ -529,15 +540,6 @@ export function DashboardClient({
             </Button>
             {showFolderDropdown && (
               <div className="absolute top-full left-0 mt-1 z-50 min-w-[180px] bg-background border rounded-xl shadow-xl p-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
-                <button
-                  onClick={() => {
-                    bulkMoveToFolder(null);
-                    setShowFolderDropdown(false);
-                  }}
-                  className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium hover:bg-foreground/5 transition-colors"
-                >
-                  Без папки
-                </button>
                 {folders.map((folder) => (
                   <button
                     key={folder.id}
@@ -556,6 +558,15 @@ export function DashboardClient({
                     Нет папок
                   </p>
                 )}
+                <button
+                  onClick={() => {
+                    bulkMoveToFolder(null);
+                    setShowFolderDropdown(false);
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium hover:bg-foreground/5 transition-colors"
+                >
+                  Без папки
+                </button>
               </div>
             )}
           </div>
