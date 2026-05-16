@@ -39,9 +39,12 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
 
   const purchaseUnitCostUAH = priceCNY * (rateCNY > 0 ? rateCNY : 1);
   const totalGoodsCost = purchased * purchaseUnitCostUAH;
-  const computedIncome = sells * priceInUA;
+  const totalCommission = sells > 0 ? sells * (priceInUA * 0.02 + 20) : 0;
+  const computedIncome = sells * priceInUA - totalCommission;
   const totalCalculatedCosts = totalGoodsCost + shippingUA + managementUAH;
-  const potentialTotalRevenue = purchased * priceInUA;
+
+  const totalPotentialCommission = purchased > 0 ? purchased * (priceInUA * 0.02 + 20) : 0;
+  const potentialTotalRevenue = purchased * priceInUA - totalPotentialCommission;
   const potentialProfit = potentialTotalRevenue - totalCalculatedCosts;
   const margin = computedIncome - totalCalculatedCosts;
   const remainingStock = purchased - sells;
@@ -89,7 +92,7 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard
           icon={<TrendingUp className="h-5 w-5 text-green-500" />}
-          label="Доход (текущий)"
+          label="Доход (текущий, чистый)"
           value={`${computedIncome.toFixed(2)} ₴`}
           large
         />

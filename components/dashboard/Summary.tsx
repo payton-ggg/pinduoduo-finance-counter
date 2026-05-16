@@ -152,20 +152,22 @@ export function Summary({
 
     const available = products
       .filter((p) => {
-        const price = p.priceInUA || 0;
-        if (price <= 0) return false;
-        const sold = Math.floor(p.income / price);
+        const rawPrice = p.priceInUA || 0;
+        const netPrice = rawPrice > 0 ? rawPrice * 0.98 - 20 : 0;
+        if (netPrice <= 0) return false;
+        const sold = p.sellsCount || 0;
         const stock = p.totalPurchased || 0;
         return stock > sold;
       })
       .map((p) => {
-        const price = p.priceInUA || 0;
-        const sold = Math.floor(p.income / price);
+        const rawPrice = p.priceInUA || 0;
+        const netPrice = rawPrice > 0 ? rawPrice * 0.98 - 20 : 0;
+        const sold = p.sellsCount || 0;
         const stock = p.totalPurchased || 0;
         return {
           id: p.id,
           name: p.name,
-          price,
+          price: netPrice,
           remaining: stock - sold,
         };
       })
@@ -218,19 +220,21 @@ export function Summary({
 
     const available = products
       .filter((p) => {
-        const price = p.priceInUA || 0;
-        if (price <= 0) return false;
-        const sold = Math.floor(p.income / price);
+        const rawPrice = p.priceInUA || 0;
+        const netPrice = rawPrice > 0 ? rawPrice * 0.98 - 20 : 0;
+        if (netPrice <= 0) return false;
+        const sold = p.sellsCount || 0;
         const stock = p.totalPurchased || 0;
         return stock > sold;
       })
       .map((p) => {
-        const price = p.priceInUA || 0;
-        const sold = Math.floor(p.income / price);
+        const rawPrice = p.priceInUA || 0;
+        const netPrice = rawPrice > 0 ? rawPrice * 0.98 - 20 : 0;
+        const sold = p.sellsCount || 0;
         const stock = p.totalPurchased || 0;
         return {
           name: p.name,
-          price,
+          price: netPrice,
           remaining: stock - sold,
         };
       });

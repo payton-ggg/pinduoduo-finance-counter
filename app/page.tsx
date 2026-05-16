@@ -54,6 +54,7 @@ export default async function Dashboard() {
       managementUAH: p.managementUAH ?? undefined,
       priceInUA: p.priceInUA || 0,
       totalPurchased: p.purchasedCount || 0,
+      sellsCount: p.sellsCount || 0,
       archive: p.archive,
       rateCNY: p.rateCNY,
       rateUSD: p.rateUSD,

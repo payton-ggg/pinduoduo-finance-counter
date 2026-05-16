@@ -159,6 +159,10 @@ export default function ProductForm({
   const totalGoodsCost = (Number(purchased) || 0) * purchaseUnitCostUAH;
 
   const computedIncome = (Number(sells) || 0) * sellingPriceUAH;
+  const totalCommission = (Number(sells) || 0) > 0 
+    ? (Number(sells) || 0) * (sellingPriceUAH * 0.02 + 20) 
+    : 0;
+  const netIncome = computedIncome - totalCommission;
 
   // Expenses for the summary/profit calculation (Includes everything)
   const totalCalculatedCosts =
@@ -166,12 +170,17 @@ export default function ProductForm({
 
   // Potential (Projected) Profit Calculation
   const potentialTotalRevenue = (Number(purchased) || 0) * sellingPriceUAH;
-  const potentialProfit = potentialTotalRevenue - totalCalculatedCosts;
-  const margin = computedIncome - totalCalculatedCosts;
+  const totalPotentialCommission = (Number(purchased) || 0) > 0 
+    ? (Number(purchased) || 0) * (sellingPriceUAH * 0.02 + 20) 
+    : 0;
+  const netPotentialRevenue = potentialTotalRevenue - totalPotentialCommission;
+
+  const potentialProfit = netPotentialRevenue - totalCalculatedCosts;
+  const margin = netIncome - totalCalculatedCosts;
 
   const syncIncomes = () => {
-    const amount = Number.isFinite(computedIncome)
-      ? Number(computedIncome.toFixed(2))
+    const amount = Number.isFinite(netIncome)
+      ? Number(netIncome.toFixed(2))
       : 0;
     setValue("incomes", [{ amount }], { shouldDirty: true });
   };
@@ -496,11 +505,16 @@ export default function ProductForm({
             </div>
             <div className="p-3 border rounded-md min-w-0">
               <p className="text-xs sm:text-sm text-gray-600">
-                Доход (текущий)
+                Доход (текущий, чистый)
               </p>
               <p className="text-base sm:text-lg font-semibold wrap-break-word">
-                {computedIncome.toFixed(2)} ₴
+                {netIncome.toFixed(2)} ₴
               </p>
+              {totalCommission > 0 && (
+                <p className="text-[10px] text-muted-foreground">
+                  (Комм: -{totalCommission.toFixed(2)} ₴)
+                </p>
+              )}
             </div>
             <div className="p-3 border rounded-md min-w-0">
               <p className="text-xs sm:text-sm text-gray-600">

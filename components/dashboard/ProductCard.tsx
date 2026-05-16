@@ -20,6 +20,7 @@ export type ProductUI = {
   managementUAH?: number;
   priceInUA?: number;
   totalPurchased?: number;
+  sellsCount?: number;
   archive?: number | null;
   rateCNY?: number;
   rateUSD?: number;
@@ -44,8 +45,12 @@ export function ProductCard({
 
   // Projected Profit: (Total Stock * Selling Price) - Total Spent
   // This assumes 'spent' covers all costs for the batch.
-  const projectedRevenue =
+  const rawProjectedRevenue =
     (product.totalPurchased || 0) * (product.priceInUA || 0);
+  const totalProjectedCommission = (product.totalPurchased || 0) > 0 
+    ? (product.totalPurchased || 0) * ((product.priceInUA || 0) * 0.02 + 20)
+    : 0;
+  const projectedRevenue = rawProjectedRevenue - totalProjectedCommission;
   const projectedProfit = projectedRevenue - product.spent;
 
   const margin = product.income - product.spent;

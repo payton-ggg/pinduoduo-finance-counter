@@ -352,7 +352,11 @@ export function DashboardClient({
   const totalIncome = summaryProducts.reduce((sum, p) => sum + p.income, 0);
 
   const totalProjectedRevenue = summaryProducts.reduce((sum, p) => {
-    return sum + (p.totalPurchased || 0) * (p.priceInUA || 0);
+    const revenue = (p.totalPurchased || 0) * (p.priceInUA || 0);
+    const commission = (p.totalPurchased || 0) > 0 
+      ? (p.totalPurchased || 0) * ((p.priceInUA || 0) * 0.02 + 20)
+      : 0;
+    return sum + (revenue - commission);
   }, 0);
 
   const totalProjectedProfit = totalProjectedRevenue - totalSpent;
