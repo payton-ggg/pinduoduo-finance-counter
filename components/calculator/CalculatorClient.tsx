@@ -213,16 +213,17 @@ export function CalculatorClient({ rates }: CalculatorClientProps) {
         <Card className="p-4 sm:p-5 glass-card flex flex-col justify-between space-y-3 group cursor-default hover:scale-[1.03] hover:shadow-xl hover:border-primary/30 transition-all duration-300">
           <div className="flex items-center justify-between">
             <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-muted-foreground/80">
-              CNY/USD
+              CNY/UAH
             </span>
             <div className="p-2 bg-purple-500/10 rounded-xl flex items-center gap-1 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
               <Flag code="CNY" />
               <span className="text-muted-foreground/50 text-xs">/</span>
-              <Flag code="USD" />
+              <Flag code="UAH" />
             </div>
           </div>
           <div className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
-            {(toUAH["CNY"] / toUAH["USD"]).toFixed(4)}
+            {toUAH["CNY"].toFixed(2)}{" "}
+            <span className="text-sm font-medium text-muted-foreground">₴</span>
           </div>
         </Card>
       </div>
