@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, Pencil } from "lucide-react";
+import { Eye, Pencil, Calculator } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 import ProductForm from "./ProductForm";
 import { ProductPreview } from "./ProductPreview";
 import { DeleteProductButton } from "./DeleteProductButton";
@@ -19,6 +20,7 @@ export function ProductPageClient({
   rates,
 }: ProductPageClientProps) {
   const [mode, setMode] = useState<"preview" | "edit">("preview");
+  const router = useRouter();
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-0">
@@ -27,6 +29,15 @@ export function ProductPageClient({
           {product?.name || "Продукт"}
         </h1>
         <div className="flex items-center gap-2 shrink-0">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push("/calculator")}
+            className="gap-1.5"
+          >
+            <Calculator className="h-4 w-4" />
+            <span className="hidden sm:inline">Калькулятор</span>
+          </Button>
           <div className="inline-flex rounded-lg border p-0.5 bg-muted/30">
             <Button
               variant={mode === "preview" ? "default" : "ghost"}
