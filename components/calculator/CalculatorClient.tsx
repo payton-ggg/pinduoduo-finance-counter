@@ -240,10 +240,10 @@ export function CalculatorClient({ rates }: CalculatorClientProps) {
                 <button
                   key={c.code}
                   onClick={() => setFrom(c.code)}
-                  className={`flex flex-col items-center gap-1.5 p-2.5 sm:p-3 rounded-xl transition-all duration-200 ${
+                  className={`flex flex-col items-center gap-1.5 p-2.5 sm:p-3 rounded-xl transition-all duration-200 cursor-pointer ${
                     from === c.code
                       ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-[1.03]"
-                      : "bg-muted/30 text-muted-foreground hover:bg-muted/60 border border-border/50"
+                      : "bg-muted/30 text-muted-foreground hover:bg-muted/60 hover:scale-[1.05] hover:shadow-md active:scale-95 border border-border/50"
                   }`}
                 >
                   <Flag code={c.code} />
@@ -262,7 +262,7 @@ export function CalculatorClient({ rates }: CalculatorClientProps) {
               placeholder="0.00"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full rounded-xl bg-muted/30 border border-border px-10 sm:px-12 py-4 sm:py-5 text-2xl sm:text-3xl font-black text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-muted-foreground/30"
+              className="w-full rounded-xl bg-muted/30 border border-border px-10 sm:px-12 py-4 sm:py-5 text-2xl sm:text-3xl font-black text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/40 hover:border-primary/30 transition-all placeholder:text-muted-foreground/30"
             />
           </div>
         </div>
@@ -291,10 +291,10 @@ export function CalculatorClient({ rates }: CalculatorClientProps) {
               <button
                 key={c.code}
                 onClick={() => setTo(c.code)}
-                className={`flex flex-col items-center gap-1.5 p-2.5 sm:p-3 rounded-xl transition-all duration-200 ${
+                className={`flex flex-col items-center gap-1.5 p-2.5 sm:p-3 rounded-xl transition-all duration-200 cursor-pointer ${
                   to === c.code
                     ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-[1.03]"
-                    : "bg-muted/30 text-muted-foreground hover:bg-muted/60 border border-border/50"
+                    : "bg-muted/30 text-muted-foreground hover:bg-muted/60 hover:scale-[1.05] hover:shadow-md active:scale-95 border border-border/50"
                 }`}
               >
                 <Flag code={c.code} />
@@ -341,7 +341,7 @@ export function CalculatorClient({ rates }: CalculatorClientProps) {
               return (
                 <div
                   key={c.code}
-                  className="flex items-center justify-between p-3.5 sm:p-4 rounded-xl bg-muted/20 border border-border/50 hover:bg-muted/40 transition-colors"
+                  className="flex items-center justify-between p-3.5 sm:p-4 rounded-xl bg-muted/20 border border-border/50 hover:bg-muted/40 hover:scale-[1.02] hover:shadow-lg hover:border-primary/20 active:scale-[0.98] transition-all duration-200 cursor-default group"
                 >
                   <div className="flex items-center gap-3">
                     <Flag code={c.code} />
