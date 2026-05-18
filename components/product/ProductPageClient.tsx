@@ -13,7 +13,11 @@ type ProductPageClientProps = {
   rates: { cny?: number; usd?: number };
 };
 
-export function ProductPageClient({ id, product, rates }: ProductPageClientProps) {
+export function ProductPageClient({
+  id,
+  product,
+  rates,
+}: ProductPageClientProps) {
   const [mode, setMode] = useState<"preview" | "edit">("preview");
 
   return (
@@ -22,7 +26,7 @@ export function ProductPageClient({ id, product, rates }: ProductPageClientProps
         <h1 className="text-2xl sm:text-3xl font-bold truncate mr-4">
           {product?.name || "Продукт"}
         </h1>
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           <div className="inline-flex rounded-lg border p-0.5 bg-muted/30">
             <Button
               variant={mode === "preview" ? "default" : "ghost"}
