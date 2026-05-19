@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { ArrowLeft, RefreshCw, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -123,6 +123,17 @@ export function CalculatorClient({ rates }: CalculatorClientProps) {
   const [from, setFrom] = useState<Currency>("CNY");
   const [to, setTo] = useState<Currency>("UAH");
   const [amount, setAmount] = useState("");
+  const [backUrl, setBackUrl] = useState("/");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const fromParam = params.get("from");
+      if (fromParam) {
+        setBackUrl(fromParam);
+      }
+    }
+  }, []);
 
   const toUAH: Record<Currency, number> = {
     UAH: 1,
@@ -166,11 +177,12 @@ export function CalculatorClient({ rates }: CalculatorClientProps) {
         <div className="flex items-center gap-3 sm:gap-4">
           <Button
             variant="outline"
-            size="icon"
-            onClick={() => router.push("/")}
-            className="glass rounded-xl border-none hover:bg-primary/20 transition-all h-10 w-10 sm:h-11 sm:w-11 shrink-0"
+            onClick={() => router.push(backUrl)}
+            className="glass rounded-xl border-none hover:bg-primary/20 transition-all px-3 sm:px-4 h-10 sm:h-11 shrink-0 flex items-center gap-2 font-bold"
+            title="Назад"
           >
             <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="text-xs sm:text-sm">Назад</span>
           </Button>
           <div className="space-y-0.5 sm:space-y-1">
             <h1 className="text-xl sm:text-3xl font-black tracking-tighter text-foreground">

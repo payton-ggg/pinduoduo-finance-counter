@@ -62,7 +62,7 @@ export function Header({
           <Button
             variant="outline"
             size="icon"
-            onClick={() => router.push("/calculator")}
+            onClick={() => router.push(`/calculator?from=${encodeURIComponent(window.location.pathname)}`)}
             className="glass rounded-xl border-none hover:bg-primary/20 transition-all h-10 sm:h-11 w-10 sm:w-11 shrink-0 flex items-center justify-center group"
             title="Калькулятор валют"
           >

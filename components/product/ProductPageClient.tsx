@@ -32,7 +32,7 @@ export function ProductPageClient({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => router.push("/calculator")}
+            onClick={() => router.push(`/calculator?from=${encodeURIComponent(window.location.pathname)}`)}
             className="gap-1.5"
           >
             <Calculator className="h-4 w-4" />
