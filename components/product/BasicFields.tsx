@@ -49,6 +49,7 @@ export function BasicFields({
   const customShippingRate = watch("customShippingRate");
 
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [autoCalculate, setAutoCalculate] = useState(true);
 
   const fetchRates = async () => {
     setIsRefreshing(true);
@@ -64,7 +65,7 @@ export function BasicFields({
     }
   };
 
-  const calculateShipping = () => {
+  const calculateShipping = (isManual = false) => {
     if (weight && purchasedCount && rateUSD) {
       let ratePerKgUSD = 0;
       switch (shippingType) {
@@ -81,19 +82,23 @@ export function BasicFields({
 
       const shippingCostUSD = (weight / 1000) * purchasedCount * ratePerKgUSD;
       const shippingCostUAH = shippingCostUSD * rateUSD;
-      setValue("shippingUA", parseFloat(shippingCostUAH.toFixed(2)));
+      setValue("shippingUA", parseFloat(shippingCostUAH.toFixed(2)), { shouldDirty: true });
+    } else if (isManual) {
+      alert("Для расчета укажите: Вес (г), Куплено (шт) и Курс (USD)");
     }
   };
 
   useEffect(() => {
-    // We only calculate shipping if we have rateUSD, weight, and count
-    calculateShipping();
+    if (autoCalculate) {
+      calculateShipping();
+    }
   }, [
     weight,
     purchasedCount,
     rateUSD,
     shippingType,
     customShippingRate,
+    autoCalculate,
     setValue,
   ]);
 
@@ -276,28 +281,44 @@ export function BasicFields({
             shippingType !== "custom" ? "sm:col-span-1 lg:col-span-2" : ""
           }
         >
-          <label className="block text-sm font-medium mb-1 items-center justify-between">
-            Цена доставки (₴) - Авто/Руч.
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-sm font-medium">
+              Цена доставки (₴)
+            </label>
+            <label className="text-xs text-muted-foreground flex items-center gap-1 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={autoCalculate}
+                onChange={(e) => setAutoCalculate(e.target.checked)}
+                className="rounded border-gray-300"
+              />
+              Авторасчет
+            </label>
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="number"
+              step="0.01"
+              className="flex-1 border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-background"
+              {...register("shippingUA", {
+                valueAsNumber: true,
+                min: { value: 0, message: "Должна быть >= 0" },
+                onChange: () => {
+                  setAutoCalculate(false);
+                }
+              })}
+              placeholder="Например: 10.00"
+            />
             <Button
               type="button"
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6"
-              onClick={calculateShipping}
+              onClick={() => calculateShipping(true)}
+              className="px-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-md flex items-center gap-1.5 shrink-0 transition-colors"
+              title="Рассчитать стоимость доставки"
             >
-              <Calculator className="h-3 w-3" />
+              <Calculator className="h-4 w-4" />
+              <span>Рассчитать</span>
             </Button>
-          </label>
-          <input
-            type="number"
-            step="0.01"
-            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            {...register("shippingUA", {
-              valueAsNumber: true,
-              min: { value: 0, message: "Должна быть >= 0" },
-            })}
-            placeholder="Например: 10.00"
-          />
+          </div>
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">
