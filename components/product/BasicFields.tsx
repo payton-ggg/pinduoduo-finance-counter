@@ -312,11 +312,11 @@ export function BasicFields({
             <Button
               type="button"
               onClick={() => calculateShipping(true)}
-              className="px-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-md flex items-center gap-1.5 shrink-0 transition-colors"
+              className="px-2.5 sm:px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-md flex items-center gap-1.5 shrink-0 transition-colors"
               title="Рассчитать стоимость доставки"
             >
               <Calculator className="h-4 w-4" />
-              <span>Рассчитать</span>
+              <span className="hidden sm:inline">Рассчитать</span>
             </Button>
           </div>
         </div>
