@@ -119,9 +119,9 @@ export function BasicFields({
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium mb-1">Название</label>
+        <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">Название</label>
         <input
-          className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
           {...register("name", { required: "Название обязательно" })}
           placeholder="Например: AirPods Pro Replica"
         />
@@ -134,7 +134,7 @@ export function BasicFields({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1 items-center justify-between">
+          <label className="flex text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2 items-center justify-between">
             Курс (CNY - UAH) 🇨🇳
             <Button
               type="button"
@@ -152,13 +152,13 @@ export function BasicFields({
           <input
             type="number"
             step="0.0001"
-            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
             {...register("rateCNY", { valueAsNumber: true })}
             placeholder="Например: 5.80"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1 items-center justify-between">
+          <label className="flex text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2 items-center justify-between">
             Курс (USD - UAH) 🇺🇸
             <Button
               type="button"
@@ -176,7 +176,7 @@ export function BasicFields({
           <input
             type="number"
             step="0.0001"
-            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
             {...register("rateUSD", { valueAsNumber: true })}
             placeholder="Например: 42.00"
           />
@@ -185,13 +185,13 @@ export function BasicFields({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">
+          <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">
             Цена закупки (¥)
           </label>
           <input
             type="number"
             step="0.01"
-            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
             {...register("priceCNY", {
               required: "Цена обязательна",
               valueAsNumber: true,
@@ -206,13 +206,13 @@ export function BasicFields({
           )}
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">
+          <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">
             Цена продажи (₴)
           </label>
           <input
             type="number"
             step="0.01"
-            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
             {...register("priceInUA", {
               valueAsNumber: true,
               min: { value: 0, message: "Должна быть >= 0" },
@@ -230,13 +230,13 @@ export function BasicFields({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">
+          <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">
             Цена чистыми (netPrice) (₴)
           </label>
           <input
             type="number"
             step="0.01"
-            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
             {...register("netPrice", {
               valueAsNumber: true,
             })}
@@ -247,9 +247,9 @@ export function BasicFields({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Тип доставки</label>
+          <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">Тип доставки</label>
           <select
-            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-background"
+            className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
             {...register("shippingType")}
           >
             <option value="air">Авиа (18.3$ / кг)</option>
@@ -260,13 +260,13 @@ export function BasicFields({
 
         {shippingType === "custom" && (
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">
               Своя цена ($)
             </label>
             <input
               type="number"
               step="0.01"
-              className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
               {...register("customShippingRate", {
                 valueAsNumber: true,
                 min: { value: 0, message: ">= 0" },
@@ -282,7 +282,7 @@ export function BasicFields({
           }
         >
           <div className="flex items-center justify-between mb-1">
-            <label className="block text-sm font-medium">
+            <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground">
               Цена доставки (₴)
             </label>
             <label className="text-xs text-muted-foreground flex items-center gap-1 cursor-pointer">
@@ -299,7 +299,7 @@ export function BasicFields({
             <input
               type="number"
               step="0.01"
-              className="flex-1 border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-background"
+              className="flex-1 bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
               {...register("shippingUA", {
                 valueAsNumber: true,
                 min: { value: 0, message: "Должна быть >= 0" },
@@ -312,7 +312,7 @@ export function BasicFields({
             <Button
               type="button"
               onClick={() => calculateShipping(true)}
-              className="px-2.5 sm:px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-md flex items-center gap-1.5 shrink-0 transition-colors"
+              className="px-4 sm:px-6 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl flex items-center gap-2 shrink-0 transition-all duration-300 shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5"
               title="Рассчитать стоимость доставки"
             >
               <Calculator className="h-4 w-4" />
@@ -321,13 +321,13 @@ export function BasicFields({
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">
+          <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">
             Расходы на управление (₴)
           </label>
           <input
             type="number"
             step="0.01"
-            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
             {...register("managementUAH", {
               valueAsNumber: true,
               min: { value: 0, message: "Должна быть >= 0" },
@@ -338,20 +338,20 @@ export function BasicFields({
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Ссылка OLX</label>
+        <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">Ссылка OLX</label>
         <input
-          className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
           {...register("olxUrl")}
           placeholder="https://www.olx.ua/…"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">
+        <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">
           Ссылка Pinduoduo
         </label>
         <input
-          className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
           {...register("pinduoduoUrl")}
           placeholder="https://mobile.yangkeduo.com/…"
         />
@@ -359,35 +359,35 @@ export function BasicFields({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Вес</label>
+          <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">Вес</label>
           <input
             type="number"
             step="0.01"
-            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
             {...register("weight", { valueAsNumber: true })}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Чип</label>
+          <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">Чип</label>
           <input
-            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
             {...register("chip")}
             placeholder="Например: H2"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Продано (шт)</label>
+          <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">Продано (шт)</label>
           <input
             type="number"
-            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
             {...register("sellsCount", { valueAsNumber: true })}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Куплено (шт)</label>
+          <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">Куплено (шт)</label>
           <input
             type="number"
-            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
             {...register("purchasedCount", { valueAsNumber: true })}
           />
         </div>
