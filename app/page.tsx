@@ -7,7 +7,15 @@ import { AuthGate } from "@/components/auth/AuthGate";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function Dashboard() {
+export default async function Dashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ folderId?: string; activeTab?: string }> | { folderId?: string; activeTab?: string };
+}) {
+  const resolvedSearchParams = await (searchParams instanceof Promise ? searchParams : Promise.resolve(searchParams));
+  const initialFolderId = resolvedSearchParams?.folderId || null;
+  const initialActiveTab = (resolvedSearchParams?.activeTab as "active" | "archive") || "active";
+
   const rates = await getExchangeRates();
   const rate = rates.cny;
 
@@ -66,7 +74,12 @@ export default async function Dashboard() {
   return (
     <AuthGate>
       <div className="container mx-auto">
-        <DashboardClient initialProducts={mapped} globalRate={rate} />
+        <DashboardClient
+          initialProducts={mapped}
+          globalRate={rate}
+          initialFolderId={initialFolderId}
+          initialActiveTab={initialActiveTab}
+        />
       </div>
     </AuthGate>
   );

@@ -160,23 +160,96 @@ function SortableFolderItem({
 interface DashboardClientProps {
   initialProducts: ProductUI[];
   globalRate?: number;
+  initialFolderId?: string | null;
+  initialActiveTab?: "active" | "archive";
 }
 
 export function DashboardClient({
   initialProducts,
   globalRate,
+  initialFolderId = null,
+  initialActiveTab = "active",
 }: DashboardClientProps) {
   const router = useRouter();
   const [products, setProducts] = useState<ProductUI[]>(initialProducts);
   const [selectedIds, setSelectedIds] = useState<Set<string | number>>(
     () => new Set(initialProducts.map((p) => p.id)),
   );
-  const [activeTab, setActiveTab] = useState<"active" | "archive">("active");
+  const [activeTab, setActiveTab] = useState<"active" | "archive">(initialActiveTab);
   const [folders, setFolders] = useState<FolderItem[]>([]);
-  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(initialFolderId);
   const [showFolderDropdown, setShowFolderDropdown] = useState(false);
   const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
   const [editingFolderName, setEditingFolderName] = useState("");
+
+  const updateFolderId = useCallback((id: string | null) => {
+    setSelectedFolderId(id);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (id === null) {
+        url.searchParams.delete("folderId");
+      } else {
+        url.searchParams.set("folderId", id);
+      }
+      window.history.replaceState(null, "", url.pathname + url.search);
+      sessionStorage.setItem("selectedFolderId", id === null ? "null" : id);
+    }
+  }, []);
+
+  const updateActiveTab = useCallback((tab: "active" | "archive") => {
+    setActiveTab(tab);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("activeTab", tab);
+      window.history.replaceState(null, "", url.pathname + url.search);
+      sessionStorage.setItem("activeTab", tab);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const params = new URLSearchParams(window.location.search);
+    let folderId = params.get("folderId");
+    let tab = params.get("activeTab") as "active" | "archive" | null;
+
+    let updated = false;
+
+    if (!folderId) {
+      const savedFolder = sessionStorage.getItem("selectedFolderId");
+      if (savedFolder && savedFolder !== "null") {
+        folderId = savedFolder;
+        setSelectedFolderId(folderId);
+        updated = true;
+      }
+    } else {
+      sessionStorage.setItem("selectedFolderId", folderId);
+    }
+
+    if (!tab) {
+      const savedTab = sessionStorage.getItem("activeTab") as "active" | "archive" | null;
+      if (savedTab === "active" || savedTab === "archive") {
+        tab = savedTab;
+        setActiveTab(tab);
+        updated = true;
+      }
+    } else {
+      sessionStorage.setItem("activeTab", tab);
+    }
+
+    if (updated) {
+      const url = new URL(window.location.href);
+      if (folderId) {
+        url.searchParams.set("folderId", folderId);
+      } else {
+        url.searchParams.delete("folderId");
+      }
+      if (tab) {
+        url.searchParams.set("activeTab", tab);
+      }
+      window.history.replaceState(null, "", url.pathname + url.search);
+    }
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -308,7 +381,7 @@ export function DashboardClient({
         body: JSON.stringify({ id: folderId }),
       });
       if (selectedFolderId === folderId) {
-        setSelectedFolderId(null);
+        updateFolderId(null);
       }
       await fetchFolders();
       window.location.reload();
@@ -376,10 +449,10 @@ export function DashboardClient({
           ? Math.min(currentIdx + 1, folderOrder.length - 1)
           : Math.max(currentIdx - 1, 0);
       if (nextIdx !== currentIdx) {
-        setSelectedFolderId(folderOrder[nextIdx] ?? null);
+        updateFolderId(folderOrder[nextIdx] ?? null);
       }
     },
-    [folderOrder, selectedFolderId],
+    [folderOrder, selectedFolderId, updateFolderId],
   );
 
   const currentFolderName =
@@ -408,7 +481,7 @@ export function DashboardClient({
 
       <div className="glass max-lg:hidden p-1.5 rounded-2xl flex gap-1 w-fit mb-6">
         <button
-          onClick={() => setActiveTab("active")}
+          onClick={() => updateActiveTab("active")}
           className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-black transition-all duration-300 ${
             activeTab === "active"
               ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-105"
@@ -419,7 +492,7 @@ export function DashboardClient({
           Активные ({products.filter((p) => !p.archive).length})
         </button>
         <button
-          onClick={() => setActiveTab("archive")}
+          onClick={() => updateActiveTab("archive")}
           className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-black transition-all duration-300 ${
             activeTab === "archive"
               ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-105"
@@ -434,7 +507,7 @@ export function DashboardClient({
       {/* Folder Filter */}
       <div className="flex flex-wrap items-center gap-2">
         <button
-          onClick={() => setSelectedFolderId(null)}
+          onClick={() => updateFolderId(null)}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 ${
             selectedFolderId === null
               ? "bg-primary text-primary-foreground shadow-md"
@@ -467,7 +540,7 @@ export function DashboardClient({
                   editingFolderName={editingFolderName}
                   setEditingFolderName={setEditingFolderName}
                   setEditingFolderId={setEditingFolderId}
-                  setSelectedFolderId={setSelectedFolderId}
+                  setSelectedFolderId={updateFolderId}
                   renameFolder={renameFolder}
                   deleteFolder={deleteFolder}
                 />
@@ -476,7 +549,7 @@ export function DashboardClient({
           </SortableContext>
         </DndContext>
         <button
-          onClick={() => setSelectedFolderId("__none__")}
+          onClick={() => updateFolderId("__none__")}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 ${
             selectedFolderId === "__none__"
               ? "bg-primary text-primary-foreground shadow-md"
