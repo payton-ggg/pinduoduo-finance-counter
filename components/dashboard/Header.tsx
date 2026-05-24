@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Plus, RefreshCw, Calculator } from "lucide-react";
+import { Plus, RefreshCw, Calculator, Search, X } from "lucide-react";
 import { ModeToggle } from "@/components/ui/mode-toggle";
 import { useRouter } from "next/navigation";
 
@@ -10,6 +10,8 @@ type HeaderProps = {
   onClearSelection?: () => void;
   onSelectAll?: () => void;
   hasSelection?: boolean;
+  searchQuery?: string;
+  onSearchQueryChange?: (query: string) => void;
 };
 
 export function Header({
@@ -17,6 +19,8 @@ export function Header({
   onClearSelection,
   onSelectAll,
   hasSelection,
+  searchQuery = "",
+  onSearchQueryChange,
 }: HeaderProps) {
   const router = useRouter();
   return (
@@ -56,6 +60,25 @@ export function Header({
               </Button>
             )}
           </div>
+        </div>
+
+        <div className="flex-1 flex items-center max-w-md w-full relative">
+          <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            placeholder="Умный поиск..."
+            value={searchQuery}
+            onChange={(e) => onSearchQueryChange?.(e.target.value)}
+            className="w-full bg-foreground/5 border-none rounded-xl pl-9 pr-10 py-2.5 sm:py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => onSearchQueryChange?.("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">

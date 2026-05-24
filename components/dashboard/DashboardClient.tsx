@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import Fuse from "fuse.js";
 import { useRouter } from "next/navigation";
 import { Header } from "./Header";
 import { Summary } from "./Summary";
@@ -181,6 +182,7 @@ export function DashboardClient({
   const [showFolderDropdown, setShowFolderDropdown] = useState(false);
   const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
   const [editingFolderName, setEditingFolderName] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const updateFolderId = useCallback((id: string | null) => {
     setSelectedFolderId(id);
@@ -409,13 +411,25 @@ export function DashboardClient({
     setEditingFolderId(null);
   };
 
-  const filteredProducts = products.filter((p) => {
-    const matchesTab = activeTab === "active" ? !p.archive : p.archive;
-    if (!matchesTab) return false;
-    if (selectedFolderId === null) return true;
-    if (selectedFolderId === "__none__") return !p.folderId;
-    return p.folderId === selectedFolderId;
-  });
+  const fuse = useMemo(() => {
+    return new Fuse(products, {
+      keys: ["name", "folderName"],
+      threshold: 0.3,
+    });
+  }, [products]);
+
+  const filteredProducts = useMemo(() => {
+    if (searchQuery.trim()) {
+      return fuse.search(searchQuery).map((result) => result.item);
+    }
+    return products.filter((p) => {
+      const matchesTab = activeTab === "active" ? !p.archive : p.archive;
+      if (!matchesTab) return false;
+      if (selectedFolderId === null) return true;
+      if (selectedFolderId === "__none__") return !p.folderId;
+      return p.folderId === selectedFolderId;
+    });
+  }, [products, searchQuery, activeTab, selectedFolderId, fuse]);
 
   const selectedProducts = filteredProducts.filter((p) =>
     selectedIds.has(p.id),
@@ -477,6 +491,8 @@ export function DashboardClient({
         onClearSelection={clearSelection}
         onSelectAll={selectAll}
         hasSelection={selectedIds.size > 0}
+        searchQuery={searchQuery}
+        onSearchQueryChange={setSearchQuery}
       />
 
       <div className="glass max-lg:hidden p-1.5 rounded-2xl flex gap-1 w-fit mb-6">
