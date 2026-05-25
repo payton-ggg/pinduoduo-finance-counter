@@ -65,7 +65,16 @@ export function ProductPageClient({
       {mode === "preview" ? (
         <ProductPreview data={product} rates={rates} />
       ) : (
-        <ProductForm id={id} initialData={product} initialRates={rates} />
+        <ProductForm 
+          id={id} 
+          initialData={product} 
+          initialRates={rates} 
+          onSuccess={() => {
+            router.refresh();
+            setMode("preview");
+          }}
+          onCancel={() => setMode("preview")}
+        />
       )}
     </div>
   );

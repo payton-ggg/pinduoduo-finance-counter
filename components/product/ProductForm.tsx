@@ -37,12 +37,16 @@ type ProductFormProps = {
   id?: string;
   initialData?: any;
   initialRates?: { cny?: number; usd?: number };
+  onSuccess?: () => void;
+  onCancel?: () => void;
 };
 
 export default function ProductForm({
   id,
   initialData,
   initialRates,
+  onSuccess,
+  onCancel,
 }: ProductFormProps) {
   const router = useRouter();
   const [folders, setFolders] = useState<{ id: string; name: string }[]>([]);
@@ -356,9 +360,16 @@ export default function ProductForm({
           body: JSON.stringify(payloadStart),
         });
         if (!res.ok) throw new Error("Failed to create product");
+        const data = await res.json();
+        router.push(`/product/${data.id}`);
+        return;
       }
 
-      window.location.href = "/";
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.push(`/product/${id}`);
+      }
       if (!id) reset();
     } catch (err) {
       console.error(err);
@@ -679,7 +690,10 @@ export default function ProductForm({
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.back()}
+              onClick={() => {
+                if (onCancel) onCancel();
+                else router.back();
+              }}
               className="w-full sm:w-auto"
             >
               Отмена
