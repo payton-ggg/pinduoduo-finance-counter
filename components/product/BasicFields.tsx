@@ -8,7 +8,7 @@ import {
   UseFormWatch,
 } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Calculator } from "lucide-react";
+import { RefreshCw, Calculator, Copy, Check } from "lucide-react";
 
 type FormValues = {
   name: string;
@@ -51,7 +51,16 @@ export function BasicFields({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [autoCalculate, setAutoCalculate] = useState(false);
   const [hasInitAuto, setHasInitAuto] = useState(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
   const shippingUA = watch("shippingUA");
+
+  const handleCopy = (text: string, fieldName: string) => {
+    if (text) {
+      navigator.clipboard.writeText(text);
+      setCopiedField(fieldName);
+      setTimeout(() => setCopiedField(null), 2000);
+    }
+  };
 
   useEffect(() => {
     if (hasInitAuto) return;
@@ -370,22 +379,50 @@ export function BasicFields({
 
       <div>
         <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">Ссылка OLX</label>
-        <input
-          className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
-          {...register("olxUrl")}
-          placeholder="https://www.olx.ua/…"
-        />
+        <div className="relative">
+          <input
+            className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 pr-12 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
+            {...register("olxUrl")}
+            placeholder="https://www.olx.ua/…"
+          />
+          <button
+            type="button"
+            onClick={() => handleCopy(watch("olxUrl"), "olxUrl")}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-muted-foreground hover:text-foreground transition-colors"
+            title="Скопировать"
+          >
+            {copiedField === "olxUrl" ? (
+              <Check className="h-4 w-4 text-green-500" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
+          </button>
+        </div>
       </div>
 
       <div>
         <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">
           Ссылка Pinduoduo
         </label>
-        <input
-          className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
-          {...register("pinduoduoUrl")}
-          placeholder="https://mobile.yangkeduo.com/…"
-        />
+        <div className="relative">
+          <input
+            className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 pr-12 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
+            {...register("pinduoduoUrl")}
+            placeholder="https://mobile.yangkeduo.com/…"
+          />
+          <button
+            type="button"
+            onClick={() => handleCopy(watch("pinduoduoUrl"), "pinduoduoUrl")}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-muted-foreground hover:text-foreground transition-colors"
+            title="Скопировать"
+          >
+            {copiedField === "pinduoduoUrl" ? (
+              <Check className="h-4 w-4 text-green-500" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
