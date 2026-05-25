@@ -49,7 +49,38 @@ export function BasicFields({
   const customShippingRate = watch("customShippingRate");
 
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [autoCalculate, setAutoCalculate] = useState(true);
+  const [autoCalculate, setAutoCalculate] = useState(false);
+  const [hasInitAuto, setHasInitAuto] = useState(false);
+  const shippingUA = watch("shippingUA");
+
+  useEffect(() => {
+    if (hasInitAuto) return;
+    
+    if (shippingUA === undefined) {
+      setAutoCalculate(true);
+      setHasInitAuto(true);
+      return;
+    }
+
+    if (rateUSD !== undefined && rateUSD > 0) {
+      let ratePerKgUSD = 0;
+      switch (shippingType) {
+        case "air": ratePerKgUSD = 18.3; break;
+        case "sea": ratePerKgUSD = 7.1; break;
+        case "custom": ratePerKgUSD = customShippingRate || 0; break;
+      }
+      
+      const calcUSD = ((weight || 0) / 1000) * (purchasedCount || 0) * ratePerKgUSD;
+      const calcUAH = parseFloat((calcUSD * rateUSD).toFixed(2));
+
+      if (shippingUA === calcUAH) {
+        setAutoCalculate(true);
+      } else {
+        setAutoCalculate(false);
+      }
+      setHasInitAuto(true);
+    }
+  }, [hasInitAuto, shippingUA, rateUSD, weight, purchasedCount, shippingType, customShippingRate]);
 
   const fetchRates = async () => {
     setIsRefreshing(true);
