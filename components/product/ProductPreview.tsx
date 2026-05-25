@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import {
   Check,
@@ -14,6 +15,7 @@ import {
   Weight,
   ShoppingCart,
   BarChart3,
+  Copy,
 } from "lucide-react";
 
 type ProductPreviewProps = {
@@ -22,6 +24,15 @@ type ProductPreviewProps = {
 };
 
 export function ProductPreview({ data, rates }: ProductPreviewProps) {
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  const handleCopy = (text: string, fieldName: string) => {
+    if (text) {
+      navigator.clipboard.writeText(text);
+      setCopiedField(fieldName);
+      setTimeout(() => setCopiedField(null), 2000);
+    }
+  };
   const images: string[] = Array.isArray(data?.images)
     ? data.images
         .map((img: any) => (typeof img === "string" ? img : (img?.url ?? "")))
@@ -305,26 +316,54 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
           </h3>
           <div className="flex flex-col sm:flex-row gap-3">
             {data?.olxUrl && (
-              <a
-                href={data.olxUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-muted/50 transition-colors text-sm font-medium"
-              >
-                <ExternalLink className="h-4 w-4" />
-                OLX
-              </a>
+              <div className="flex items-center gap-1">
+                <a
+                  href={data.olxUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-muted/50 transition-colors text-sm font-medium"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  OLX
+                </a>
+                <button
+                  type="button"
+                  onClick={() => handleCopy(data.olxUrl, "olxUrl")}
+                  className="p-2 rounded-lg border hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground"
+                  title="Скопировать ссылку"
+                >
+                  {copiedField === "olxUrl" ? (
+                    <Check className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
             )}
             {data?.pinduoduoUrl && (
-              <a
-                href={data.pinduoduoUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-muted/50 transition-colors text-sm font-medium"
-              >
-                <ExternalLink className="h-4 w-4" />
-                Pinduoduo
-              </a>
+              <div className="flex items-center gap-1">
+                <a
+                  href={data.pinduoduoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-muted/50 transition-colors text-sm font-medium"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  Pinduoduo
+                </a>
+                <button
+                  type="button"
+                  onClick={() => handleCopy(data.pinduoduoUrl, "pinduoduoUrl")}
+                  className="p-2 rounded-lg border hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground"
+                  title="Скопировать ссылку"
+                >
+                  {copiedField === "pinduoduoUrl" ? (
+                    <Check className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
             )}
           </div>
         </Card>
