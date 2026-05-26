@@ -183,6 +183,14 @@ export function DashboardClient({
   const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
   const [editingFolderName, setEditingFolderName] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const updateFolderId = useCallback((id: string | null) => {
     setSelectedFolderId(id);
@@ -419,8 +427,8 @@ export function DashboardClient({
   }, [products]);
 
   const filteredProducts = useMemo(() => {
-    if (searchQuery.trim()) {
-      return fuse.search(searchQuery).map((result) => result.item);
+    if (debouncedSearchQuery.trim()) {
+      return fuse.search(debouncedSearchQuery).map((result) => result.item);
     }
     return products.filter((p) => {
       const matchesTab = activeTab === "active" ? !p.archive : p.archive;
@@ -429,7 +437,7 @@ export function DashboardClient({
       if (selectedFolderId === "__none__") return !p.folderId;
       return p.folderId === selectedFolderId;
     });
-  }, [products, searchQuery, activeTab, selectedFolderId, fuse]);
+  }, [products, debouncedSearchQuery, activeTab, selectedFolderId, fuse]);
 
   const selectedProducts = filteredProducts.filter((p) =>
     selectedIds.has(p.id),
