@@ -4,7 +4,15 @@ import { useState } from "react";
 import { Eye, Pencil, Calculator } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import ProductForm from "./ProductForm";
+import dynamic from "next/dynamic";
+const ProductForm = dynamic(() => import("./ProductForm"), {
+  loading: () => (
+    <div className="flex items-center justify-center p-12">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    </div>
+  ),
+  ssr: false,
+});
 import { ProductPreview } from "./ProductPreview";
 import { DeleteProductButton } from "./DeleteProductButton";
 
