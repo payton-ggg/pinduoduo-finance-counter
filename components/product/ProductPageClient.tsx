@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Eye, Pencil, Calculator } from "lucide-react";
+import { Eye, Pencil, Calculator, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
@@ -46,6 +46,14 @@ export function ProductPageClient({
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-0">
       <div className="flex items-center justify-between mb-6">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => router.push("/")}
+          className="gap-1.5"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
         <h1 className="text-2xl sm:text-3xl font-bold truncate mr-4">
           {localProduct?.name || "Продукт"}
         </h1>
@@ -53,7 +61,11 @@ export function ProductPageClient({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => router.push(`/calculator?from=${encodeURIComponent(window.location.pathname)}`)}
+            onClick={() =>
+              router.push(
+                `/calculator?from=${encodeURIComponent(window.location.pathname)}`,
+              )
+            }
             className="gap-1.5"
           >
             <Calculator className="h-4 w-4" />

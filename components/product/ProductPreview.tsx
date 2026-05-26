@@ -92,7 +92,10 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
       {images.length > 0 && (
         <div className="flex gap-3 overflow-x-auto pb-2">
           {images.map((url, i) => (
-            <div key={i} className="relative h-48 w-48 shrink-0 rounded-xl border shadow-sm overflow-hidden bg-muted/20">
+            <div
+              key={i}
+              className="relative h-48 w-48 shrink-0 rounded-xl border shadow-sm overflow-hidden bg-muted/20"
+            >
               <Image
                 src={url}
                 alt={`${data?.name || "Product"} ${i + 1}`}
