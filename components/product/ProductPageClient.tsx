@@ -47,12 +47,12 @@ export function ProductPageClient({
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-0">
       <div className="flex items-center justify-between mb-6">
         <Button
-          variant="outline"
-          size="sm"
+          variant="default"
+          size="lg"
           onClick={() => router.push("/")}
           className="gap-1.5"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-6 w-6" />
         </Button>
         <h1 className="text-2xl sm:text-3xl font-bold truncate mr-4">
           {localProduct?.name || "Продукт"}
