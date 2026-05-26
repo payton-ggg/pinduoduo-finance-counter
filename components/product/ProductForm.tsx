@@ -39,6 +39,7 @@ type ProductFormProps = {
   initialRates?: { cny?: number; usd?: number };
   onSuccess?: () => void;
   onCancel?: () => void;
+  onValuesChange?: (values: any) => void;
 };
 
 export default function ProductForm({
@@ -47,6 +48,7 @@ export default function ProductForm({
   initialRates,
   onSuccess,
   onCancel,
+  onValuesChange,
 }: ProductFormProps) {
   const router = useRouter();
   const [folders, setFolders] = useState<{ id: string; name: string }[]>([]);
@@ -106,6 +108,18 @@ export default function ProductForm({
     watch,
     reset,
   } = useForm<FormValues>({ defaultValues });
+
+  const watchedValues = watch();
+  const serializedValues = JSON.stringify(watchedValues);
+
+  useEffect(() => {
+    if (onValuesChange) {
+      onValuesChange({
+        ...initialData,
+        ...watchedValues,
+      });
+    }
+  }, [serializedValues, onValuesChange, initialData]);
 
   const {
     fields: imageFields,

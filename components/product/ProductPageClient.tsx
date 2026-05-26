@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Eye, Pencil, Calculator } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -28,13 +28,26 @@ export function ProductPageClient({
   rates,
 }: ProductPageClientProps) {
   const [mode, setMode] = useState<"preview" | "edit">("preview");
+  const [hasOpenedEdit, setHasOpenedEdit] = useState(false);
+  const [localProduct, setLocalProduct] = useState(product);
+  const [formKey, setFormKey] = useState(0);
   const router = useRouter();
+
+  useEffect(() => {
+    setLocalProduct(product);
+  }, [product]);
+
+  useEffect(() => {
+    if (mode === "edit") {
+      setHasOpenedEdit(true);
+    }
+  }, [mode]);
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-0">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold truncate mr-4">
-          {product?.name || "Продукт"}
+          {localProduct?.name || "Продукт"}
         </h1>
         <div className="flex items-center gap-2 shrink-0">
           <Button
@@ -70,19 +83,30 @@ export function ProductPageClient({
         </div>
       </div>
 
-      {mode === "preview" ? (
-        <ProductPreview data={product} rates={rates} />
-      ) : (
-        <ProductForm 
-          id={id} 
-          initialData={product} 
-          initialRates={rates} 
-          onSuccess={() => {
-            router.refresh();
-            setMode("preview");
-          }}
-          onCancel={() => setMode("preview")}
-        />
+      <div className={mode === "preview" ? "block" : "hidden"}>
+        <ProductPreview data={localProduct} rates={rates} />
+      </div>
+
+      {hasOpenedEdit && (
+        <div className={mode === "edit" ? "block" : "hidden"}>
+          <ProductForm
+            key={formKey}
+            id={id}
+            initialData={product}
+            initialRates={rates}
+            onSuccess={() => {
+              router.refresh();
+              setFormKey((prev) => prev + 1);
+              setMode("preview");
+            }}
+            onCancel={() => {
+              setLocalProduct(product);
+              setFormKey((prev) => prev + 1);
+              setMode("preview");
+            }}
+            onValuesChange={setLocalProduct}
+          />
+        </div>
       )}
     </div>
   );
