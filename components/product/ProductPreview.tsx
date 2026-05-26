@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import {
   Check,
@@ -91,12 +92,15 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
       {images.length > 0 && (
         <div className="flex gap-3 overflow-x-auto pb-2">
           {images.map((url, i) => (
-            <img
-              key={i}
-              src={url}
-              alt={`${data?.name || "Product"} ${i + 1}`}
-              className="h-48 w-48 object-cover rounded-xl border shadow-sm shrink-0"
-            />
+            <div key={i} className="relative h-48 w-48 shrink-0 rounded-xl border shadow-sm overflow-hidden bg-muted/20">
+              <Image
+                src={url}
+                alt={`${data?.name || "Product"} ${i + 1}`}
+                fill
+                sizes="192px"
+                className="object-cover object-center"
+              />
+            </div>
           ))}
         </div>
       )}
