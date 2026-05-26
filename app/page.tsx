@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import Loading from "./loading";
 import { prisma } from "@/lib/prisma";
 import { DashboardClient } from "@/components/dashboard/DashboardClient";
 import type { ProductUI } from "@/components/dashboard/ProductCard";
@@ -7,15 +9,13 @@ import { AuthGate } from "@/components/auth/AuthGate";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function Dashboard({
-  searchParams,
+async function DashboardDataWrapper({
+  initialFolderId,
+  initialActiveTab,
 }: {
-  searchParams: Promise<{ folderId?: string; activeTab?: string }> | { folderId?: string; activeTab?: string };
+  initialFolderId: string | null;
+  initialActiveTab: "active" | "archive";
 }) {
-  const resolvedSearchParams = await (searchParams instanceof Promise ? searchParams : Promise.resolve(searchParams));
-  const initialFolderId = resolvedSearchParams?.folderId || null;
-  const initialActiveTab = (resolvedSearchParams?.activeTab as "active" | "archive") || "active";
-
   const rates = await getExchangeRates();
   const rate = rates.cny;
 
@@ -72,14 +72,33 @@ export default async function Dashboard({
   });
 
   return (
+    <DashboardClient
+      initialProducts={mapped}
+      globalRate={rate}
+      initialFolderId={initialFolderId}
+      initialActiveTab={initialActiveTab}
+    />
+  );
+}
+
+export default async function Dashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ folderId?: string; activeTab?: string }> | { folderId?: string; activeTab?: string };
+}) {
+  const resolvedSearchParams = await (searchParams instanceof Promise ? searchParams : Promise.resolve(searchParams));
+  const initialFolderId = resolvedSearchParams?.folderId || null;
+  const initialActiveTab = (resolvedSearchParams?.activeTab as "active" | "archive") || "active";
+
+  return (
     <AuthGate>
       <div className="container mx-auto">
-        <DashboardClient
-          initialProducts={mapped}
-          globalRate={rate}
-          initialFolderId={initialFolderId}
-          initialActiveTab={initialActiveTab}
-        />
+        <Suspense fallback={<Loading />}>
+          <DashboardDataWrapper
+            initialFolderId={initialFolderId}
+            initialActiveTab={initialActiveTab}
+          />
+        </Suspense>
       </div>
     </AuthGate>
   );

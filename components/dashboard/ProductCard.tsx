@@ -1,5 +1,7 @@
 "use client";
 
+import { memo, useState } from "react";
+import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   TrendingUp,
@@ -36,12 +38,14 @@ type ProductCardProps = {
   globalRate?: number;
 };
 
-export function ProductCard({
+export const ProductCard = memo(function ProductCard({
   product,
   isSelected,
   onToggle,
   globalRate,
 }: ProductCardProps) {
+  const [imgSrc, setImgSrc] = useState(product.img || "/placeholder.png");
+
   const balance = product.income - product.spent;
 
   // Projected Profit: (Total Stock * Selling Price) - Total Spent
@@ -68,14 +72,14 @@ export function ProductCard({
       className={`group overflow-hidden glass-card h-full flex flex-col border-none shadow-lg transition-all duration-300`}
     >
       <div className="relative aspect-square w-full overflow-hidden bg-muted/20">
-        <img
-          src={product.img || "/placeholder.png"}
+        <Image
+          src={imgSrc}
           alt={product.name}
-          loading="lazy"
-          className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-110"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src =
-              "https://placehold.co/400x300?text=No+Image";
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          className="object-cover object-center transition-transform duration-700 group-hover:scale-110"
+          onError={() => {
+            setImgSrc("https://placehold.co/400x300?text=No+Image");
           }}
         />
 
@@ -201,4 +205,4 @@ export function ProductCard({
       </CardContent>
     </Card>
   );
-}
+});
