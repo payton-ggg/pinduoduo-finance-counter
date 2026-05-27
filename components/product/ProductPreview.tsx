@@ -49,6 +49,9 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
   const shippingUA = Number(data?.shippingUA) || 0;
   const managementUAH = Number(data?.managementUAH) || 0;
 
+  const unitWeight = Number(data?.weight) || 0;
+  const totalWeight = unitWeight * purchased;
+
   const purchaseUnitCostUAH = priceCNY * (rateCNY > 0 ? rateCNY : 1);
   const totalGoodsCost = purchased * purchaseUnitCostUAH;
   const actualNetPrice =
@@ -261,12 +264,29 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
               </div>
             </div>
           )}
-          {data?.weight && (
+          {unitWeight > 0 && (
             <div className="flex items-center gap-2">
               <Weight className="h-4 w-4 text-muted-foreground" />
               <div>
                 <p className="text-xs text-muted-foreground">Вес</p>
-                <p className="font-medium">{data.weight} г</p>
+                <p className="font-medium">
+                  {unitWeight > 1000
+                    ? `${(unitWeight / 1000).toFixed(3)} кг`
+                    : `${unitWeight} г`}
+                </p>
+              </div>
+            </div>
+          )}
+          {totalWeight > 0 && (
+            <div className="flex items-center gap-2">
+              <Weight className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="text-xs text-muted-foreground">Вес посылки</p>
+                <p className="font-medium">
+                  {totalWeight > 1000
+                    ? `${(totalWeight / 1000).toFixed(3)} кг`
+                    : `${totalWeight} г`}
+                </p>
               </div>
             </div>
           )}
