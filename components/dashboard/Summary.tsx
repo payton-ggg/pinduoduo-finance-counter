@@ -214,22 +214,7 @@ export function Summary({
   const getAlternativePlans = () => {
     if (profit >= 0 || !products || products.length === 0) return [];
 
-    let deficit = Math.abs(profit);
-    const options: {
-      type: string;
-      title: string;
-      items: { name: string; count: number }[];
-      profit: number;
-    }[] = [];
-
-    if (breakEvenPlan && breakEvenPlan.remainingDeficit <= 0) {
-      options.push({
-        type: "mix",
-        title: "Сборный микс (Оптимальный)",
-        items: breakEvenPlan.plan,
-        profit: breakEvenPlan.finalProfit,
-      });
-    }
+    const deficit = Math.abs(profit);
 
     const available = products
       .filter((p) => {
@@ -246,33 +231,175 @@ export function Summary({
         const sold = p.sellsCount || 0;
         const stock = p.totalPurchased || 0;
         return {
+          id: p.id,
           name: p.name,
           price: netPrice,
           remaining: stock - sold,
         };
       });
 
+    if (available.length === 0) return [];
+
+    const options: {
+      type: string;
+      title: string;
+      items: { name: string; count: number }[];
+      profit: number;
+      remainingDeficit: number;
+    }[] = [];
+
+    const solveGreedy = (sortedItems: typeof available, title: string, type: string) => {
+      let currentDeficit = deficit;
+      const items: { name: string; count: number }[] = [];
+      let totalEarned = 0;
+
+      for (const item of sortedItems) {
+        if (currentDeficit <= 0) break;
+        const countToSell = Math.min(
+          item.remaining,
+          Math.ceil(currentDeficit / item.price)
+        );
+        if (countToSell > 0) {
+          items.push({ name: item.name, count: countToSell });
+          currentDeficit -= countToSell * item.price;
+          totalEarned += countToSell * item.price;
+        }
+      }
+
+      return {
+        type,
+        title,
+        items,
+        profit: currentDeficit <= 0 ? totalEarned - deficit : totalEarned - deficit,
+        remainingDeficit: currentDeficit > 0 ? currentDeficit : 0,
+      };
+    };
+
+    // Strategy 1: Greedy sorting by Price Descending (Minimize number of units sold)
+    const mixPriceDesc = [...available].sort((a, b) => b.price - a.price);
+    options.push(solveGreedy(mixPriceDesc, "Оптимальный микс (Минимум штук)", "mix_optimal"));
+
+    // Strategy 2: Greedy sorting by Remaining Stock Descending (Clear out largest stocks first)
+    const mixStockDesc = [...available].sort((a, b) => b.remaining - a.remaining);
+    options.push(solveGreedy(mixStockDesc, "Разгрузка склада (По остаткам)", "mix_clear_large"));
+
+    // Strategy 3: Greedy sorting by Remaining Stock Ascending (Clear out almost-finished batches)
+    const mixStockAsc = [...available].sort((a, b) => a.remaining - b.remaining);
+    options.push(solveGreedy(mixStockAsc, "Закрытие мелких партий", "mix_clear_small"));
+
+    // Strategy 4: Single product focus (for any product that can cover the deficit alone)
     for (const p of available) {
       const need = Math.ceil(deficit / p.price);
       if (need <= p.remaining) {
         options.push({
           type: "single",
-          title: `Только ${p.name}`,
+          title: `Только "${p.name}"`,
           items: [{ name: p.name, count: need }],
           profit: need * p.price - deficit,
+          remainingDeficit: 0,
         });
       }
     }
 
-    options.sort((a, b) => {
-      const aCount = a.items.reduce((sum, i) => sum + i.count, 0);
-      const bCount = b.items.reduce((sum, i) => sum + i.count, 0);
-      if (aCount !== bCount) return aCount - bCount;
-      return b.profit - a.profit;
+    // Strategy 5: Partial single product focus
+    if (options.filter(o => o.type === "single").length === 0) {
+      const sortedByCoverage = [...available]
+        .map(p => ({ p, coverage: p.remaining * p.price }))
+        .sort((a, b) => b.coverage - a.coverage);
+
+      for (const entry of sortedByCoverage.slice(0, 3)) {
+        options.push({
+          type: "single_partial",
+          title: `Максимум из "${entry.p.name}" (Частично)`,
+          items: [{ name: entry.p.name, count: entry.p.remaining }],
+          profit: entry.coverage - deficit,
+          remainingDeficit: Math.max(0, deficit - entry.coverage),
+        });
+      }
+    }
+
+    // Strategy 6: Balanced Mix
+    let low = 0;
+    let high = 1.0;
+    let bestP = 1.0;
+    for (let step = 0; step < 20; step++) {
+      const mid = (low + high) / 2;
+      let sum = 0;
+      for (const item of available) {
+        sum += Math.ceil(mid * item.remaining) * item.price;
+      }
+      if (sum >= deficit) {
+        bestP = mid;
+        high = mid;
+      } else {
+        low = mid;
+      }
+    }
+    const balancedItems: { name: string; count: number }[] = [];
+    let balancedSum = 0;
+    for (const item of available) {
+      const count = Math.ceil(bestP * item.remaining);
+      if (count > 0) {
+        balancedItems.push({ name: item.name, count });
+        balancedSum += count * item.price;
+      }
+    }
+    if (balancedItems.length > 0) {
+      options.push({
+        type: "balanced",
+        title: `Равномерный микс (~${Math.round(bestP * 100)}% от остатка)`,
+        items: balancedItems,
+        profit: balancedSum - deficit,
+        remainingDeficit: balancedSum >= deficit ? 0 : Math.max(0, deficit - balancedSum),
+      });
+    }
+
+    // Strategy 7: Sell Everything (if total stock is not enough to cover deficit)
+    const totalPotential = available.reduce((sum, p) => sum + p.remaining * p.price, 0);
+    if (totalPotential < deficit) {
+      options.push({
+        type: "sell_all",
+        title: "Продать все доступные остатки",
+        items: available.map(p => ({ name: p.name, count: p.remaining })),
+        profit: totalPotential - deficit,
+        remainingDeficit: deficit - totalPotential,
+      });
+    }
+
+    // Filter duplicates and empty item arrays
+    const uniqueOptions: typeof options = [];
+    const seenSignatures = new Set<string>();
+
+    for (const opt of options) {
+      if (opt.items.length === 0) continue;
+      const signature = opt.items
+        .map(i => `${i.name}:${i.count}`)
+        .sort()
+        .join("|");
+      if (!seenSignatures.has(signature)) {
+        seenSignatures.add(signature);
+        uniqueOptions.push(opt);
+      }
+    }
+
+    uniqueOptions.sort((a, b) => {
+      if (a.remainingDeficit === 0 && b.remainingDeficit > 0) return -1;
+      if (a.remainingDeficit > 0 && b.remainingDeficit === 0) return 1;
+
+      if (a.remainingDeficit === 0 && b.remainingDeficit === 0) {
+        const aCount = a.items.reduce((sum, i) => sum + i.count, 0);
+        const bCount = b.items.reduce((sum, i) => sum + i.count, 0);
+        if (aCount !== bCount) return aCount - bCount;
+        return b.profit - a.profit;
+      } else {
+        return a.remainingDeficit - b.remainingDeficit;
+      }
     });
 
-    return options.slice(0, 10);
+    return uniqueOptions.slice(0, 10);
   };
+
+  const alternativePlans = getAlternativePlans();
 
   return (
     <div className="mb-6 overflow-hidden py-5 rounded-xl">
@@ -515,8 +642,8 @@ export function Summary({
               </button>
             </div>
             <div className="p-4 overflow-y-auto space-y-3 custom-scrollbar">
-              {getAlternativePlans().length > 0 ? (
-                getAlternativePlans().map((opt, i) => (
+              {alternativePlans.length > 0 ? (
+                alternativePlans.map((opt, i) => (
                   <div
                     key={i}
                     className="p-3 rounded-xl border bg-card hover:bg-muted/30 transition-colors"
@@ -529,12 +656,25 @@ export function Summary({
                         {opt.title}
                       </h3>
                       <div className="text-right pl-2">
-                        <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest mb-0.5">
-                          Чистыми после:
-                        </p>
-                        <p className="text-sm font-black text-green-500">
-                          +{opt.profit.toLocaleString()} ₴
-                        </p>
+                        {opt.remainingDeficit > 0 ? (
+                          <>
+                            <p className="text-[10px] font-medium text-destructive uppercase tracking-widest mb-0.5">
+                              Останется дефицит:
+                            </p>
+                            <p className="text-sm font-black text-destructive">
+                              -{opt.remainingDeficit.toLocaleString()} ₴
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest mb-0.5">
+                              Чистыми после:
+                            </p>
+                            <p className="text-sm font-black text-green-500">
+                              +{opt.profit.toLocaleString()} ₴
+                            </p>
+                          </>
+                        )}
                       </div>
                     </div>
                     <div className="space-y-1.5 bg-foreground/5 p-2.5 rounded-lg">
