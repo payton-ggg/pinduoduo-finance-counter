@@ -29,6 +29,7 @@ export type ProductUI = {
   rateUSD?: number;
   folderId?: string | null;
   folderName?: string | null;
+  weight?: number | null;
 };
 
 type ProductCardProps = {

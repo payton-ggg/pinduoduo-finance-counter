@@ -10,6 +10,7 @@ import {
   ChevronRight,
   FolderOpen,
   X,
+  Weight,
 } from "lucide-react";
 import type { ProductUI } from "./ProductCard";
 
@@ -37,7 +38,19 @@ export function Summary({
   const [showGross, setShowGross] = useState(false);
   const [showBreakEven, setShowBreakEven] = useState(false);
   const [showOptionsModal, setShowOptionsModal] = useState(false);
+  const [showWeight, setShowWeight] = useState(false);
   const profit = totalIncome - totalSpent;
+
+  const totalWeightGrams =
+    products?.reduce(
+      (sum, p) => sum + (p.weight || 0) * (p.totalPurchased || 0),
+      0,
+    ) || 0;
+
+  const formattedTotalWeight =
+    totalWeightGrams > 1000
+      ? `${(totalWeightGrams / 1000).toFixed(3)} кг`
+      : `${totalWeightGrams} г`;
 
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
@@ -458,17 +471,24 @@ export function Summary({
           </div>
         </Card>
 
-        <Card className="p-5 glass-card flex flex-col justify-between space-y-3">
-          <div className="flex items-center justify-between text-muted-foreground/80">
+        <Card
+          onClick={() => setShowWeight(!showWeight)}
+          className="p-5 glass-card flex flex-col justify-between space-y-3 cursor-pointer group hover:border-primary/40 relative overflow-hidden transition-all duration-300"
+        >
+          <div className="flex items-center justify-between text-muted-foreground/80 relative z-10">
             <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
-              Товары
+              {showWeight ? "Общий вес" : "Товары"}
             </span>
-            <div className="p-2 bg-blue-500/10 rounded-xl">
-              <Package className="h-5 w-5 text-blue-500" />
+            <div className="p-2 bg-blue-500/10 rounded-xl transition-transform group-hover:scale-110">
+              {showWeight ? (
+                <Weight className="h-5 w-5 text-blue-500" />
+              ) : (
+                <Package className="h-5 w-5 text-blue-500" />
+              )}
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
-            {variationsCount}
+          <div className="text-xl sm:text-2xl font-black tracking-tight text-foreground relative z-10">
+            {showWeight ? formattedTotalWeight : variationsCount}
           </div>
         </Card>
       </div>

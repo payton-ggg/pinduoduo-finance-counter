@@ -68,6 +68,7 @@ async function DashboardDataWrapper({
       rateUSD: p.rateUSD,
       folderId: p.folderId,
       folderName: p.folder?.name,
+      weight: p.weight,
     } as ProductUI;
   });
 
