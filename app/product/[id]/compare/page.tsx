@@ -42,25 +42,45 @@ export default async function CompareVersionsPage(props: {
     const sells = Number(v.sellsCount) || 0;
     const shippingUA = Number(v.shippingUA) || 0;
     const managementUAH = Number(v.managementUAH) || 0;
+    const unitWeight = Number(v.weight) || 0;
+    const packageWeight = unitWeight * purchased;
 
-    const purchaseCostUAH = priceCNY * (rateCNY > 0 ? rateCNY : 1);
-    const totalCostPerUnit = purchaseCostUAH + shippingUA + managementUAH;
+    const unitPurchaseUAH = priceCNY * (rateCNY > 0 ? rateCNY : 1);
+    const totalPurchaseUAH = unitPurchaseUAH * purchased;
+    const totalExpenses = totalPurchaseUAH + shippingUA + managementUAH;
 
-    const actualNetPrice =
-      v.netPrice || (priceInUA > 0 ? priceInUA * 0.98 - 20 : 0);
-    const margin = actualNetPrice - totalCostPerUnit;
-    const roi = totalCostPerUnit > 0 ? (margin / totalCostPerUnit) * 100 : 0;
+    const actualNetPrice = v.netPrice || (priceInUA > 0 ? priceInUA * 0.98 - 20 : 0);
+    const potentialRevenue = actualNetPrice * purchased;
+    const totalRevenue = actualNetPrice * sells;
+
+    const potentialGrossProfit = potentialRevenue - totalPurchaseUAH;
+    const currentGrossProfit = totalRevenue - totalPurchaseUAH;
+
+    const potentialNetProfit = potentialRevenue - totalExpenses;
+    const currentNetProfit = totalRevenue - totalExpenses;
+
+    const potentialRoi = totalExpenses > 0 ? (potentialNetProfit / totalExpenses) * 100 : 0;
+    const currentRoi = totalExpenses > 0 ? (currentNetProfit / totalExpenses) * 100 : 0;
 
     return {
       ...v,
       originalIndex: idx + 1,
-      purchaseCostUAH,
-      totalCostPerUnit,
+      unitPurchaseUAH,
+      totalPurchaseUAH,
+      totalExpenses,
       actualNetPrice,
-      margin,
-      roi,
+      potentialRevenue,
+      totalRevenue,
+      potentialGrossProfit,
+      currentGrossProfit,
+      potentialNetProfit,
+      currentNetProfit,
+      potentialRoi,
+      currentRoi,
       sells,
       purchased,
+      unitWeight,
+      packageWeight,
       isIncluded: v.isIncluded !== false,
     };
   });
@@ -69,27 +89,23 @@ export default async function CompareVersionsPage(props: {
   const includedVariants = computedVariants.filter((v) => v.isIncluded);
 
   const maxSells = Math.max(...includedVariants.map((v) => v.sells), 0);
-  const maxMargin = Math.max(...includedVariants.map((v) => v.margin), 0);
-  const maxRoi = Math.max(...includedVariants.map((v) => v.roi), 0);
+  const maxMargin = Math.max(...includedVariants.map((v) => v.potentialNetProfit), 0);
+  const maxRoi = Math.max(...includedVariants.map((v) => v.potentialRoi), 0);
 
-  // Overall Maximums for drawing relative bars (even including excluded variants for visual scale)
   const absoluteMaxSells = Math.max(...computedVariants.map((v) => v.sells), 1);
   const absoluteMaxMargin = Math.max(
-    ...computedVariants.map((v) => Math.abs(v.margin)),
+    ...computedVariants.map((v) => Math.abs(v.potentialNetProfit)),
     1,
   );
 
-  const winnerSells =
-    maxSells > 0 ? includedVariants.find((v) => v.sells === maxSells) : null;
-  const winnerMargin =
-    maxMargin > 0 ? includedVariants.find((v) => v.margin === maxMargin) : null;
-  const winnerRoi =
-    maxRoi > 0 ? includedVariants.find((v) => v.roi === maxRoi) : null;
+  const winnerSells = maxSells > 0 ? includedVariants.find((v) => v.sells === maxSells) : null;
+  const winnerMargin = maxMargin > 0 ? includedVariants.find((v) => v.potentialNetProfit === maxMargin) : null;
+  const winnerRoi = maxRoi > 0 ? includedVariants.find((v) => v.potentialRoi === maxRoi) : null;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-20">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sticky top-0 bg-background/80 backdrop-blur-xl z-30 pt-4 pb-4 border-b border-foreground/5 -mx-4 px-4 sm:mx-0 sm:px-0">
+    <div className="max-w-7xl mx-auto space-y-8 pb-20">
+      {/* Clean Header */}
+      <div className="flex flex-col gap-4 mt-4">
         <Link
           href={`/product/${product.id}`}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit"
@@ -98,7 +114,7 @@ export default async function CompareVersionsPage(props: {
           Назад к товару
         </Link>
         <div className="flex items-center gap-4">
-          <div className="relative h-12 w-12 rounded-lg overflow-hidden border shadow-sm shrink-0">
+          <div className="relative h-14 w-14 rounded-xl overflow-hidden border shadow-sm shrink-0">
             <Image
               src={
                 (product.images &&
@@ -112,10 +128,10 @@ export default async function CompareVersionsPage(props: {
             />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-black leading-tight line-clamp-1">
+            <h1 className="text-2xl sm:text-3xl font-black leading-tight line-clamp-1">
               {product.name}
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm sm:text-base text-muted-foreground">
               Детальное сравнение версий ({variants.length})
             </p>
           </div>
@@ -132,23 +148,17 @@ export default async function CompareVersionsPage(props: {
           color="blue"
         />
         <WinnerCard
-          title="Самая прибыльная"
+          title="Макс. Потенц. Прибыль"
           icon={<DollarSign className="w-5 h-5 text-green-500" />}
           winner={winnerMargin}
-          value={
-            winnerMargin
-              ? `${winnerMargin.margin.toFixed(0)} ₴ маржи`
-              : "Нет данных"
-          }
+          value={winnerMargin ? `${winnerMargin.potentialNetProfit.toFixed(0)} ₴` : "Нет данных"}
           color="green"
         />
         <WinnerCard
-          title="Лучший ROI"
+          title="Лучший Потенц. ROI"
           icon={<TrendingUp className="w-5 h-5 text-purple-500" />}
           winner={winnerRoi}
-          value={
-            winnerRoi ? `${winnerRoi.roi.toFixed(1)}% рентаб.` : "Нет данных"
-          }
+          value={winnerRoi ? `${winnerRoi.potentialRoi.toFixed(1)}%` : "Нет данных"}
           color="purple"
         />
       </div>
@@ -158,14 +168,14 @@ export default async function CompareVersionsPage(props: {
         <div className="overflow-x-auto pb-2">
           <table className="w-full text-sm text-left border-collapse">
             <thead>
-              <tr className="border-b border-foreground/10 bg-muted/30">
-                <th className="p-4 font-semibold text-muted-foreground sticky left-0 bg-card/95 backdrop-blur-md z-20 min-w-[140px] shadow-[4px_0_12px_rgba(0,0,0,0.03)] border-r border-foreground/5">
+              <tr className="border-b border-foreground/10 bg-muted/20">
+                <th className="p-4 font-semibold text-muted-foreground sticky left-0 bg-card z-20 min-w-[150px] shadow-[4px_0_12px_rgba(0,0,0,0.03)] border-r border-foreground/5">
                   Метрика
                 </th>
                 {computedVariants.map((v) => (
                   <th
                     key={v.id}
-                    className={`p-4 min-w-[220px] align-top ${!v.isIncluded ? "opacity-50" : ""}`}
+                    className={`p-4 min-w-[240px] align-top ${!v.isIncluded ? "opacity-50" : ""}`}
                   >
                     <div className="flex flex-col gap-1.5">
                       <div className="flex items-center justify-between">
@@ -195,28 +205,21 @@ export default async function CompareVersionsPage(props: {
             </thead>
             <tbody className="divide-y divide-foreground/5">
               {/* Sales Row */}
-              <tr className="hover:bg-muted/10 transition-colors">
-                <td className="p-4 font-medium sticky left-0 bg-card/95 backdrop-blur-md z-20 shadow-[4px_0_12px_rgba(0,0,0,0.03)] border-r border-foreground/5">
+              <tr className="hover:bg-muted/5 transition-colors">
+                <td className="p-4 font-medium sticky left-0 bg-card z-20 shadow-[4px_0_12px_rgba(0,0,0,0.03)] border-r border-foreground/5">
                   Продажи
                 </td>
                 {computedVariants.map((v) => (
-                  <td
-                    key={v.id}
-                    className={`p-4 ${!v.isIncluded ? "opacity-50 grayscale-30" : ""}`}
-                  >
+                  <td key={v.id} className={`p-4 ${!v.isIncluded ? "opacity-50 grayscale-30" : ""}`}>
                     <div className="flex flex-col gap-2">
                       <div className="flex items-end gap-2">
                         <span className="text-lg font-black">{v.sells}</span>
-                        <span className="text-xs text-muted-foreground mb-0.5">
-                          из {v.purchased}
-                        </span>
+                        <span className="text-xs text-muted-foreground mb-0.5">из {v.purchased}</span>
                       </div>
                       <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                         <div
                           className="h-full bg-blue-500 rounded-full transition-all duration-1000 ease-out"
-                          style={{
-                            width: `${(v.sells / absoluteMaxSells) * 100}%`,
-                          }}
+                          style={{ width: `${(v.sells / absoluteMaxSells) * 100}%` }}
                         />
                       </div>
                     </div>
@@ -224,133 +227,115 @@ export default async function CompareVersionsPage(props: {
                 ))}
               </tr>
 
-              {/* Margin Row */}
-              <tr className="hover:bg-muted/10 transition-colors">
-                <td className="p-4 font-medium sticky left-0 bg-card/95 backdrop-blur-md z-20 shadow-[4px_0_12px_rgba(0,0,0,0.03)] border-r border-foreground/5">
-                  Маржа (1 шт)
+              {/* Potential Net Profit Row */}
+              <tr className="hover:bg-muted/5 transition-colors">
+                <td className="p-4 font-medium sticky left-0 bg-card z-20 shadow-[4px_0_12px_rgba(0,0,0,0.03)] border-r border-foreground/5">
+                  Чистая прибыль<br/>(Потенциал)
                 </td>
                 {computedVariants.map((v) => (
-                  <td
-                    key={v.id}
-                    className={`p-4 ${!v.isIncluded ? "opacity-50 grayscale-30" : ""}`}
-                  >
+                  <td key={v.id} className={`p-4 ${!v.isIncluded ? "opacity-50 grayscale-30" : ""}`}>
                     <div className="flex flex-col gap-2">
-                      <span
-                        className={`text-lg font-black ${v.margin >= 0 ? "text-green-600" : "text-red-600"}`}
-                      >
-                        {v.margin > 0 ? "+" : ""}
-                        {v.margin.toFixed(2)} ₴
+                      <span className={`text-lg font-black ${v.potentialNetProfit >= 0 ? "text-green-600" : "text-red-600"}`}>
+                        {v.potentialNetProfit > 0 ? "+" : ""}{v.potentialNetProfit.toFixed(2)} ₴
                       </span>
                       <div className="h-2 w-full bg-muted rounded-full overflow-hidden flex">
-                        {v.margin >= 0 ? (
+                        {v.potentialNetProfit >= 0 ? (
                           <div
                             className="h-full bg-green-500 rounded-full transition-all duration-1000 ease-out"
-                            style={{
-                              width: `${(v.margin / absoluteMaxMargin) * 100}%`,
-                            }}
+                            style={{ width: `${(v.potentialNetProfit / absoluteMaxMargin) * 100}%` }}
                           />
                         ) : (
                           <div
                             className="h-full bg-red-500 rounded-full transition-all duration-1000 ease-out"
-                            style={{
-                              width: `${(Math.abs(v.margin) / absoluteMaxMargin) * 100}%`,
-                            }}
+                            style={{ width: `${(Math.abs(v.potentialNetProfit) / absoluteMaxMargin) * 100}%` }}
                           />
                         )}
                       </div>
+                      <div className="text-xs text-muted-foreground">Текущая: {v.currentNetProfit > 0 ? "+" : ""}{v.currentNetProfit.toFixed(2)} ₴</div>
                     </div>
+                  </td>
+                ))}
+              </tr>
+
+              {/* Potential Gross Profit Row */}
+              <tr className="hover:bg-muted/5 transition-colors bg-muted/10">
+                <td className="p-4 font-medium sticky left-0 bg-card z-20 shadow-[4px_0_12px_rgba(0,0,0,0.03)] border-r border-foreground/5 text-xs text-muted-foreground uppercase tracking-wider">
+                  Грязная прибыль
+                </td>
+                {computedVariants.map((v) => (
+                  <td key={v.id} className={`p-4 ${!v.isIncluded ? "opacity-50" : ""}`}>
+                    <div className="font-semibold">{v.potentialGrossProfit > 0 ? "+" : ""}{v.potentialGrossProfit.toFixed(2)} ₴</div>
+                    <div className="text-xs text-muted-foreground">Текущая: {v.currentGrossProfit.toFixed(2)} ₴</div>
                   </td>
                 ))}
               </tr>
 
               {/* ROI Row */}
-              <tr className="hover:bg-muted/10 transition-colors">
-                <td className="p-4 font-medium sticky left-0 bg-card/95 backdrop-blur-md z-20 shadow-[4px_0_12px_rgba(0,0,0,0.03)] border-r border-foreground/5">
-                  ROI (Рентаб.)
+              <tr className="hover:bg-muted/5 transition-colors">
+                <td className="p-4 font-medium sticky left-0 bg-card z-20 shadow-[4px_0_12px_rgba(0,0,0,0.03)] border-r border-foreground/5">
+                  Потенциальный ROI
                 </td>
                 {computedVariants.map((v) => (
-                  <td
-                    key={v.id}
-                    className={`p-4 ${!v.isIncluded ? "opacity-50 grayscale-30" : ""}`}
-                  >
-                    <div className="flex items-center gap-2">
+                  <td key={v.id} className={`p-4 ${!v.isIncluded ? "opacity-50 grayscale-30" : ""}`}>
+                    <div className="flex flex-col gap-1 items-start">
                       <span
-                        className={`px-2.5 py-1 rounded-lg text-sm font-bold ${v.roi >= 100 ? "bg-purple-500/10 text-purple-600" : v.roi >= 50 ? "bg-green-500/10 text-green-600" : v.roi >= 0 ? "bg-zinc-500/10 text-zinc-600" : "bg-red-500/10 text-red-600"}`}
+                        className={`px-2.5 py-1 rounded-lg text-sm font-bold ${v.potentialRoi >= 100 ? "bg-purple-500/10 text-purple-600" : v.potentialRoi >= 50 ? "bg-green-500/10 text-green-600" : v.potentialRoi >= 0 ? "bg-zinc-500/10 text-zinc-600" : "bg-red-500/10 text-red-600"}`}
                       >
-                        {v.roi.toFixed(1)}%
+                        {v.potentialRoi.toFixed(1)}%
                       </span>
+                      <span className="text-[10px] text-muted-foreground px-1">Текущий: {v.currentRoi.toFixed(1)}%</span>
                     </div>
                   </td>
                 ))}
               </tr>
 
-              {/* Purchase Cost Row */}
-              <tr className="hover:bg-muted/10 transition-colors bg-muted/10">
-                <td className="p-4 font-medium sticky left-0 bg-card/95 backdrop-blur-md z-20 shadow-[4px_0_12px_rgba(0,0,0,0.03)] border-r border-foreground/5 text-xs text-muted-foreground uppercase tracking-wider">
-                  Закупка
+              {/* Expenses Row */}
+              <tr className="hover:bg-muted/5 transition-colors">
+                <td className="p-4 font-medium sticky left-0 bg-card z-20 shadow-[4px_0_12px_rgba(0,0,0,0.03)] border-r border-foreground/5">
+                  Расход (Всего)
                 </td>
                 {computedVariants.map((v) => (
-                  <td
-                    key={v.id}
-                    className={`p-4 ${!v.isIncluded ? "opacity-50" : ""}`}
-                  >
-                    <div className="font-semibold">{Number(v.priceCNY)} ¥</div>
-                    <div className="text-xs text-muted-foreground">
-                      ≈ {v.purchaseCostUAH.toFixed(2)} ₴
-                    </div>
-                  </td>
-                ))}
-              </tr>
-
-              {/* Selling Price Row */}
-              <tr className="hover:bg-muted/10 transition-colors bg-muted/10">
-                <td className="p-4 font-medium sticky left-0 bg-card/95 backdrop-blur-md z-20 shadow-[4px_0_12px_rgba(0,0,0,0.03)] border-r border-foreground/5 text-xs text-muted-foreground uppercase tracking-wider">
-                  Продажа
-                </td>
-                {computedVariants.map((v) => (
-                  <td
-                    key={v.id}
-                    className={`p-4 ${!v.isIncluded ? "opacity-50" : ""}`}
-                  >
-                    <div className="font-semibold">
-                      {Number(v.priceInUA) > 0 ? `${v.priceInUA} ₴` : "—"}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      Чистыми: {v.actualNetPrice.toFixed(2)} ₴
-                    </div>
-                  </td>
-                ))}
-              </tr>
-
-              {/* Additional Costs Row */}
-              <tr className="hover:bg-muted/10 transition-colors">
-                <td className="p-4 font-medium sticky left-0 bg-card/95 backdrop-blur-md z-20 shadow-[4px_0_12px_rgba(0,0,0,0.03)] border-r border-foreground/5">
-                  Доп. расходы
-                </td>
-                {computedVariants.map((v) => (
-                  <td
-                    key={v.id}
-                    className={`p-4 ${!v.isIncluded ? "opacity-50" : ""}`}
-                  >
-                    <div className="text-sm space-y-1">
+                  <td key={v.id} className={`p-4 ${!v.isIncluded ? "opacity-50" : ""}`}>
+                    <div className="font-bold text-base text-foreground mb-2">{v.totalExpenses.toFixed(2)} ₴</div>
+                    <div className="text-xs space-y-1">
                       <div className="flex justify-between border-b border-foreground/5 pb-1">
+                        <span className="text-muted-foreground">Закупка:</span>
+                        <span className="font-medium">{v.totalPurchaseUAH.toFixed(2)} ₴</span>
+                      </div>
+                      <div className="flex justify-between border-b border-foreground/5 pb-1 pt-1">
                         <span className="text-muted-foreground">Доставка:</span>
-                        <span className="font-medium">
-                          {Number(v.shippingUA).toFixed(2)} ₴
-                        </span>
+                        <span className="font-medium">{Number(v.shippingUA || 0).toFixed(2)} ₴</span>
                       </div>
                       <div className="flex justify-between pt-1">
-                        <span className="text-muted-foreground">
-                          Управление:
-                        </span>
-                        <span className="font-medium">
-                          {Number(v.managementUAH).toFixed(2)} ₴
-                        </span>
+                        <span className="text-muted-foreground">Управление:</span>
+                        <span className="font-medium">{Number(v.managementUAH || 0).toFixed(2)} ₴</span>
                       </div>
                     </div>
                   </td>
                 ))}
               </tr>
+
+              {/* Weight Row */}
+              <tr className="hover:bg-muted/5 transition-colors bg-muted/10">
+                <td className="p-4 font-medium sticky left-0 bg-card z-20 shadow-[4px_0_12px_rgba(0,0,0,0.03)] border-r border-foreground/5 text-xs text-muted-foreground uppercase tracking-wider">
+                  Вес
+                </td>
+                {computedVariants.map((v) => (
+                  <td key={v.id} className={`p-4 ${!v.isIncluded ? "opacity-50" : ""}`}>
+                    <div className="flex flex-col gap-1 text-sm">
+                      <div className="flex gap-2">
+                        <span className="text-muted-foreground">1 шт:</span>
+                        <span className="font-semibold">{v.unitWeight > 1000 ? `${(v.unitWeight/1000).toFixed(2)} кг` : `${v.unitWeight} г`}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-muted-foreground">Посылка:</span>
+                        <span className="font-semibold">{v.packageWeight > 1000 ? `${(v.packageWeight/1000).toFixed(2)} кг` : `${v.packageWeight} г`}</span>
+                      </div>
+                    </div>
+                  </td>
+                ))}
+              </tr>
+
             </tbody>
           </table>
         </div>
