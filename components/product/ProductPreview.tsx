@@ -11,8 +11,6 @@ import {
   TrendingUp,
   TrendingDown,
   Truck,
-  Settings,
-  Cpu,
   Weight,
   ShoppingCart,
   BarChart3,
@@ -34,61 +32,47 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
       setTimeout(() => setCopiedField(null), 2000);
     }
   };
+
   const images: string[] = Array.isArray(data?.images)
     ? data.images
         .map((img: any) => (typeof img === "string" ? img : (img?.url ?? "")))
         .filter(Boolean)
     : [];
 
-  const rateCNY = data?.rateCNY || rates?.cny || 0;
-  const rateUSD = data?.rateUSD || rates?.usd || 0;
-  const priceCNY = Number(data?.priceCNY) || 0;
-  const priceInUA = Number(data?.priceInUA) || 0;
-  const purchased = Number(data?.purchasedCount) || 0;
-  const sells = Number(data?.sellsCount) || 0;
-  const shippingUA = Number(data?.shippingUA) || 0;
-  const managementUAH = Number(data?.managementUAH) || 0;
+  const variants: any[] = Array.isArray(data?.variants) ? data.variants : [];
 
-  const unitWeight = Number(data?.weight) || 0;
-  const totalWeight = unitWeight * purchased;
+  const totals = variants.reduce(
+    (acc, v) => {
+      const rateCNY = v.rateCNY || rates?.cny || 0;
+      const rateUSD = v.rateUSD || rates?.usd || 0;
+      const priceCNY = Number(v.priceCNY) || 0;
+      const priceInUA = Number(v.priceInUA) || 0;
+      const purchased = Number(v.purchasedCount) || 0;
+      const sells = Number(v.sellsCount) || 0;
+      const shippingUA = Number(v.shippingUA) || 0;
+      const managementUAH = Number(v.managementUAH) || 0;
+      const unitWeight = Number(v.weight) || 0;
 
-  const purchaseUnitCostUAH = priceCNY * (rateCNY > 0 ? rateCNY : 1);
-  const totalGoodsCost = purchased * purchaseUnitCostUAH;
-  const actualNetPrice =
-    data?.netPrice || (priceInUA > 0 ? priceInUA * 0.98 - 20 : 0);
+      const purchaseUnitCostUAH = priceCNY * (rateCNY > 0 ? rateCNY : 1);
+      const goodsCost = purchased * purchaseUnitCostUAH;
+      const actualNetPrice = v.netPrice || (priceInUA > 0 ? priceInUA * 0.98 - 20 : 0);
+      const income = sells * actualNetPrice;
+      const costs = goodsCost + shippingUA + managementUAH;
 
-  const computedIncome = sells * actualNetPrice;
-  const totalCalculatedCosts = totalGoodsCost + shippingUA + managementUAH;
-
-  const potentialTotalRevenue = purchased * actualNetPrice;
-  const potentialProfit = potentialTotalRevenue - totalCalculatedCosts;
-  const margin = computedIncome - totalCalculatedCosts;
-  const remainingStock = purchased - sells;
-
-  const shippingLabel =
-    data?.shippingType === "sea"
-      ? "Море (7.1$/кг)"
-      : data?.shippingType === "custom"
-        ? `Своя (${data?.customShippingRate || 0}$/кг)`
-        : "Авиа (18.3$/кг)";
-
-  const flags = [
-    {
-      key: "workModalWindowIOS",
-      label: "Модальное окно iOS",
-      value: data?.workModalWindowIOS,
+      acc.totalPurchased += purchased;
+      acc.totalSells += sells;
+      acc.totalIncome += income;
+      acc.totalCosts += costs;
+      acc.totalPotentialRevenue += purchased * actualNetPrice;
+      acc.totalWeight += unitWeight * purchased;
+      return acc;
     },
-    { key: "soundReducer", label: "Шумоподавление", value: data?.soundReducer },
-    { key: "sensesOfEar", label: "Датчик уха", value: data?.sensesOfEar },
-    {
-      key: "wirelessCharger",
-      label: "Беспроводная зарядка",
-      value: data?.wirelessCharger,
-    },
-    { key: "gyroscope", label: "Гироскоп", value: data?.gyroscope },
-  ];
+    { totalPurchased: 0, totalSells: 0, totalIncome: 0, totalCosts: 0, totalPotentialRevenue: 0, totalWeight: 0 }
+  );
 
-  const activeFlags = flags.filter((f) => f.value);
+  const potentialProfit = totals.totalPotentialRevenue - totals.totalCosts;
+  const margin = totals.totalIncome - totals.totalCosts;
+  const remainingStock = totals.totalPurchased - totals.totalSells;
 
   return (
     <div className="space-y-6">
@@ -115,19 +99,19 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
         <StatCard
           icon={<TrendingUp className="h-5 w-5 text-green-500" />}
           label="Доход (текущий, чистый)"
-          value={`${computedIncome.toFixed(2)} ₴`}
+          value={`${totals.totalIncome.toFixed(2)} ₴`}
           large
         />
         <StatCard
           icon={<TrendingDown className="h-5 w-5 text-red-500" />}
           label="Расходы (всего)"
-          value={`${totalCalculatedCosts.toFixed(2)} ₴`}
+          value={`${totals.totalCosts.toFixed(2)} ₴`}
           large
         />
         <StatCard
           icon={<ShoppingCart className="h-5 w-5 text-blue-500" />}
           label="Продано / Куплено"
-          value={`${sells} / ${purchased}`}
+          value={`${totals.totalSells} / ${totals.totalPurchased}`}
           large
         />
         <StatCard
@@ -145,7 +129,7 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
           <div className="flex items-center gap-2 mb-1">
             <BarChart3 className="h-5 w-5 text-muted-foreground" />
             <p className="text-sm text-muted-foreground font-medium">
-              Прогноз прибыли (если продать все {purchased} шт)
+              Прогноз прибыли (если продать все {totals.totalPurchased} шт)
             </p>
           </div>
           <p
@@ -158,240 +142,116 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
         <Card
           className={`p-5 border-2 relative ${margin >= 0 ? "border-green-500/30 bg-green-50/50 dark:bg-green-950/20" : "border-orange-500/30 bg-orange-50/50 dark:bg-orange-950/20"}`}
         >
-          <div className="flex justify-between items-start">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <BarChart3 className="h-5 w-5 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground font-medium">
-                  Маржа ({sells} из {purchased} шт)
-                </p>
-              </div>
-              <p
-                className={`text-3xl font-bold ${margin >= 0 ? "text-green-600" : "text-orange-600"}`}
-              >
-                {margin >= 0 ? "+" : ""}
-                {margin.toFixed(2)} ₴
-              </p>
-            </div>
-            {margin < 0 && priceInUA > 0 && (
-              <div className="text-right flex flex-col justify-end h-full">
-                {(() => {
-                  const deficit = Math.abs(margin);
-                  const itemsToBreakEven = Math.ceil(deficit / actualNetPrice);
-                  const canBreakEven = itemsToBreakEven <= remainingStock;
-                  const finalProfit =
-                    itemsToBreakEven * actualNetPrice - deficit;
-
-                  if (!canBreakEven) {
-                    return (
-                      <div className="bg-red-100/50 dark:bg-red-900/30 p-2 rounded-lg border border-red-200 dark:border-red-800/50 mt-2">
-                        <p className="text-xs font-bold text-red-600 dark:text-red-400">
-                          Не хватит товара
-                        </p>
-                        <p className="text-[10px] text-red-500/80">
-                          Останется: {potentialProfit.toFixed(2)} ₴
-                        </p>
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <div className="bg-orange-100/50 dark:bg-orange-900/30 p-2 rounded-lg border border-orange-200 dark:border-orange-800/50 mt-2">
-                      <p className="text-xs font-medium text-orange-800 dark:text-orange-300">
-                        Выход в ноль:
-                      </p>
-                      <p className="text-base font-black text-orange-600 dark:text-orange-400">
-                        {itemsToBreakEven} шт
-                      </p>
-                      {finalProfit > 0 && (
-                        <p className="text-[10px] font-bold text-green-600 dark:text-green-400 mt-0.5">
-                          И будет +{finalProfit.toFixed(2)} ₴
-                        </p>
-                      )}
-                    </div>
-                  );
-                })()}
-              </div>
-            )}
+          <div className="flex items-center gap-2 mb-1">
+            <BarChart3 className="h-5 w-5 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground font-medium">
+              Маржа ({totals.totalSells} из {totals.totalPurchased} шт)
+            </p>
           </div>
+          <p
+            className={`text-3xl font-bold ${margin >= 0 ? "text-green-600" : "text-orange-600"}`}
+          >
+            {margin >= 0 ? "+" : ""}
+            {margin.toFixed(2)} ₴
+          </p>
         </Card>
       </div>
 
-      <Card className="p-5">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-          Цены и курсы
-        </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-y-4 gap-x-6">
-          <InfoRow label="Цена закупки" value={`${priceCNY} ¥`} />
-          <InfoRow
-            label="Закупка в ₴"
-            value={`${purchaseUnitCostUAH.toFixed(2)} ₴`}
-          />
-          <InfoRow label="Цена продажи" value={`${priceInUA} ₴`} />
-          <InfoRow
-            label="Сумма закупки"
-            value={`${totalGoodsCost.toFixed(2)} ₴`}
-            sub={`${purchased} шт`}
-          />
-          <InfoRow
-            label="Курс CNY"
-            value={rateCNY > 0 ? rateCNY.toFixed(4) : "—"}
-          />
-          <InfoRow
-            label="Курс USD"
-            value={rateUSD > 0 ? rateUSD.toFixed(4) : "—"}
-          />
-          <InfoRow
-            label="Доставка"
-            value={`${shippingUA.toFixed(2)} ₴`}
-            sub={shippingLabel}
-          />
-          <InfoRow label="Управление" value={`${managementUAH.toFixed(2)} ₴`} />
-        </div>
-      </Card>
-
-      <Card className="p-5">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-          Характеристики
-        </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-4 gap-x-6">
-          {data?.chip && (
-            <div className="flex items-center gap-2">
-              <Cpu className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">Чип</p>
-                <p className="font-medium">{data.chip}</p>
-              </div>
-            </div>
-          )}
-          {unitWeight > 0 && (
-            <div className="flex items-center gap-2">
-              <Weight className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">Вес</p>
-                <p className="font-medium">
-                  {unitWeight > 1000
-                    ? `${(unitWeight / 1000).toFixed(3)} кг`
-                    : `${unitWeight} г`}
-                </p>
-              </div>
-            </div>
-          )}
-          {totalWeight > 0 && (
-            <div className="flex items-center gap-2">
-              <Weight className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">Вес посылки</p>
-                <p className="font-medium">
-                  {totalWeight > 1000
-                    ? `${(totalWeight / 1000).toFixed(3)} кг`
-                    : `${totalWeight} г`}
-                </p>
-              </div>
-            </div>
-          )}
-          {data?.equipment && (
-            <div className="flex items-center gap-2">
-              <Settings className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">Комплектация</p>
-                <p className="font-medium">{data.equipment}</p>
-              </div>
-            </div>
-          )}
-          <div className="flex items-center gap-2">
-            <Truck className="h-4 w-4 text-muted-foreground" />
-            <div>
-              <p className="text-xs text-muted-foreground">Тип доставки</p>
-              <p className="font-medium">{shippingLabel}</p>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {activeFlags.length > 0 && (
+      {/* Variants detail */}
+      {variants.length > 0 && (
         <Card className="p-5">
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-            Функции
+            Версии ({variants.length})
           </h3>
-          <div className="flex flex-wrap gap-2">
-            {flags.map((flag) => (
-              <span
-                key={flag.key}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium ${
-                  flag.value
-                    ? "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300"
-                    : "bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500"
-                }`}
-              >
-                {flag.value ? (
-                  <Check className="h-3.5 w-3.5" />
-                ) : (
-                  <X className="h-3.5 w-3.5" />
-                )}
-                {flag.label}
-              </span>
-            ))}
+          <div className="space-y-4">
+            {variants.map((v: any, i: number) => {
+              const rateCNY = v.rateCNY || rates?.cny || 0;
+              const priceCNY = Number(v.priceCNY) || 0;
+              const priceInUA = Number(v.priceInUA) || 0;
+              const purchased = Number(v.purchasedCount) || 0;
+              const sells = Number(v.sellsCount) || 0;
+              const shippingUA = Number(v.shippingUA) || 0;
+              const managementUAH = Number(v.managementUAH) || 0;
+              const unitWeight = Number(v.weight) || 0;
+              const purchaseUAH = priceCNY * (rateCNY > 0 ? rateCNY : 1);
+
+              const shippingLabel =
+                v.shippingType === "sea"
+                  ? "Море (7.1$/кг)"
+                  : v.shippingType === "custom"
+                    ? `Своя (${v.customShippingRate || 0}$/кг)`
+                    : "Авиа (18.3$/кг)";
+
+              return (
+                <div key={v.id || i} className="border rounded-xl p-4 bg-foreground/2">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-sm font-bold">Версия {i + 1}</h4>
+                    {v.pddSearchQuery && (
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+                          PDD: {v.pddSearchQuery}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopy(v.pddSearchQuery, `pdd-${i}`)}
+                          className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {copiedField === `pdd-${i}` ? (
+                            <Check className="h-3.5 w-3.5 text-green-500" />
+                          ) : (
+                            <Copy className="h-3.5 w-3.5" />
+                          )}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-y-3 gap-x-6 text-sm">
+                    <InfoRow label="Закупка" value={`${priceCNY} ¥ ≈ ${purchaseUAH.toFixed(2)} ₴`} />
+                    <InfoRow label="Продажа" value={priceInUA > 0 ? `${priceInUA} ₴` : "—"} />
+                    <InfoRow label="Куплено / Продано" value={`${purchased} / ${sells}`} />
+                    {unitWeight > 0 && (
+                      <InfoRow
+                        label="Вес"
+                        value={unitWeight > 1000 ? `${(unitWeight / 1000).toFixed(3)} кг` : `${unitWeight} г`}
+                      />
+                    )}
+                    <InfoRow label="Доставка" value={`${shippingUA.toFixed(2)} ₴`} sub={shippingLabel} />
+                    <InfoRow label="Управление" value={`${managementUAH.toFixed(2)} ₴`} />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </Card>
       )}
 
-      {(data?.olxUrl || data?.pinduoduoUrl) && (
+      {data?.pinduoduoUrl && (
         <Card className="p-5">
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
             Ссылки
           </h3>
-          <div className="flex flex-col sm:flex-row gap-3">
-            {data?.olxUrl && (
-              <div className="flex items-center gap-1">
-                <a
-                  href={data.olxUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-muted/50 transition-colors text-sm font-medium"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  OLX
-                </a>
-                <button
-                  type="button"
-                  onClick={() => handleCopy(data.olxUrl, "olxUrl")}
-                  className="p-2 rounded-lg border hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground"
-                  title="Скопировать ссылку"
-                >
-                  {copiedField === "olxUrl" ? (
-                    <Check className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                </button>
-              </div>
-            )}
-            {data?.pinduoduoUrl && (
-              <div className="flex items-center gap-1">
-                <a
-                  href={data.pinduoduoUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-muted/50 transition-colors text-sm font-medium"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  Pinduoduo
-                </a>
-                <button
-                  type="button"
-                  onClick={() => handleCopy(data.pinduoduoUrl, "pinduoduoUrl")}
-                  className="p-2 rounded-lg border hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground"
-                  title="Скопировать ссылку"
-                >
-                  {copiedField === "pinduoduoUrl" ? (
-                    <Check className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                </button>
-              </div>
-            )}
+          <div className="flex items-center gap-1">
+            <a
+              href={data.pinduoduoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-muted/50 transition-colors text-sm font-medium"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Pinduoduo
+            </a>
+            <button
+              type="button"
+              onClick={() => handleCopy(data.pinduoduoUrl, "pinduoduoUrl")}
+              className="p-2 rounded-lg border hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground"
+              title="Скопировать ссылку"
+            >
+              {copiedField === "pinduoduoUrl" ? (
+                <Check className="h-4 w-4 text-green-500" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
+            </button>
           </div>
         </Card>
       )}
