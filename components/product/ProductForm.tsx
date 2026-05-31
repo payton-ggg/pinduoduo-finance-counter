@@ -33,6 +33,7 @@ type VariantValues = {
   rateUSD?: number;
   shippingType?: "air" | "sea" | "custom";
   customShippingRate?: number;
+  isIncluded?: boolean;
 };
 
 type FormValues = {
@@ -58,6 +59,7 @@ type ProductFormProps = {
 const emptyVariant = (): VariantValues => ({
   priceCNY: 0,
   shippingType: "air",
+  isIncluded: true,
 });
 
 export default function ProductForm({
@@ -76,6 +78,9 @@ export default function ProductForm({
     new Set(),
   );
   const [deletedVariantIds, setDeletedVariantIds] = useState<string[]>([]);
+  const [activeVariantIndex, setActiveVariantIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   useEffect(() => {
     fetch("/api/folders")
@@ -200,6 +205,8 @@ export default function ProductForm({
 
   const totals = variants.reduce(
     (acc, v) => {
+      if (v.isIncluded === false) return acc;
+
       const rateCNY = v.rateCNY || 0;
       const purchased = Number(v.purchasedCount) || 0;
       const sells = Number(v.sellsCount) || 0;

@@ -42,6 +42,7 @@ model Variant {
   rateUSD   Float?
   shippingType String?
   customShippingRate Float?
+  isIncluded Boolean @default(true)
 
   createdAt DateTime @default(now())
 }
