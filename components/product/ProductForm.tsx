@@ -112,6 +112,7 @@ export default function ProductForm({
           rateUSD: v.rateUSD ?? undefined,
           shippingType: v.shippingType ?? "air",
           customShippingRate: v.customShippingRate ?? undefined,
+          isIncluded: v.isIncluded ?? true,
         }))
       : [emptyVariant()];
 
