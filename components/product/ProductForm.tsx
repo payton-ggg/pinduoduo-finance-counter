@@ -202,42 +202,31 @@ export default function ProductForm({
   }, [initialData, initialRates, setValue]);
 
   const variants = watch("variants");
+  const activeVariant = variants[activeVariantIndex] || variants[0] || {};
+  const totals = (() => {
+    const rateCNY = activeVariant.rateCNY || 0;
+    const purchased = Number(activeVariant.purchasedCount) || 0;
+    const sells = Number(activeVariant.sellsCount) || 0;
+    const unitCost = (Number(activeVariant.priceCNY) || 0) * (rateCNY > 0 ? rateCNY : 1);
+    const goodsCost = purchased * unitCost;
+    const sellingPrice = Number(activeVariant.priceInUA) || 0;
+    const actualNet =
+      activeVariant.netPrice || (sellingPrice > 0 ? sellingPrice * 0.98 - 20 : 0);
+    const income = sells * actualNet;
+    const costs =
+      goodsCost +
+      (Number(activeVariant.shippingUA) || 0) +
+      (Number(activeVariant.managementUAH) || 0);
 
-  const totals = variants.reduce(
-    (acc, v) => {
-      if (v.isIncluded === false) return acc;
-
-      const rateCNY = v.rateCNY || 0;
-      const purchased = Number(v.purchasedCount) || 0;
-      const sells = Number(v.sellsCount) || 0;
-      const unitCost = (Number(v.priceCNY) || 0) * (rateCNY > 0 ? rateCNY : 1);
-      const goodsCost = purchased * unitCost;
-      const sellingPrice = Number(v.priceInUA) || 0;
-      const actualNet =
-        v.netPrice || (sellingPrice > 0 ? sellingPrice * 0.98 - 20 : 0);
-      const income = sells * actualNet;
-      const costs =
-        goodsCost +
-        (Number(v.shippingUA) || 0) +
-        (Number(v.managementUAH) || 0);
-
-      acc.totalPurchased += purchased;
-      acc.totalSells += sells;
-      acc.totalGoodsCost += goodsCost;
-      acc.totalIncome += income;
-      acc.totalCosts += costs;
-      acc.totalPotentialRevenue += purchased * actualNet;
-      return acc;
-    },
-    {
-      totalPurchased: 0,
-      totalSells: 0,
-      totalGoodsCost: 0,
-      totalIncome: 0,
-      totalCosts: 0,
-      totalPotentialRevenue: 0,
-    },
-  );
+    return {
+      totalPurchased: purchased,
+      totalSells: sells,
+      totalGoodsCost: goodsCost,
+      totalIncome: income,
+      totalCosts: costs,
+      totalPotentialRevenue: purchased * actualNet,
+    };
+  })();
 
   const potentialProfit = totals.totalPotentialRevenue - totals.totalCosts;
   const margin = totals.totalIncome - totals.totalCosts;
@@ -618,15 +607,8 @@ export default function ProductForm({
                 </div>
               </div>
 
-              {/* Variant Content */}
               <div className="p-4 sm:p-5 relative bg-background/30">
-                <div
-                  className={
-                    variants[activeVariantIndex]?.isIncluded === false
-                      ? "opacity-50 grayscale-30 transition-all pointer-events-none"
-                      : "transition-all"
-                  }
-                >
+                <div className="transition-all">
                   <VariantFields
                     prefix={`variants.${activeVariantIndex}`}
                     register={register}
@@ -634,19 +616,6 @@ export default function ProductForm({
                     watch={watch}
                   />
                 </div>
-                {variants[activeVariantIndex]?.isIncluded === false && (
-                  <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
-                    <div className="bg-background/80 backdrop-blur-sm border border-foreground/10 px-4 py-2 rounded-xl shadow-lg pointer-events-auto">
-                      <p className="text-sm font-semibold text-muted-foreground text-center">
-                        Эта версия исключена из итоговых расчетов.
-                        <br />
-                        <span className="text-xs font-normal">
-                          Включите чекбокс выше, чтобы разблокировать.
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           )}
@@ -701,8 +670,8 @@ export default function ProductForm({
 
         {/* Financial summary */}
         <div className="overflow-x-auto">
-          <label className="text-sm font-medium block mb-2">
-            Финансовый расчет (суммарно)
+          <label className="text-sm font-medium block mb-2 text-primary">
+            Финансовый расчет (Текущая версия)
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div className="p-3 border rounded-md min-w-0">
