@@ -20,6 +20,13 @@ CREATE TABLE "Variant" (
     CONSTRAINT "Variant_pkey" PRIMARY KEY ("id")
 );
 
+-- Ensure missing columns exist on Product table before migrating data (for shadow database validation)
+ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "netPrice" DOUBLE PRECISION;
+ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "rateCNY" DOUBLE PRECISION;
+ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "rateUSD" DOUBLE PRECISION;
+ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "shippingType" TEXT;
+ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "customShippingRate" DOUBLE PRECISION;
+
 -- Migrate existing product data into Variant rows
 INSERT INTO "Variant" ("id", "productId", "priceCNY", "priceInUA", "netPrice", "weight", "pddSearchQuery", "sellsCount", "purchasedCount", "shippingUA", "managementUAH", "rateCNY", "rateUSD", "shippingType", "customShippingRate", "createdAt")
 SELECT
