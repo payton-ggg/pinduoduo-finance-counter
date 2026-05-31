@@ -48,6 +48,7 @@ export async function POST(req: Request) {
               rateUSD: v.rateUSD ?? null,
               shippingType: v.shippingType || null,
               customShippingRate: v.customShippingRate ?? null,
+              isIncluded: v.isIncluded ?? true,
             }))
           : [{
               priceCNY: Number(firstVariant.priceCNY) || 0,
@@ -63,6 +64,7 @@ export async function POST(req: Request) {
               rateUSD: firstVariant.rateUSD ?? null,
               shippingType: firstVariant.shippingType || null,
               customShippingRate: firstVariant.customShippingRate ?? null,
+              isIncluded: firstVariant.isIncluded ?? true,
             }],
       },
     },
