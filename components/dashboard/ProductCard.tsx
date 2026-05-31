@@ -9,6 +9,7 @@ import {
   Coins,
   CheckSquare,
   Square,
+  Layers,
 } from "lucide-react";
 
 export type ProductUI = {
@@ -30,6 +31,7 @@ export type ProductUI = {
   folderId?: string | null;
   folderName?: string | null;
   weight?: number | null;
+  variantCount: number;
 };
 
 type ProductCardProps = {
@@ -49,8 +51,6 @@ export const ProductCard = memo(function ProductCard({
 
   const balance = product.income - product.spent;
 
-  // Projected Profit: (Total Stock * Selling Price) - Total Spent
-  // This assumes 'spent' covers all costs for the batch.
   const actualNetPrice = product.netPrice || ((product.priceInUA || 0) > 0 ? (product.priceInUA || 0) * 0.98 - 20 : 0);
   const projectedRevenue = (product.totalPurchased || 0) * actualNetPrice;
   const projectedProfit = projectedRevenue - product.spent;
@@ -103,7 +103,7 @@ export const ProductCard = memo(function ProductCard({
           </div>
         )}
 
-        <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10">
+        <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10 flex flex-col items-end gap-1">
           <div
             className={`flex items-center gap-1 sm:gap-1.5 rounded-xl sm:rounded-2xl px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-black text-white shadow-xl backdrop-blur-xl border border-white/20 ${
               balance >= 0 ? "bg-green-500/80" : "bg-red-500/80"
@@ -116,6 +116,12 @@ export const ProductCard = memo(function ProductCard({
             )}
             {balance.toFixed(0)} ₴
           </div>
+          {product.variantCount > 1 && (
+            <div className="flex items-center gap-1 rounded-xl px-2 py-1 text-[10px] font-bold text-white/90 bg-black/40 backdrop-blur-md border border-white/20">
+              <Layers className="h-3 w-3" />
+              {product.variantCount} вер.
+            </div>
+          )}
         </div>
       </div>
 
@@ -141,7 +147,6 @@ export const ProductCard = memo(function ProductCard({
         </div>
 
         <div className="mt-auto space-y-2.5 sm:space-y-3">
-          {/* Main Stats Grid */}
           <div className="grid grid-cols-2 gap-2 p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-foreground/3 border border-foreground/5">
             <div className="space-y-0.5">
               <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-muted-foreground font-bold">
@@ -178,7 +183,7 @@ export const ProductCard = memo(function ProductCard({
 
             <div className="flex justify-between items-center px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-foreground/3 border border-foreground/5">
               <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground uppercase">
-                Моржа
+                Маржа
               </span>
               <span
                 className={`text-[11px] sm:text-xs font-black ${margin >= 0 ? "text-primary" : "text-destructive"}`}
