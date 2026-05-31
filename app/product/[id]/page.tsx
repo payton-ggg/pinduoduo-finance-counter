@@ -17,6 +17,7 @@ export default async function ProductId({
     prisma.product.findUnique({
       where: { id },
       include: {
+        variants: true,
         expenses: true,
         incomes: true,
         folder: true,
