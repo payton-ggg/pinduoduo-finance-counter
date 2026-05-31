@@ -5,30 +5,34 @@ import { useRouter } from "next/navigation";
 import { useForm, useFieldArray } from "react-hook-form";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BasicFields } from "./BasicFields";
+import { VariantFields } from "./BasicFields";
 import { ImagesFieldArray } from "./ImagesFieldArray";
-import { Calculator, RefreshCw, Bot, Loader2 } from "lucide-react";
+import { Calculator, RefreshCw, Bot, Loader2, Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 
-type FormValues = {
-  name: string;
-  images: { url: string }[];
-  olxUrl?: string;
-  pinduoduoUrl?: string;
-  priceCNY?: number;
-  shippingUA?: number;
-  managementUAH?: number;
-  weight?: number;
-  sellsCount?: number;
-  purchasedCount?: number;
-  chip?: string;
+type VariantValues = {
+  id?: string;
+  priceCNY: number;
   priceInUA?: number;
   netPrice?: number;
-  incomes: { id?: string; amount: number }[];
-  expenses: { id?: string; amount: number; type: string }[];
+  weight?: number;
+  pddSearchQuery?: string;
+  sellsCount?: number;
+  purchasedCount?: number;
+  shippingUA?: number;
+  managementUAH?: number;
   rateCNY?: number;
   rateUSD?: number;
   shippingType?: "air" | "sea" | "custom";
   customShippingRate?: number;
+};
+
+type FormValues = {
+  name: string;
+  images: { url: string }[];
+  pinduoduoUrl?: string;
+  variants: VariantValues[];
+  incomes: { id?: string; amount: number }[];
+  expenses: { id?: string; amount: number; type: string }[];
   archive?: number | null;
   folderId?: string | null;
 };
@@ -42,6 +46,11 @@ type ProductFormProps = {
   onValuesChange?: (values: any) => void;
 };
 
+const emptyVariant = (): VariantValues => ({
+  priceCNY: 0,
+  shippingType: "air",
+});
+
 export default function ProductForm({
   id,
   initialData,
@@ -54,6 +63,8 @@ export default function ProductForm({
   const [folders, setFolders] = useState<{ id: string; name: string }[]>([]);
   const [aiText, setAiText] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [collapsedVariants, setCollapsedVariants] = useState<Set<number>>(new Set());
+  const [deletedVariantIds, setDeletedVariantIds] = useState<string[]>([]);
 
   useEffect(() => {
     fetch("/api/folders")
@@ -68,20 +79,31 @@ export default function ProductForm({
       )
     : [{ url: "" }];
 
+  const initialVariants: VariantValues[] =
+    Array.isArray(initialData?.variants) && initialData.variants.length > 0
+      ? initialData.variants.map((v: any) => ({
+          id: v.id,
+          priceCNY: v.priceCNY ?? 0,
+          priceInUA: v.priceInUA ?? undefined,
+          netPrice: v.netPrice ?? undefined,
+          weight: v.weight ?? undefined,
+          pddSearchQuery: v.pddSearchQuery ?? "",
+          sellsCount: v.sellsCount ?? undefined,
+          purchasedCount: v.purchasedCount ?? undefined,
+          shippingUA: v.shippingUA ?? undefined,
+          managementUAH: v.managementUAH ?? undefined,
+          rateCNY: v.rateCNY ?? undefined,
+          rateUSD: v.rateUSD ?? undefined,
+          shippingType: v.shippingType ?? "air",
+          customShippingRate: v.customShippingRate ?? undefined,
+        }))
+      : [emptyVariant()];
+
   const defaultValues: FormValues = {
     name: initialData?.name ?? "",
     images: normalizedImages,
-    olxUrl: initialData?.olxUrl ?? "",
     pinduoduoUrl: initialData?.pinduoduoUrl ?? "",
-    priceCNY: initialData?.priceCNY ?? initialData?.priceUAH ?? undefined,
-    shippingUA: initialData?.shippingUA ?? undefined,
-    managementUAH: initialData?.managementUAH ?? undefined,
-    weight: initialData?.weight ?? undefined,
-    sellsCount: initialData?.sellsCount ?? undefined,
-    purchasedCount: initialData?.purchasedCount ?? undefined,
-    chip: initialData?.chip ?? "",
-    priceInUA: initialData?.priceInUA ?? undefined,
-    netPrice: initialData?.netPrice ?? undefined,
+    variants: initialVariants,
     incomes: (initialData?.incomes || []).map((i: any) => ({
       id: i.id,
       amount: i.amount,
@@ -91,10 +113,6 @@ export default function ProductForm({
       amount: e.amount,
       type: e.type,
     })),
-    rateCNY: initialData?.rateCNY ?? undefined,
-    rateUSD: initialData?.rateUSD ?? undefined,
-    shippingType: initialData?.shippingType ?? "air",
-    customShippingRate: initialData?.customShippingRate ?? undefined,
     archive: initialData?.archive ?? null,
     folderId: initialData?.folderId ?? null,
   };
@@ -128,6 +146,12 @@ export default function ProductForm({
   } = useFieldArray({ control, name: "images" });
 
   const {
+    fields: variantFields,
+    append: appendVariant,
+    remove: removeVariant,
+  } = useFieldArray({ control, name: "variants" });
+
+  const {
     fields: expenseFields,
     append: appendExpense,
     remove: removeExpense,
@@ -136,26 +160,26 @@ export default function ProductForm({
   useEffect(() => {
     const fetchRates = async () => {
       try {
-        if (!initialData?.rateCNY || !initialData?.rateUSD) {
-          if (initialRates?.cny && !initialData?.rateCNY) {
-            setValue("rateCNY", initialRates.cny);
-          }
-          if (initialRates?.usd && !initialData?.rateUSD) {
-            setValue("rateUSD", initialRates.usd);
-          }
+        const variants = watch("variants");
+        const needsRates = variants.some(
+          (v) => !v.rateCNY || !v.rateUSD
+        );
+        if (!needsRates) return;
 
-          if (
-            (!initialData?.rateCNY && !initialRates?.cny) ||
-            (!initialData?.rateUSD && !initialRates?.usd)
-          ) {
-            const res = await fetch("/api/rates");
-            const data = await res.json();
-            if (data.cny && !initialData?.rateCNY && !initialRates?.cny)
-              setValue("rateCNY", data.cny);
-            if (data.usd && !initialData?.rateUSD && !initialRates?.usd)
-              setValue("rateUSD", data.usd);
-          }
+        let cny = initialRates?.cny;
+        let usd = initialRates?.usd;
+
+        if (!cny || !usd) {
+          const res = await fetch("/api/rates");
+          const data = await res.json();
+          cny = cny || data.cny;
+          usd = usd || data.usd;
         }
+
+        variants.forEach((v, i) => {
+          if (!v.rateCNY && cny) setValue(`variants.${i}.rateCNY`, cny);
+          if (!v.rateUSD && usd) setValue(`variants.${i}.rateUSD`, usd);
+        });
       } catch (error) {
         console.error("Failed to fetch exchange rates:", error);
       }
@@ -163,62 +187,42 @@ export default function ProductForm({
     fetchRates();
   }, [initialData, initialRates, setValue]);
 
-  const sells = watch("sellsCount");
-  const purchased = watch("purchasedCount");
-  const priceCNY = watch("priceCNY");
-  const priceInUA = watch("priceInUA");
-  const shippingUA = watch("shippingUA");
-  const managementUAH = watch("managementUAH");
-  const netPrice = watch("netPrice");
-  const rateCNY = watch("rateCNY") || 0;
+  const variants = watch("variants");
 
-  const purchaseUnitCostUAH =
-    (Number(priceCNY) || 0) * (rateCNY > 0 ? rateCNY : 1);
-  const sellingPriceUAH = Number(priceInUA) || 0;
+  const totals = variants.reduce(
+    (acc, v) => {
+      const rateCNY = v.rateCNY || 0;
+      const purchased = Number(v.purchasedCount) || 0;
+      const sells = Number(v.sellsCount) || 0;
+      const unitCost = (Number(v.priceCNY) || 0) * (rateCNY > 0 ? rateCNY : 1);
+      const goodsCost = purchased * unitCost;
+      const sellingPrice = Number(v.priceInUA) || 0;
+      const actualNet = v.netPrice || (sellingPrice > 0 ? sellingPrice * 0.98 - 20 : 0);
+      const income = sells * actualNet;
+      const costs = goodsCost + (Number(v.shippingUA) || 0) + (Number(v.managementUAH) || 0);
 
-  // Total cost of purchasing the goods (without shipping/management)
-  const totalGoodsCost = (Number(purchased) || 0) * purchaseUnitCostUAH;
+      acc.totalPurchased += purchased;
+      acc.totalSells += sells;
+      acc.totalGoodsCost += goodsCost;
+      acc.totalIncome += income;
+      acc.totalCosts += costs;
+      acc.totalPotentialRevenue += purchased * actualNet;
+      return acc;
+    },
+    { totalPurchased: 0, totalSells: 0, totalGoodsCost: 0, totalIncome: 0, totalCosts: 0, totalPotentialRevenue: 0 }
+  );
 
-  const actualNetPrice =
-    netPrice || (sellingPriceUAH > 0 ? sellingPriceUAH * 0.98 - 20 : 0);
+  const potentialProfit = totals.totalPotentialRevenue - totals.totalCosts;
+  const margin = totals.totalIncome - totals.totalCosts;
 
-  const netIncome = (Number(sells) || 0) * actualNetPrice;
-  const totalCommission =
-    (Number(sells) || 0) *
-    (sellingPriceUAH > 0 ? sellingPriceUAH - actualNetPrice : 0);
-
-  // Expenses for the summary/profit calculation (Includes everything)
-  const totalCalculatedCosts =
-    totalGoodsCost + (Number(shippingUA) || 0) + (Number(managementUAH) || 0);
-
-  // Potential (Projected) Profit Calculation
-  const netPotentialRevenue = (Number(purchased) || 0) * actualNetPrice;
-
-  const potentialProfit = netPotentialRevenue - totalCalculatedCosts;
-  const margin = netIncome - totalCalculatedCosts;
-
-  const syncIncomes = () => {
-    const amount = Number.isFinite(netIncome)
-      ? Number(netIncome.toFixed(2))
-      : 0;
-    setValue("incomes", [{ amount }], { shouldDirty: true });
+  const toggleCollapse = (index: number) => {
+    setCollapsedVariants((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
+    });
   };
-
-  const syncExpenses = () => {
-    const currentExpenses = watch("expenses") || [];
-    const purchaseIdx = currentExpenses.findIndex((e) => e.type === "Закупка");
-    const amount = Number.isFinite(totalGoodsCost)
-      ? Number(totalGoodsCost.toFixed(2))
-      : 0;
-
-    if (purchaseIdx > -1) {
-      setValue(`expenses.${purchaseIdx}.amount`, amount, { shouldDirty: true });
-    } else {
-      appendExpense({ amount, type: "Закупка" });
-    }
-  };
-
-  // Auto-sync calculated income/expense to form arrays
 
   const handleAiFill = async () => {
     if (!aiText.trim()) return;
@@ -235,21 +239,13 @@ export default function ProductForm({
         return;
       }
 
-      if (data.warning) {
-        console.warn(data.warning);
-      }
-
       const parsed = data.data;
       if (parsed) {
-        Object.keys(parsed).forEach((key) => {
-          if (
-            parsed[key] !== null &&
-            parsed[key] !== undefined &&
-            key !== "images"
-          ) {
-            setValue(key as keyof FormValues, parsed[key], {
-              shouldDirty: true,
-            });
+        if (parsed.name) setValue("name", parsed.name, { shouldDirty: true });
+        const variantKeys = ["priceCNY", "priceInUA", "netPrice", "weight", "pddSearchQuery", "sellsCount", "purchasedCount", "shippingUA", "managementUAH"];
+        variantKeys.forEach((key) => {
+          if (parsed[key] !== null && parsed[key] !== undefined) {
+            setValue(`variants.0.${key}` as any, parsed[key], { shouldDirty: true });
           }
         });
       }
@@ -262,41 +258,42 @@ export default function ProductForm({
   };
 
   const onSubmit = async (values: FormValues) => {
-    const payloadStart = {
+    const payload = {
       name: values.name,
-      priceCNY: Number(values.priceCNY),
-      shippingUA: values.shippingUA ?? null,
-      managementUAH: values.managementUAH ?? null,
-      priceInUA: values.priceInUA ?? null,
-      netPrice: values.netPrice ?? null,
-      olxUrl: values.olxUrl || null,
       pinduoduoUrl: values.pinduoduoUrl || null,
-      weight: values.weight ?? null,
-      sellsCount: values.sellsCount ?? null,
-      purchasedCount: values.purchasedCount ?? null,
-      chip: values.chip || null,
       archive: values.archive ?? null,
-      rateCNY: values.rateCNY ?? null,
-      rateUSD: values.rateUSD ?? null,
-      shippingType: values.shippingType || null,
-      customShippingRate: values.customShippingRate ?? null,
       folderId: values.folderId || null,
       images: (values.images || [])
         .map((i) => i.url.trim())
         .filter((u) => u.length > 0),
+      variants: values.variants.map((v) => ({
+        id: v.id || undefined,
+        priceCNY: Number(v.priceCNY) || 0,
+        priceInUA: v.priceInUA ?? null,
+        netPrice: v.netPrice ?? null,
+        weight: v.weight ?? null,
+        pddSearchQuery: v.pddSearchQuery || null,
+        sellsCount: v.sellsCount ?? null,
+        purchasedCount: v.purchasedCount ?? 0,
+        shippingUA: v.shippingUA ?? null,
+        managementUAH: v.managementUAH ?? null,
+        rateCNY: v.rateCNY ?? null,
+        rateUSD: v.rateUSD ?? null,
+        shippingType: v.shippingType || null,
+        customShippingRate: v.customShippingRate ?? null,
+      })),
+      deletedVariantIds,
     };
 
     try {
       if (id) {
-        // UPDATE (PATCH)
         const res = await fetch(`/api/products/${id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payloadStart),
+          body: JSON.stringify(payload),
         });
         if (!res.ok) throw new Error("Failed to update product");
 
-        // Sync expenses/incomes logic (same as old ProductEditForm)
         const initialIncomeMap = new Map(
           (initialData?.incomes || []).map((i: any) => [i.id, i]),
         );
@@ -319,7 +316,6 @@ export default function ProductForm({
             });
           }
         }
-        // Delete leftovers
         for (const [leftId] of initialIncomeMap) {
           await fetch(`/api/incomes`, {
             method: "DELETE",
@@ -363,15 +359,10 @@ export default function ProductForm({
           });
         }
       } else {
-        // CREATE (POST)
-        // Note: The POST /api/products handler already creates a 'Shipping' expense
-        // if shippingUA is present. We trust that for now.
-        // Manual expenses added in the UI won't be saved unless we update the API.
-        // Assuming simple create flow for now.
         const res = await fetch("/api/products", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payloadStart),
+          body: JSON.stringify(payload),
         });
         if (!res.ok) throw new Error("Failed to create product");
         const data = await res.json();
@@ -403,12 +394,12 @@ export default function ProductForm({
           Автозаполнение через ИИ (io.net)
         </label>
         <p className="text-xs text-blue-600 dark:text-blue-400 mb-3">
-          Опишите товар текстом, и ИИ автоматически заполнит все нужные поля
-          формы. Фотографии затронуты не будут.
+          Опишите товар текстом, и ИИ автоматически заполнит поля первой версии.
+          Фотографии затронуты не будут.
         </p>
         <div className="flex flex-col sm:flex-row gap-3">
           <textarea
-            placeholder="Например: Это наушники Airpods Pro 2 с гироскопом, без шумодава, на чипе airoha, цена на пиндуодуо 150 юаней, вес 250г..."
+            placeholder="Например: Товар за 150 юаней, вес 250г, продаём за 2000 грн..."
             value={aiText}
             onChange={(e) => setAiText(e.target.value)}
             className="flex-1 border rounded-md p-2 bg-white dark:bg-gray-950 resize-none text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -430,12 +421,101 @@ export default function ProductForm({
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <BasicFields
-          register={register}
-          errors={errors}
-          setValue={setValue}
-          watch={watch}
-        />
+        <div>
+          <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">Название</label>
+          <input
+            className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
+            {...register("name", { required: "Название обязательно" })}
+            placeholder="Например: AirPods Pro Replica"
+          />
+          {errors.name && (
+            <p className="text-red-600 text-sm mt-1">
+              {String(errors.name.message)}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">
+            Ссылка Pinduoduo
+          </label>
+          <input
+            className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
+            {...register("pinduoduoUrl")}
+            placeholder="https://mobile.yangkeduo.com/…"
+          />
+        </div>
+
+        {/* Variants */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+              Версии ({variantFields.length})
+            </h2>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => appendVariant(emptyVariant())}
+              className="flex items-center gap-1"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Добавить версию
+            </Button>
+          </div>
+
+          {variantFields.map((field, index) => (
+            <div
+              key={field.id}
+              className="border border-foreground/10 rounded-xl overflow-hidden"
+            >
+              <div
+                className="flex items-center justify-between px-4 py-3 bg-foreground/3 cursor-pointer"
+                onClick={() => toggleCollapse(index)}
+              >
+                <span className="text-sm font-bold">
+                  Версия {index + 1}
+                  {variants[index]?.priceCNY ? ` — ${variants[index].priceCNY}¥` : ""}
+                </span>
+                <div className="flex items-center gap-2">
+                  {variantFields.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-destructive hover:text-destructive"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const variantId = variants[index]?.id;
+                        if (variantId) {
+                          setDeletedVariantIds((prev) => [...prev, variantId]);
+                        }
+                        removeVariant(index);
+                      }}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+                  {collapsedVariants.has(index) ? (
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </div>
+              </div>
+              {!collapsedVariants.has(index) && (
+                <div className="p-4">
+                  <VariantFields
+                    prefix={`variants.${index}`}
+                    register={register}
+                    setValue={setValue}
+                    watch={watch}
+                  />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
 
         <div className="p-4 border rounded-md bg-muted/30">
           <label htmlFor="folderId" className="text-sm font-medium block mb-2">
@@ -484,76 +564,27 @@ export default function ProductForm({
           setValue={setValue}
         />
 
+        {/* Financial summary */}
         <div className="overflow-x-auto">
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-sm font-medium">Финансовый расчет</label>
-            <div className="flex gap-1">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 text-muted-foreground hover:text-primary transition-colors"
-                onClick={syncIncomes}
-                title="Пересчитать доход"
-              >
-                <Calculator className="h-3.5 w-3.5" />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 text-muted-foreground hover:text-primary transition-colors"
-                onClick={syncExpenses}
-                title="Пересчитать расход"
-              >
-                <RefreshCw className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          </div>
+          <label className="text-sm font-medium block mb-2">Финансовый расчет (суммарно)</label>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div className="p-3 border rounded-md min-w-0">
-              <p className="text-xs sm:text-sm text-gray-600">Курс CNY → UAH</p>
+              <p className="text-xs sm:text-sm text-gray-600">Общий расход</p>
               <p className="text-base sm:text-lg font-semibold wrap-break-word">
-                {rateCNY > 0 ? rateCNY.toFixed(2) : "—"}
+                {totals.totalCosts.toFixed(2)} ₴
               </p>
-            </div>
-            <div className="p-3 border rounded-md min-w-0">
-              <p className="text-xs sm:text-sm text-gray-600">
-                Закупочная цена (UAH)
-              </p>
-              <div className="w-full justify-between">
-                <p className="text-base sm:text-lg font-semibold wrap-break-word">
-                  {purchaseUnitCostUAH.toFixed(2)} ₴
-                </p>
-                <p className="text-xs sm:text-sm text-muted-foreground wrap-break-word">
-                  (Всего: {totalGoodsCost.toFixed(2)} ₴)
-                </p>
-              </div>
             </div>
             <div className="p-3 border rounded-md min-w-0">
               <p className="text-xs sm:text-sm text-gray-600">
                 Доход (текущий, чистый)
               </p>
               <p className="text-base sm:text-lg font-semibold wrap-break-word">
-                {netIncome.toFixed(2)} ₴
-              </p>
-              {totalCommission > 0 && (
-                <p className="text-[10px] text-muted-foreground">
-                  (Комм: -{totalCommission.toFixed(2)} ₴)
-                </p>
-              )}
-            </div>
-            <div className="p-3 border rounded-md min-w-0">
-              <p className="text-xs sm:text-sm text-gray-600">
-                Рассчитанный расход
-              </p>
-              <p className="text-base sm:text-lg font-semibold wrap-break-word">
-                {totalCalculatedCosts.toFixed(2)} ₴
+                {totals.totalIncome.toFixed(2)} ₴
               </p>
             </div>
-            <div className="p-3 border rounded-md bg-green-50/50 dark:bg-green-900/20 col-span-1 sm:col-span-2 lg:col-span-4 min-w-0">
+            <div className="p-3 border rounded-md bg-green-50/50 dark:bg-green-900/20 col-span-1 sm:col-span-2 lg:col-span-2 min-w-0">
               <p className="text-xs sm:text-sm text-gray-600 font-medium wrap-break-word">
-                Прогноз чистой прибыли (если продать всё, {purchased || 0} шт)
+                Прогноз чистой прибыли (если продать всё, {totals.totalPurchased} шт)
               </p>
               <p
                 suppressHydrationWarning={true}
@@ -567,65 +598,18 @@ export default function ProductForm({
             <div
               className={`p-3 border rounded-md relative col-span-1 sm:col-span-2 lg:col-span-4 min-w-0 ${margin >= 0 ? "bg-green-50/50 dark:bg-green-900/20" : "bg-orange-50/50 dark:bg-orange-900/20"}`}
             >
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-xs sm:text-sm text-gray-600 font-medium wrap-break-word mb-1">
-                    Моржа (на {sells || 0} шт из {purchased || 0} шт)
-                  </p>
-                  <p
-                    suppressHydrationWarning={true}
-                    className={`text-lg sm:text-xl font-bold wrap-break-word ${
-                      margin >= 0 ? "text-green-600" : "text-orange-600"
-                    }`}
-                  >
-                    {margin >= 0 ? "+" : ""}
-                    {margin.toFixed(2)} ₴
-                  </p>
-                </div>
-                {margin < 0 && sellingPriceUAH > 0 && (
-                  <div className="text-right flex flex-col justify-end">
-                    {(() => {
-                      const deficit = Math.abs(margin);
-                      const itemsToBreakEven = Math.ceil(
-                        deficit / actualNetPrice,
-                      );
-                      const remainingStock = (purchased || 0) - (sells || 0);
-                      const canBreakEven = itemsToBreakEven <= remainingStock;
-                      const finalProfit =
-                        itemsToBreakEven * actualNetPrice - deficit;
-
-                      if (!canBreakEven) {
-                        return (
-                          <div className="bg-red-100/50 dark:bg-red-900/30 p-2 rounded-lg border border-red-200 dark:border-red-800/50 mt-1">
-                            <p className="text-xs font-bold text-red-600 dark:text-red-400">
-                              Не хватит товара
-                            </p>
-                            <p className="text-[10px] text-red-500/80">
-                              Останется: {potentialProfit.toFixed(2)} ₴
-                            </p>
-                          </div>
-                        );
-                      }
-
-                      return (
-                        <div className="bg-orange-100/50 dark:bg-orange-900/30 p-2 rounded-lg border border-orange-200 dark:border-orange-800/50 mt-1">
-                          <p className="text-[10px] sm:text-xs font-medium text-orange-800 dark:text-orange-300">
-                            Выход в ноль:
-                          </p>
-                          <p className="text-sm sm:text-base font-black text-orange-600 dark:text-orange-400">
-                            {itemsToBreakEven} шт
-                          </p>
-                          {finalProfit > 0 && (
-                            <p className="text-[9px] sm:text-[10px] font-bold text-green-600 dark:text-green-400 mt-0.5">
-                              И будет +{finalProfit.toFixed(2)} ₴
-                            </p>
-                          )}
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )}
-              </div>
+              <p className="text-xs sm:text-sm text-gray-600 font-medium wrap-break-word mb-1">
+                Маржа ({totals.totalSells} шт из {totals.totalPurchased} шт)
+              </p>
+              <p
+                suppressHydrationWarning={true}
+                className={`text-lg sm:text-xl font-bold wrap-break-word ${
+                  margin >= 0 ? "text-green-600" : "text-orange-600"
+                }`}
+              >
+                {margin >= 0 ? "+" : ""}
+                {margin.toFixed(2)} ₴
+              </p>
             </div>
           </div>
         </div>
@@ -634,18 +618,8 @@ export default function ProductForm({
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
             <div className="flex items-center justify-between gap-2 w-full">
               <label className="text-sm font-medium">
-                Расходы (Делатизация)
+                Расходы (Детализация)
               </label>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 text-muted-foreground hover:text-primary transition-colors"
-                onClick={syncExpenses}
-                title="Пересчитать закупку"
-              >
-                <Calculator className="h-3.5 w-3.5" />
-              </Button>
             </div>
             <Button
               type="button"

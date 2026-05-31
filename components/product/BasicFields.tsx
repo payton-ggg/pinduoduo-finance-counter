@@ -10,49 +10,30 @@ import {
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Calculator, Copy, Check } from "lucide-react";
 
-type FormValues = {
-  name: string;
-  priceCNY: number;
-  shippingUA?: number;
-  managementUAH?: number;
-  priceInUA?: number;
-  netPrice?: number;
-  olxUrl?: string;
-  pinduoduoUrl?: string;
-  chip?: string;
-  weight?: number;
-  sellsCount?: number;
-  purchasedCount?: number;
-  rateCNY?: number;
-  rateUSD?: number;
-  shippingType?: "air" | "sea" | "custom";
-  customShippingRate?: number;
-};
-
-type BasicFieldsProps = {
+type VariantFieldsProps = {
+  prefix: string;
   register: UseFormRegister<any>;
-  errors: FieldErrors<FormValues>;
   setValue: UseFormSetValue<any>;
   watch: UseFormWatch<any>;
 };
 
-export function BasicFields({
+export function VariantFields({
+  prefix,
   register,
-  errors,
   setValue,
   watch,
-}: BasicFieldsProps) {
-  const weight = watch("weight");
-  const purchasedCount = watch("purchasedCount");
-  const rateUSD = watch("rateUSD");
-  const shippingType = watch("shippingType") || "air";
-  const customShippingRate = watch("customShippingRate");
+}: VariantFieldsProps) {
+  const weight = watch(`${prefix}.weight`);
+  const purchasedCount = watch(`${prefix}.purchasedCount`);
+  const rateUSD = watch(`${prefix}.rateUSD`);
+  const shippingType = watch(`${prefix}.shippingType`) || "air";
+  const customShippingRate = watch(`${prefix}.customShippingRate`);
 
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [autoCalculate, setAutoCalculate] = useState(false);
   const [hasInitAuto, setHasInitAuto] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
-  const shippingUA = watch("shippingUA");
+  const shippingUA = watch(`${prefix}.shippingUA`);
 
   const handleCopy = (text: string, fieldName: string) => {
     if (text) {
@@ -64,7 +45,7 @@ export function BasicFields({
 
   useEffect(() => {
     if (hasInitAuto) return;
-    
+
     if (shippingUA === undefined) {
       setAutoCalculate(true);
       setHasInitAuto(true);
@@ -78,7 +59,7 @@ export function BasicFields({
         case "sea": ratePerKgUSD = 7.1; break;
         case "custom": ratePerKgUSD = customShippingRate || 0; break;
       }
-      
+
       const calcUSD = ((weight || 0) / 1000) * (purchasedCount || 0) * ratePerKgUSD;
       const calcUAH = parseFloat((calcUSD * rateUSD).toFixed(2));
 
@@ -96,8 +77,8 @@ export function BasicFields({
     try {
       const res = await fetch("/api/rates");
       const data = await res.json();
-      if (data.cny) setValue("rateCNY", data.cny);
-      if (data.usd) setValue("rateUSD", data.usd);
+      if (data.cny) setValue(`${prefix}.rateCNY`, data.cny);
+      if (data.usd) setValue(`${prefix}.rateUSD`, data.usd);
     } catch (error) {
       console.error("Failed to refresh rates", error);
     } finally {
@@ -109,20 +90,14 @@ export function BasicFields({
     if (weight && purchasedCount && rateUSD) {
       let ratePerKgUSD = 0;
       switch (shippingType) {
-        case "air":
-          ratePerKgUSD = 18.3;
-          break;
-        case "sea":
-          ratePerKgUSD = 7.1;
-          break;
-        case "custom":
-          ratePerKgUSD = customShippingRate || 0;
-          break;
+        case "air": ratePerKgUSD = 18.3; break;
+        case "sea": ratePerKgUSD = 7.1; break;
+        case "custom": ratePerKgUSD = customShippingRate || 0; break;
       }
 
       const shippingCostUSD = (weight / 1000) * purchasedCount * ratePerKgUSD;
       const shippingCostUAH = shippingCostUSD * rateUSD;
-      setValue("shippingUA", parseFloat(shippingCostUAH.toFixed(2)), { shouldDirty: true });
+      setValue(`${prefix}.shippingUA`, parseFloat(shippingCostUAH.toFixed(2)), { shouldDirty: true });
     } else if (isManual) {
       alert("Для расчета укажите: Вес (г), Куплено (шт) и Курс (USD)");
     }
@@ -142,36 +117,10 @@ export function BasicFields({
     setValue,
   ]);
 
-  const priceInUA = watch("priceInUA");
-  const netPrice = watch("netPrice");
-
-  useEffect(() => {
-    // Auto-calculate netPrice if priceInUA changes and netPrice is not manually set, or simply update it
-    if (priceInUA && priceInUA > 0) {
-      const calculatedNet = priceInUA * 0.98 - 20;
-      // We will sync it automatically to save time, but allow manual edits if needed?
-      // Actually, if they added netPrice as a field, let's just let it be calculated automatically unless they want to type it.
-      // A better UX: auto-calculate but let them edit. Let's just calculate it directly if they change priceInUA.
-      // To avoid infinite loops or overwriting manual inputs, we'll just leave it up to the form logic or calculate it here.
-    }
-  }, [priceInUA]);
+  const priceInUA = watch(`${prefix}.priceInUA`);
 
   return (
     <div className="space-y-4">
-      <div>
-        <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">Название</label>
-        <input
-          className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
-          {...register("name", { required: "Название обязательно" })}
-          placeholder="Например: AirPods Pro Replica"
-        />
-        {errors.name && (
-          <p className="text-red-600 text-sm mt-1">
-            {String(errors.name.message)}
-          </p>
-        )}
-      </div>
-
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="flex text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2 items-center justify-between">
@@ -193,7 +142,7 @@ export function BasicFields({
             type="number"
             step="0.0001"
             className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
-            {...register("rateCNY", { valueAsNumber: true })}
+            {...register(`${prefix}.rateCNY`, { valueAsNumber: true })}
             placeholder="Например: 5.80"
           />
         </div>
@@ -217,7 +166,7 @@ export function BasicFields({
             type="number"
             step="0.0001"
             className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
-            {...register("rateUSD", { valueAsNumber: true })}
+            {...register(`${prefix}.rateUSD`, { valueAsNumber: true })}
             placeholder="Например: 42.00"
           />
         </div>
@@ -232,18 +181,12 @@ export function BasicFields({
             type="number"
             step="0.01"
             className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
-            {...register("priceCNY", {
-              required: "Цена обязательна",
+            {...register(`${prefix}.priceCNY`, {
               valueAsNumber: true,
               min: { value: 0, message: "Цена должна быть >= 0" },
             })}
             placeholder="Например: 499.99"
           />
-          {errors.priceCNY && (
-            <p className="text-red-600 text-sm mt-1">
-              {String(errors.priceCNY.message)}
-            </p>
-          )}
         </div>
         <div>
           <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">
@@ -253,13 +196,13 @@ export function BasicFields({
             type="number"
             step="0.01"
             className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
-            {...register("priceInUA", {
+            {...register(`${prefix}.priceInUA`, {
               valueAsNumber: true,
               min: { value: 0, message: "Должна быть >= 0" },
               onChange: (e) => {
                 const val = parseFloat(e.target.value);
                 if (val > 0) {
-                  setValue("netPrice", parseFloat((val * 0.98 - 20).toFixed(2)), { shouldDirty: true });
+                  setValue(`${prefix}.netPrice`, parseFloat((val * 0.98 - 20).toFixed(2)), { shouldDirty: true });
                 }
               }
             })}
@@ -277,7 +220,7 @@ export function BasicFields({
             type="number"
             step="0.01"
             className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
-            {...register("netPrice", {
+            {...register(`${prefix}.netPrice`, {
               valueAsNumber: true,
             })}
             placeholder="После вычета комиссии"
@@ -290,7 +233,7 @@ export function BasicFields({
           <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">Тип доставки</label>
           <select
             className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
-            {...register("shippingType")}
+            {...register(`${prefix}.shippingType`)}
           >
             <option value="air">Авиа (18.3$ / кг)</option>
             <option value="sea">Море (7.1$ / кг)</option>
@@ -307,7 +250,7 @@ export function BasicFields({
               type="number"
               step="0.01"
               className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
-              {...register("customShippingRate", {
+              {...register(`${prefix}.customShippingRate`, {
                 valueAsNumber: true,
                 min: { value: 0, message: ">= 0" },
               })}
@@ -340,7 +283,7 @@ export function BasicFields({
               type="number"
               step="0.01"
               className="flex-1 bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
-              {...register("shippingUA", {
+              {...register(`${prefix}.shippingUA`, {
                 valueAsNumber: true,
                 min: { value: 0, message: "Должна быть >= 0" },
                 onChange: () => {
@@ -368,7 +311,7 @@ export function BasicFields({
             type="number"
             step="0.01"
             className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
-            {...register("managementUAH", {
+            {...register(`${prefix}.managementUAH`, {
               valueAsNumber: true,
               min: { value: 0, message: "Должна быть >= 0" },
             })}
@@ -378,20 +321,20 @@ export function BasicFields({
       </div>
 
       <div>
-        <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">Ссылка OLX</label>
+        <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">Поисковый запрос PDD</label>
         <div className="relative">
           <input
             className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 pr-12 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
-            {...register("olxUrl")}
-            placeholder="https://www.olx.ua/…"
+            {...register(`${prefix}.pddSearchQuery`)}
+            placeholder="Например: 蓝牙耳机 降噪"
           />
           <button
             type="button"
-            onClick={() => handleCopy(watch("olxUrl"), "olxUrl")}
+            onClick={() => handleCopy(watch(`${prefix}.pddSearchQuery`), "pddSearchQuery")}
             className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-muted-foreground hover:text-foreground transition-colors"
             title="Скопировать"
           >
-            {copiedField === "olxUrl" ? (
+            {copiedField === "pddSearchQuery" ? (
               <Check className="h-4 w-4 text-green-500" />
             ) : (
               <Copy className="h-4 w-4" />
@@ -400,47 +343,14 @@ export function BasicFields({
         </div>
       </div>
 
-      <div>
-        <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">
-          Ссылка Pinduoduo
-        </label>
-        <div className="relative">
-          <input
-            className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 pr-12 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
-            {...register("pinduoduoUrl")}
-            placeholder="https://mobile.yangkeduo.com/…"
-          />
-          <button
-            type="button"
-            onClick={() => handleCopy(watch("pinduoduoUrl"), "pinduoduoUrl")}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-muted-foreground hover:text-foreground transition-colors"
-            title="Скопировать"
-          >
-            {copiedField === "pinduoduoUrl" ? (
-              <Check className="h-4 w-4 text-green-500" />
-            ) : (
-              <Copy className="h-4 w-4" />
-            )}
-          </button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">Вес</label>
+          <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">Вес (г)</label>
           <input
             type="number"
             step="0.01"
             className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
-            {...register("weight", { valueAsNumber: true })}
-          />
-        </div>
-        <div>
-          <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">Чип</label>
-          <input
-            className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
-            {...register("chip")}
-            placeholder="Например: H2"
+            {...register(`${prefix}.weight`, { valueAsNumber: true })}
           />
         </div>
         <div>
@@ -448,7 +358,7 @@ export function BasicFields({
           <input
             type="number"
             className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
-            {...register("sellsCount", { valueAsNumber: true })}
+            {...register(`${prefix}.sellsCount`, { valueAsNumber: true })}
           />
         </div>
         <div>
@@ -456,7 +366,7 @@ export function BasicFields({
           <input
             type="number"
             className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
-            {...register("purchasedCount", { valueAsNumber: true })}
+            {...register(`${prefix}.purchasedCount`, { valueAsNumber: true })}
           />
         </div>
       </div>
