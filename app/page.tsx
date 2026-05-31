@@ -102,6 +102,11 @@ async function DashboardDataWrapper({
       spent: totalSpent,
       income,
       priceCNY: firstPriceCNY,
+      variantsList: variants.filter((v: any) => v.isIncluded !== false).map((v: any) => ({
+        priceCNY: Number(v.priceCNY) || 0,
+        priceInUA: Number(v.priceInUA) || 0,
+        rateCNY: v.rateCNY,
+      })),
       shippingUA: totalShipping || undefined,
       managementUAH: totalManagement || undefined,
       priceInUA: firstPriceInUA || 0,

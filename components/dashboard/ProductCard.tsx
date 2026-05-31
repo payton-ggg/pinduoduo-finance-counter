@@ -10,6 +10,8 @@ import {
   CheckSquare,
   Square,
   Layers,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 export type ProductUI = {
@@ -32,6 +34,11 @@ export type ProductUI = {
   folderName?: string | null;
   weight?: number | null;
   variantCount: number;
+  variantsList?: {
+    priceCNY: number;
+    priceInUA?: number;
+    rateCNY?: number;
+  }[];
 };
 
 type ProductCardProps = {
@@ -48,6 +55,7 @@ export const ProductCard = memo(function ProductCard({
   globalRate,
 }: ProductCardProps) {
   const [imgSrc, setImgSrc] = useState(product.img || "/placeholder.png");
+  const [priceIndex, setPriceIndex] = useState(0);
 
   const balance = product.income - product.spent;
 
@@ -57,10 +65,13 @@ export const ProductCard = memo(function ProductCard({
 
   const margin = product.income - product.spent;
 
-  const actualRateCNY = product.rateCNY || globalRate || 0;
+  const variants = product.variantsList && product.variantsList.length > 0 ? product.variantsList : [product];
+  const activeVariant = variants[priceIndex] || variants[0];
+
+  const actualRateCNY = activeVariant.rateCNY || globalRate || 0;
 
   const purchaseCostUAH =
-    actualRateCNY > 0 ? product.priceCNY * actualRateCNY : product.priceCNY * 1;
+    actualRateCNY > 0 ? activeVariant.priceCNY * actualRateCNY : activeVariant.priceCNY * 1;
 
   const handleSelection = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -131,17 +142,45 @@ export const ProductCard = memo(function ProductCard({
             {product.name}
           </h3>
           <div className="flex flex-wrap gap-1.5 sm:gap-2 items-center">
+            {variants.length > 1 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setPriceIndex(prev => prev > 0 ? prev - 1 : variants.length - 1);
+                }}
+                className="p-0.5 rounded-md hover:bg-muted text-muted-foreground transition-colors"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </button>
+            )}
+
             <span className="inline-flex items-center gap-1 bg-secondary/50 backdrop-blur-md px-2 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-[11px] font-bold text-secondary-foreground border border-secondary">
               <Coins className="w-3 h-3" />
               {actualRateCNY > 0
-                ? `${product.priceCNY}¥ ≈ ${purchaseCostUAH.toFixed(0)}₴`
-                : `${product.priceCNY}¥`}
+                ? `${activeVariant.priceCNY}¥ ≈ ${purchaseCostUAH.toFixed(0)}₴`
+                : `${activeVariant.priceCNY}¥`}
             </span>
-            {product.priceInUA && (
+            {activeVariant.priceInUA && (
               <span className="inline-flex items-center gap-1 bg-primary/10 px-2 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-[11px] font-bold text-primary border border-primary/20">
                 <TrendingUp className="w-3 h-3" />
-                {product.priceInUA} ₴
+                {activeVariant.priceInUA} ₴
               </span>
+            )}
+
+            {variants.length > 1 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setPriceIndex(prev => prev < variants.length - 1 ? prev + 1 : 0);
+                }}
+                className="p-0.5 rounded-md hover:bg-muted text-muted-foreground transition-colors"
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
             )}
           </div>
         </div>

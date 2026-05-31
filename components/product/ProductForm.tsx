@@ -319,6 +319,7 @@ export default function ProductForm({
         rateUSD: v.rateUSD ?? null,
         shippingType: v.shippingType || null,
         customShippingRate: v.customShippingRate ?? null,
+        isIncluded: v.isIncluded ?? true,
       })),
       deletedVariantIds,
     };
