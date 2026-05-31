@@ -25,26 +25,17 @@ export async function POST(req: Request) {
 
     const systemPrompt = `You are an AI assistant that extracts product information from user text and returns ONLY a valid JSON object.
 Extract these fields:
-- name (string)
-- olxUrl (string)
-- pinduoduoUrl (string)
-- priceCNY (number)
-- shippingUA (number)
-- managementUAH (number)
-- workModalWindowIOS (boolean)
-- soundReducer (boolean)
-- sensesOfEar (boolean)
-- wirelessCharger (boolean)
-- gyroscope (boolean)
-- weight (number)
-- microphoneQuality (string)
-- sellsCount (number)
-- purchasedCount (number)
-- chip (string)
-- equipment (string)
-- priceInUA (number)
+- name (string) — product name
+- priceCNY (number) — purchase price in Chinese Yuan
+- priceInUA (number) — selling price in Ukrainian Hryvnia
+- weight (number) — weight in grams
+- pddSearchQuery (string) — search text for finding the product on Pinduoduo
+- sellsCount (number) — number of units sold
+- purchasedCount (number) — number of units purchased
+- shippingUA (number) — shipping cost in UAH
+- managementUAH (number) — management expenses in UAH
 
-If a field is not mentioned, omit it or set it to null/false/0 appropriately. Return only the JSON object, no markdown code blocks, no other text.`;
+If a field is not mentioned, omit it or set it to null/0 appropriately. Return only the JSON object, no markdown code blocks, no other text.`;
 
     const completionRes = await fetch(`${BASE_URL}/chat/completions`, {
       method: "POST",
@@ -66,10 +57,9 @@ If a field is not mentioned, omit it or set it to null/false/0 appropriately. Re
 
     const completionData = await completionRes.json();
     let content = completionData.choices?.[0]?.message?.content || "";
-    
-    // Clean up potential markdown formatting in the response
+
     content = content.replace(/```json/gi, "").replace(/```/g, "").trim();
-    
+
     let parsedData;
     try {
       parsedData = JSON.parse(content);
@@ -77,24 +67,17 @@ If a field is not mentioned, omit it or set it to null/false/0 appropriately. Re
       throw new Error("Failed to parse JSON from AI response: " + content);
     }
 
-    // Return the successfully parsed data
     return NextResponse.json({ data: parsedData, verified: true });
 
   } catch (error: any) {
     console.error("AI parse error:", error);
-    
-    // Fallback mock data in case the API request fails
+
     return NextResponse.json({
       warning: "API fetch failed. Returning mock data for demonstration. Error: " + error.message,
       data: {
-        name: "AirPods Pro 2",
+        name: "Sample Product",
         priceCNY: 150,
-        chip: "Airoha 1562AE",
-        gyroscope: true,
-        soundReducer: true,
-        sensesOfEar: true,
         weight: 250,
-        microphoneQuality: "Excellent",
         priceInUA: 2000,
       },
     });
