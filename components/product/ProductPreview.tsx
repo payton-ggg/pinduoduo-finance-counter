@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import {
   Check,
@@ -174,9 +175,20 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
       {/* Variants detail */}
       {variants.length > 0 && (
         <Card className="p-5">
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-            Версии ({variants.length})
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              Версии ({variants.length})
+            </h3>
+            {variants.length > 1 && (
+              <Link
+                href={`/product/${data.id}/compare`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg shadow-sm transition-transform hover:scale-105 active:scale-95"
+              >
+                <BarChart3 className="w-3.5 h-3.5" />
+                Сравнить версии
+              </Link>
+            )}
+          </div>
           {variants.length > 0 &&
             (() => {
               const v = variants[activeVariantIndex] || variants[0];
