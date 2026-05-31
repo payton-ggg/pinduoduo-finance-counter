@@ -388,28 +388,38 @@ export default function ProductForm({
         {id ? "Edit Product" : "Create Product"}
       </h1>
 
-      <div className="mb-6 p-4 border border-blue-200 bg-blue-50/30 rounded-lg dark:border-blue-900 dark:bg-blue-900/10">
-        <label className="flex items-center gap-2 text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
-          <Bot className="w-5 h-5" />
-          Автозаполнение через ИИ (io.net)
-        </label>
-        <p className="text-xs text-blue-600 dark:text-blue-400 mb-3">
+      <div className="mb-6 p-5 border border-primary/15 bg-primary/5 rounded-2xl relative overflow-hidden backdrop-blur-xs shadow-xs transition-all duration-300 hover:border-primary/25">
+        {/* Subtle decorative background glow for AI theme */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
+        
+        <div className="flex items-center justify-between mb-2">
+          <label className="flex items-center gap-2 text-sm font-bold text-foreground">
+            <Bot className="w-5 h-5 text-primary animate-pulse" />
+            Автозаполнение через ИИ (io.net)
+          </label>
+          <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-primary/10 text-primary border border-primary/15">
+            AI Assistant
+          </span>
+        </div>
+        
+        <p className="text-xs text-muted-foreground mb-4">
           Опишите товар текстом, и ИИ автоматически заполнит поля первой версии.
           Фотографии затронуты не будут.
         </p>
-        <div className="flex flex-col sm:flex-row gap-3">
+        
+        <div className="flex flex-col sm:flex-row gap-3 relative z-10">
           <textarea
             placeholder="Например: Товар за 150 юаней, вес 250г, продаём за 2000 грн..."
             value={aiText}
             onChange={(e) => setAiText(e.target.value)}
-            className="flex-1 border rounded-md p-2 bg-white dark:bg-gray-950 resize-none text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 w-full bg-background/50 border border-foreground/10 rounded-xl px-4 py-3 text-sm text-foreground transition-all duration-300 hover:border-primary/30 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 resize-none placeholder:text-muted-foreground/60 min-h-[80px]"
             rows={3}
           />
           <Button
             type="button"
             onClick={handleAiFill}
             disabled={isAiLoading || !aiText.trim()}
-            className="sm:w-32 bg-blue-600 hover:bg-blue-700 text-white"
+            className="sm:w-32 h-auto py-3 sm:py-0 font-semibold"
           >
             {isAiLoading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
