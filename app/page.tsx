@@ -21,6 +21,7 @@ async function DashboardDataWrapper({
 
   const data = await prisma.product.findMany({
     include: {
+      variants: true,
       expenses: true,
       incomes: true,
       folder: true,
@@ -31,13 +32,43 @@ async function DashboardDataWrapper({
   });
 
   const mapped: ProductUI[] = data.map((p: any) => {
-    const actualRateCNY = p.rateCNY || rate;
-    const unitCost =
-      (p.priceCNY || 0) * (actualRateCNY > 0 ? actualRateCNY : 1);
-    const goodsCost = unitCost * (p.purchasedCount || 0);
+    const variants: any[] = Array.isArray(p.variants) ? p.variants : [];
 
-    const spent =
-      goodsCost + (Number(p.shippingUA) || 0) + (Number(p.managementUAH) || 0);
+    let totalSpent = 0;
+    let totalPurchased = 0;
+    let totalSells = 0;
+    let totalShipping = 0;
+    let totalManagement = 0;
+    let totalWeight = 0;
+    let firstPriceCNY = 0;
+    let firstPriceInUA = 0;
+    let firstNetPrice: number | undefined;
+    let firstRateCNY: number | undefined;
+    let firstRateUSD: number | undefined;
+
+    variants.forEach((v, i) => {
+      const actualRateCNY = v.rateCNY || rate;
+      const unitCost = (v.priceCNY || 0) * (actualRateCNY > 0 ? actualRateCNY : 1);
+      const purchased = Number(v.purchasedCount) || 0;
+      const goodsCost = unitCost * purchased;
+      const shipping = Number(v.shippingUA) || 0;
+      const management = Number(v.managementUAH) || 0;
+
+      totalSpent += goodsCost + shipping + management;
+      totalPurchased += purchased;
+      totalSells += Number(v.sellsCount) || 0;
+      totalShipping += shipping;
+      totalManagement += management;
+      totalWeight += (Number(v.weight) || 0) * purchased;
+
+      if (i === 0) {
+        firstPriceCNY = v.priceCNY || 0;
+        firstPriceInUA = v.priceInUA || 0;
+        firstNetPrice = v.netPrice;
+        firstRateCNY = v.rateCNY;
+        firstRateUSD = v.rateUSD;
+      }
+    });
 
     const income = Array.isArray(p.incomes)
       ? p.incomes.reduce(
@@ -49,26 +80,28 @@ async function DashboardDataWrapper({
     const img =
       Array.isArray(p.images) && p.images.length > 0
         ? p.images[0]
-        : "https://images.prom.ua/6613313628_w640_h640_naushniki-apple-airpods.jpg";
+        : "https://placehold.co/400x300?text=No+Image";
 
     return {
       id: p.id,
       name: p.name,
       img,
-      spent,
+      spent: totalSpent,
       income,
-      priceCNY: p.priceCNY || 0,
-      shippingUA: p.shippingUA ?? undefined,
-      managementUAH: p.managementUAH ?? undefined,
-      priceInUA: p.priceInUA || 0,
-      totalPurchased: p.purchasedCount || 0,
-      sellsCount: p.sellsCount || 0,
+      priceCNY: firstPriceCNY,
+      shippingUA: totalShipping || undefined,
+      managementUAH: totalManagement || undefined,
+      priceInUA: firstPriceInUA || 0,
+      netPrice: firstNetPrice,
+      totalPurchased,
+      sellsCount: totalSells,
       archive: p.archive,
-      rateCNY: p.rateCNY,
-      rateUSD: p.rateUSD,
+      rateCNY: firstRateCNY,
+      rateUSD: firstRateUSD,
       folderId: p.folderId,
       folderName: p.folder?.name,
-      weight: p.weight,
+      weight: totalWeight || null,
+      variantCount: variants.length,
     } as ProductUI;
   });
 
