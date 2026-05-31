@@ -11,41 +11,40 @@ generator client {
 model Product {
   id        String   @id @default(uuid())
   name      String
-  images    String[] // массив ссылок на фото
-  olxUrl    String?
+  images    String[]
   pinduoduoUrl String?
-  priceCNY  Float   @map("priceUAH")
-  shippingUA Float?
-  managementUAH Float?
-  priceInUA Float?
-  netPrice  Float?
-  rateCNY   Float?
-  rateUSD   Float?
-  shippingType String?
-  customShippingRate Float?
-
-  workModalWindowIOS Boolean @default(false)
-  soundReducer       Boolean @default(false)
-  sensesOfEar        Boolean @default(false)
-  wirelessCharger    Boolean @default(false)
-  gyroscope          Boolean @default(false)
-
-  weight    Float? 
-  microphoneQuality Int?
-  sellsCount Int?
-  purchasedCount Int? @default(0)
-  chip      String?
-  equipment String?
-  archive   Int? // null = not archived, any value = archived
+  archive   Int?
 
   folderId  String?
   folder    Folder?   @relation(fields: [folderId], references: [id])
 
+  variants  Variant[]
   expenses  Expense[]
   incomes   Income[]
   createdAt DateTime @default(now())
 }
 
+model Variant {
+  id        String   @id @default(uuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  priceCNY  Float
+  priceInUA Float?
+  netPrice  Float?
+  weight    Float?
+  pddSearchQuery String?
+  sellsCount     Int?
+  purchasedCount Int?    @default(0)
+  shippingUA     Float?
+  managementUAH  Float?
+  rateCNY   Float?
+  rateUSD   Float?
+  shippingType String?
+  customShippingRate Float?
+
+  createdAt DateTime @default(now())
+}
 
 model Folder {
   id        String    @id @default(uuid())
@@ -71,4 +70,3 @@ model Income {
   amount    Float
   createdAt DateTime @default(now())
 }
-
