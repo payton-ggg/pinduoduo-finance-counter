@@ -46,7 +46,10 @@ async function DashboardDataWrapper({
     let firstRateCNY: number | undefined;
     let firstRateUSD: number | undefined;
 
+    let hasSetFirst = false;
     variants.forEach((v, i) => {
+      if (v.isIncluded === false) return;
+
       const actualRateCNY = v.rateCNY || rate;
       const unitCost = (v.priceCNY || 0) * (actualRateCNY > 0 ? actualRateCNY : 1);
       const purchased = Number(v.purchasedCount) || 0;
@@ -61,14 +64,24 @@ async function DashboardDataWrapper({
       totalManagement += management;
       totalWeight += (Number(v.weight) || 0) * purchased;
 
-      if (i === 0) {
+      if (!hasSetFirst) {
         firstPriceCNY = v.priceCNY || 0;
         firstPriceInUA = v.priceInUA || 0;
         firstNetPrice = v.netPrice;
         firstRateCNY = v.rateCNY;
         firstRateUSD = v.rateUSD;
+        hasSetFirst = true;
       }
     });
+
+    if (!hasSetFirst && variants.length > 0) {
+      const v = variants[0];
+      firstPriceCNY = v.priceCNY || 0;
+      firstPriceInUA = v.priceInUA || 0;
+      firstNetPrice = v.netPrice;
+      firstRateCNY = v.rateCNY;
+      firstRateUSD = v.rateUSD;
+    }
 
     const income = Array.isArray(p.incomes)
       ? p.incomes.reduce(

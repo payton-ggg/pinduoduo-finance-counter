@@ -497,7 +497,7 @@ export default function ProductForm({
           />
         </div>
 
-        {/* Variants */}
+        {/* Variants Carousel */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
@@ -507,7 +507,10 @@ export default function ProductForm({
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => appendVariant(emptyVariant())}
+              onClick={() => {
+                appendVariant(emptyVariant());
+                setActiveVariantIndex(variantFields.length);
+              }}
               className="flex items-center gap-1"
             >
               <Plus className="h-3.5 w-3.5" />
@@ -515,59 +518,138 @@ export default function ProductForm({
             </Button>
           </div>
 
-          {variantFields.map((field, index) => (
+          {variantFields.length > 0 && (
             <div
-              key={field.id}
-              className="border border-foreground/10 rounded-xl overflow-hidden"
+              className="border border-foreground/10 rounded-xl overflow-hidden relative bg-card shadow-sm"
+              onTouchStart={(e) => setTouchStart(e.targetTouches[0].clientX)}
+              onTouchMove={(e) => setTouchEnd(e.targetTouches[0].clientX)}
+              onTouchEnd={() => {
+                if (!touchStart || !touchEnd) return;
+                const distance = touchStart - touchEnd;
+                if (
+                  distance > 50 &&
+                  activeVariantIndex < variantFields.length - 1
+                )
+                  setActiveVariantIndex((prev) => prev + 1);
+                if (distance < -50 && activeVariantIndex > 0)
+                  setActiveVariantIndex((prev) => prev - 1);
+                setTouchStart(null);
+                setTouchEnd(null);
+              }}
             >
-              <div
-                className="flex items-center justify-between px-4 py-3 bg-foreground/3 cursor-pointer"
-                onClick={() => toggleCollapse(index)}
-              >
-                <span className="text-sm font-bold">
-                  Версия {index + 1}
-                  {variants[index]?.priceCNY
-                    ? ` — ${variants[index].priceCNY}¥`
-                    : ""}
-                </span>
-                <div className="flex items-center gap-2">
+              {/* Carousel Header / Navigation */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-3 bg-foreground/3 border-b border-foreground/5 gap-3">
+                <div className="flex items-center justify-between sm:justify-start gap-2 w-full sm:w-auto">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8 shrink-0"
+                    disabled={activeVariantIndex === 0}
+                    onClick={() => setActiveVariantIndex((prev) => prev - 1)}
+                  >
+                    <ChevronDown className="h-4 w-4 rotate-90" />
+                  </Button>
+
+                  <div className="flex flex-col items-center sm:items-start overflow-hidden">
+                    <span className="text-sm font-bold truncate">
+                      Версия {activeVariantIndex + 1} из {variantFields.length}
+                    </span>
+                    <span className="text-xs text-muted-foreground truncate">
+                      {variants[activeVariantIndex]?.priceCNY
+                        ? `${variants[activeVariantIndex].priceCNY}¥`
+                        : "Новая"}
+                    </span>
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8 shrink-0"
+                    disabled={activeVariantIndex === variantFields.length - 1}
+                    onClick={() => setActiveVariantIndex((prev) => prev + 1)}
+                  >
+                    <ChevronDown className="h-4 w-4 -rotate-90" />
+                  </Button>
+                </div>
+
+                <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto">
+                  <label className="flex items-center gap-2 text-sm cursor-pointer select-none bg-background/50 px-3 py-1.5 rounded-lg border border-foreground/10 hover:bg-background transition-colors">
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 rounded text-primary focus:ring-primary cursor-pointer"
+                      checked={
+                        variants[activeVariantIndex]?.isIncluded !== false
+                      }
+                      onChange={(e) =>
+                        setValue(
+                          `variants.${activeVariantIndex}.isIncluded`,
+                          e.target.checked,
+                          { shouldDirty: true },
+                        )
+                      }
+                    />
+                    <span className="font-medium whitespace-nowrap text-xs sm:text-sm text-foreground">
+                      В итоговом расчете
+                    </span>
+                  </label>
+
                   {variantFields.length > 1 && (
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 text-destructive hover:text-destructive"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const variantId = variants[index]?.id;
+                      className="h-8 w-8 shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => {
+                        const variantId = variants[activeVariantIndex]?.id;
                         if (variantId) {
                           setDeletedVariantIds((prev) => [...prev, variantId]);
                         }
-                        removeVariant(index);
+                        removeVariant(activeVariantIndex);
+                        if (activeVariantIndex > 0) {
+                          setActiveVariantIndex((prev) => prev - 1);
+                        }
                       }}
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
-                  )}
-                  {collapsedVariants.has(index) ? (
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
                   )}
                 </div>
               </div>
-              {!collapsedVariants.has(index) && (
-                <div className="p-4">
+
+              {/* Variant Content */}
+              <div className="p-4 sm:p-5 relative bg-background/30">
+                <div
+                  className={
+                    variants[activeVariantIndex]?.isIncluded === false
+                      ? "opacity-50 grayscale-30 transition-all pointer-events-none"
+                      : "transition-all"
+                  }
+                >
                   <VariantFields
-                    prefix={`variants.${index}`}
+                    prefix={`variants.${activeVariantIndex}`}
                     register={register}
                     setValue={setValue}
                     watch={watch}
                   />
                 </div>
-              )}
+                {variants[activeVariantIndex]?.isIncluded === false && (
+                  <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+                    <div className="bg-background/80 backdrop-blur-sm border border-foreground/10 px-4 py-2 rounded-xl shadow-lg pointer-events-auto">
+                      <p className="text-sm font-semibold text-muted-foreground text-center">
+                        Эта версия исключена из итоговых расчетов.
+                        <br />
+                        <span className="text-xs font-normal">
+                          Включите чекбокс выше, чтобы разблокировать.
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          ))}
+          )}
         </div>
 
         <div className="p-4 border rounded-md bg-muted/30">
