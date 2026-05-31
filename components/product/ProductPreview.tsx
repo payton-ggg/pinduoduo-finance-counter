@@ -15,6 +15,7 @@ import {
   ShoppingCart,
   BarChart3,
   Copy,
+  ChevronDown,
 } from "lucide-react";
 
 type ProductPreviewProps = {
@@ -24,6 +25,9 @@ type ProductPreviewProps = {
 
 export function ProductPreview({ data, rates }: ProductPreviewProps) {
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [activeVariantIndex, setActiveVariantIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   const handleCopy = (text: string, fieldName: string) => {
     if (text) {
@@ -43,6 +47,8 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
 
   const totals = variants.reduce(
     (acc, v) => {
+      if (v.isIncluded === false) return acc;
+
       const rateCNY = v.rateCNY || rates?.cny || 0;
       const rateUSD = v.rateUSD || rates?.usd || 0;
       const priceCNY = Number(v.priceCNY) || 0;
@@ -55,7 +61,8 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
 
       const purchaseUnitCostUAH = priceCNY * (rateCNY > 0 ? rateCNY : 1);
       const goodsCost = purchased * purchaseUnitCostUAH;
-      const actualNetPrice = v.netPrice || (priceInUA > 0 ? priceInUA * 0.98 - 20 : 0);
+      const actualNetPrice =
+        v.netPrice || (priceInUA > 0 ? priceInUA * 0.98 - 20 : 0);
       const income = sells * actualNetPrice;
       const costs = goodsCost + shippingUA + managementUAH;
 
@@ -67,7 +74,14 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
       acc.totalWeight += unitWeight * purchased;
       return acc;
     },
-    { totalPurchased: 0, totalSells: 0, totalIncome: 0, totalCosts: 0, totalPotentialRevenue: 0, totalWeight: 0 }
+    {
+      totalPurchased: 0,
+      totalSells: 0,
+      totalIncome: 0,
+      totalCosts: 0,
+      totalPotentialRevenue: 0,
+      totalWeight: 0,
+    },
   );
 
   const potentialProfit = totals.totalPotentialRevenue - totals.totalCosts;
@@ -163,8 +177,10 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
             Версии ({variants.length})
           </h3>
-          <div className="space-y-4">
-            {variants.map((v: any, i: number) => {
+          {variants.length > 0 &&
+            (() => {
+              const v = variants[activeVariantIndex] || variants[0];
+              const i = activeVariantIndex;
               const rateCNY = v.rateCNY || rates?.cny || 0;
               const priceCNY = Number(v.priceCNY) || 0;
               const priceInUA = Number(v.priceInUA) || 0;
@@ -183,45 +199,128 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
                     : "Авиа (18.3$/кг)";
 
               return (
-                <div key={v.id || i} className="border rounded-xl p-4 bg-foreground/2">
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="text-sm font-bold">Версия {i + 1}</h4>
-                    {v.pddSearchQuery && (
-                      <div className="flex items-center gap-1">
-                        <span className="text-xs text-muted-foreground truncate max-w-[200px]">
-                          PDD: {v.pddSearchQuery}
+                <div
+                  className="border border-foreground/10 rounded-xl overflow-hidden relative bg-card shadow-sm"
+                  onTouchStart={(e) =>
+                    setTouchStart(e.targetTouches[0].clientX)
+                  }
+                  onTouchMove={(e) => setTouchEnd(e.targetTouches[0].clientX)}
+                  onTouchEnd={() => {
+                    if (!touchStart || !touchEnd) return;
+                    const distance = touchStart - touchEnd;
+                    if (
+                      distance > 50 &&
+                      activeVariantIndex < variants.length - 1
+                    )
+                      setActiveVariantIndex((prev) => prev + 1);
+                    if (distance < -50 && activeVariantIndex > 0)
+                      setActiveVariantIndex((prev) => prev - 1);
+                    setTouchStart(null);
+                    setTouchEnd(null);
+                  }}
+                >
+                  {/* Carousel Header / Navigation */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-3 bg-foreground/3 border-b border-foreground/5 gap-3">
+                    <div className="flex items-center justify-between sm:justify-start gap-2 w-full sm:w-auto">
+                      <button
+                        type="button"
+                        className="flex items-center justify-center h-8 w-8 rounded-md border bg-background hover:bg-muted disabled:opacity-50 disabled:pointer-events-none transition-colors"
+                        disabled={activeVariantIndex === 0}
+                        onClick={() =>
+                          setActiveVariantIndex((prev) => prev - 1)
+                        }
+                      >
+                        <ChevronDown className="h-4 w-4 rotate-90" />
+                      </button>
+
+                      <div className="flex flex-col items-center sm:items-start overflow-hidden">
+                        <span className="text-sm font-bold truncate">
+                          Версия {activeVariantIndex + 1} из {variants.length}
                         </span>
-                        <button
-                          type="button"
-                          onClick={() => handleCopy(v.pddSearchQuery, `pdd-${i}`)}
-                          className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          {copiedField === `pdd-${i}` ? (
-                            <Check className="h-3.5 w-3.5 text-green-500" />
-                          ) : (
-                            <Copy className="h-3.5 w-3.5" />
-                          )}
-                        </button>
                       </div>
+
+                      <button
+                        type="button"
+                        className="flex items-center justify-center h-8 w-8 rounded-md border bg-background hover:bg-muted disabled:opacity-50 disabled:pointer-events-none transition-colors"
+                        disabled={activeVariantIndex === variants.length - 1}
+                        onClick={() =>
+                          setActiveVariantIndex((prev) => prev + 1)
+                        }
+                      >
+                        <ChevronDown className="h-4 w-4 -rotate-90" />
+                      </button>
+                    </div>
+
+                    {v.isIncluded === false && (
+                      <span className="text-xs font-semibold bg-muted/50 border border-foreground/10 text-muted-foreground px-2.5 py-1 rounded-md truncate">
+                        Исключена из расчета
+                      </span>
                     )}
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-y-3 gap-x-6 text-sm">
-                    <InfoRow label="Закупка" value={`${priceCNY} ¥ ≈ ${purchaseUAH.toFixed(2)} ₴`} />
-                    <InfoRow label="Продажа" value={priceInUA > 0 ? `${priceInUA} ₴` : "—"} />
-                    <InfoRow label="Куплено / Продано" value={`${purchased} / ${sells}`} />
-                    {unitWeight > 0 && (
+
+                  <div
+                    className={`p-4 bg-background/30 transition-all ${v.isIncluded === false ? "opacity-60 grayscale-20" : ""}`}
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-sm font-bold">Детали</h4>
+                      {v.pddSearchQuery && (
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+                            PDD: {v.pddSearchQuery}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleCopy(v.pddSearchQuery, `pdd-${i}`)
+                            }
+                            className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors bg-background border shadow-sm ml-2"
+                          >
+                            {copiedField === `pdd-${i}` ? (
+                              <Check className="h-3.5 w-3.5 text-green-500" />
+                            ) : (
+                              <Copy className="h-3.5 w-3.5" />
+                            )}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-y-4 gap-x-6 text-sm">
                       <InfoRow
-                        label="Вес"
-                        value={unitWeight > 1000 ? `${(unitWeight / 1000).toFixed(3)} кг` : `${unitWeight} г`}
+                        label="Закупка"
+                        value={`${priceCNY} ¥ ≈ ${purchaseUAH.toFixed(2)} ₴`}
                       />
-                    )}
-                    <InfoRow label="Доставка" value={`${shippingUA.toFixed(2)} ₴`} sub={shippingLabel} />
-                    <InfoRow label="Управление" value={`${managementUAH.toFixed(2)} ₴`} />
+                      <InfoRow
+                        label="Продажа"
+                        value={priceInUA > 0 ? `${priceInUA} ₴` : "—"}
+                      />
+                      <InfoRow
+                        label="Куплено / Продано"
+                        value={`${purchased} / ${sells}`}
+                      />
+                      {unitWeight > 0 && (
+                        <InfoRow
+                          label="Вес"
+                          value={
+                            unitWeight > 1000
+                              ? `${(unitWeight / 1000).toFixed(3)} кг`
+                              : `${unitWeight} г`
+                          }
+                        />
+                      )}
+                      <InfoRow
+                        label="Доставка"
+                        value={`${shippingUA.toFixed(2)} ₴`}
+                        sub={shippingLabel}
+                      />
+                      <InfoRow
+                        label="Управление"
+                        value={`${managementUAH.toFixed(2)} ₴`}
+                      />
+                    </div>
                   </div>
                 </div>
               );
-            })}
-          </div>
+            })()}
         </Card>
       )}
 
