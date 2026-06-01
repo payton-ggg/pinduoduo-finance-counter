@@ -449,180 +449,138 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
       <div className="overflow-hidden h-0 w-0 absolute left-[-9999px] top-[-9999px]">
         <div
           ref={exportRef}
-          className="w-[800px] bg-linear-to-br from-slate-900 via-slate-800 to-indigo-950 p-8 rounded-3xl text-white font-sans flex flex-col gap-8 shadow-2xl relative"
+          className="w-[1000px] bg-white text-slate-900 flex shadow-2xl rounded-none"
         >
-          {/* Decorative background elements */}
-          <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
-
-          {/* Header */}
-          <div className="flex gap-6 z-10">
-            {images.length > 0 && (
-              <div className="w-32 h-32 rounded-2xl overflow-hidden shrink-0 shadow-lg border-2 border-white/10 relative">
-                {/* next/image doesn't play well with html2canvas sometimes, using img is safer, but next/image with unoptimized is also fine. We'll use standard img for export */}
-                <img
-                  src={images[0]}
-                  alt=""
-                  className="w-full h-full object-cover"
-                  crossOrigin="anonymous"
-                />
+          {/* Left Column: Huge Image */}
+          <div className="w-[420px] bg-slate-100 shrink-0 relative">
+            {images.length > 0 ? (
+              <img
+                src={images[0]}
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover"
+                crossOrigin="anonymous"
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center bg-slate-200">
+                <Package className="w-20 h-20 text-slate-400" />
               </div>
             )}
-            <div className="flex flex-col justify-center">
-              <h1 className="text-3xl font-black mb-2 line-clamp-2 leading-tight">
+            
+            {/* Overlay Gradient at bottom for text */}
+            <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-8">
+              <h1 className="text-3xl font-black text-white leading-tight mb-3 drop-shadow-lg">
                 {data?.name || "Отчет по товару"}
               </h1>
               {data?.folder && (
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm w-fit text-sm">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/20 backdrop-blur-md text-white border border-white/20 w-fit text-sm font-medium shadow-lg">
                   <Package className="w-4 h-4" />
-                  Папка: {data.folder.name}
+                  {data.folder.name}
                 </div>
               )}
             </div>
           </div>
 
-          {/* Key Metrics */}
-          <div className="grid grid-cols-4 gap-4 z-10">
-            <div className="bg-white/5 backdrop-blur-md rounded-2xl p-5 border border-white/10 shadow-lg">
-              <p className="text-white/60 text-sm font-medium mb-1">
-                Доход (чистый)
-              </p>
-              <p className="text-2xl font-bold text-green-400">
-                {totals.totalIncome.toFixed(2)} ₴
-              </p>
+          {/* Right Column: Content */}
+          <div className="w-[580px] p-10 flex flex-col bg-slate-50">
+            <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-200">
+               <div className="flex items-center gap-2">
+                 <BarChart3 className="w-6 h-6 text-indigo-600" />
+                 <span className="text-xl font-black tracking-tight text-slate-800">
+                   Pinduoduo Analytics
+                 </span>
+               </div>
+               <div className="text-slate-500 text-sm font-medium">
+                 {new Date().toLocaleDateString("ru-RU")}
+               </div>
             </div>
-            <div className="bg-white/5 backdrop-blur-md rounded-2xl p-5 border border-white/10 shadow-lg">
-              <p className="text-white/60 text-sm font-medium mb-1">
-                Расходы (всего)
-              </p>
-              <p className="text-2xl font-bold text-rose-400">
-                {totals.totalCosts.toFixed(2)} ₴
-              </p>
-            </div>
-            <div className="bg-white/5 backdrop-blur-md rounded-2xl p-5 border border-white/10 shadow-lg">
-              <p className="text-white/60 text-sm font-medium mb-1">
-                Продано / Куплено
-              </p>
-              <p className="text-2xl font-bold text-blue-400">
-                {totals.totalSells} <span className="text-white/40">/</span>{" "}
-                {totals.totalPurchased}
-              </p>
-            </div>
-            <div className="bg-white/5 backdrop-blur-md rounded-2xl p-5 border border-white/10 shadow-lg">
-              <p className="text-white/60 text-sm font-medium mb-1">Остаток</p>
-              <p className="text-2xl font-bold text-orange-400">
-                {remainingStock} шт
-              </p>
-            </div>
-          </div>
-
-          {/* ROI & Projections */}
-          <div className="grid grid-cols-2 gap-4 z-10">
-            <div className="bg-linear-to-br from-green-500/20 to-emerald-600/10 backdrop-blur-md rounded-2xl p-6 border border-green-500/30 shadow-lg relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-green-500/20 rounded-full blur-2xl translate-x-1/2 -translate-y-1/2" />
-              <p className="text-green-300/80 text-sm font-medium mb-2 uppercase tracking-wider">
-                Прогноз прибыли
-              </p>
-              <div className="flex items-end gap-3">
-                <p className="text-4xl font-black text-green-400">
-                  +{potentialProfit.toFixed(2)} ₴
-                </p>
-                <p className="text-green-300 font-bold mb-1 bg-green-500/20 px-2 py-1 rounded-lg">
-                  ROI {roi.toFixed(1)}%
-                </p>
+            
+            <div className="flex flex-col gap-5 flex-1">
+              {/* Key Metrics */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+                  <span className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Доход (чистый)</span>
+                  <span className="text-2xl font-black text-green-600">{totals.totalIncome.toFixed(2)} ₴</span>
+                </div>
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+                  <span className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Расходы (всего)</span>
+                  <span className="text-2xl font-black text-rose-600">{totals.totalCosts.toFixed(2)} ₴</span>
+                </div>
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+                  <span className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Продано / Куплено</span>
+                  <span className="text-2xl font-black text-blue-600">{totals.totalSells} <span className="text-slate-300">/</span> {totals.totalPurchased}</span>
+                </div>
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+                  <span className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Остаток на складе</span>
+                  <span className="text-2xl font-black text-orange-600">{remainingStock} шт</span>
+                </div>
               </div>
-              <p className="text-green-400/60 text-sm mt-2">
-                Если продать все {totals.totalPurchased} шт
-              </p>
-            </div>
 
-            <div className="bg-linear-to-br from-blue-500/20 to-indigo-600/10 backdrop-blur-md rounded-2xl p-6 border border-blue-500/30 shadow-lg relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/20 rounded-full blur-2xl translate-x-1/2 -translate-y-1/2" />
-              <p className="text-blue-300/80 text-sm font-medium mb-2 uppercase tracking-wider">
-                Текущая Маржа
-              </p>
-              <div className="flex items-end gap-3">
-                <p className="text-4xl font-black text-blue-400">
-                  {margin > 0 ? "+" : ""}
-                  {margin.toFixed(2)} ₴
-                </p>
-                <p className="text-blue-300 font-bold mb-1 bg-blue-500/20 px-2 py-1 rounded-lg">
-                  Текущий ROI {currentRoi.toFixed(1)}%
-                </p>
+              {/* ROI & Projections */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-green-50 p-6 rounded-2xl border border-green-200 flex flex-col relative overflow-hidden">
+                   <div className="absolute top-0 right-0 w-32 h-32 bg-green-200/50 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2" />
+                   <span className="text-green-700 text-xs font-bold uppercase tracking-wider mb-2 relative z-10">Прогноз прибыли</span>
+                   <span className="text-3xl font-black text-green-700 mb-1 relative z-10">+{potentialProfit.toFixed(2)} ₴</span>
+                   <div className="flex items-center gap-2 mt-auto pt-2 relative z-10">
+                     <span className="bg-green-200 text-green-800 text-xs font-black px-2 py-1 rounded-md">ROI {roi.toFixed(1)}%</span>
+                     <span className="text-green-700/80 text-xs font-medium">Если продать все</span>
+                   </div>
+                </div>
+                
+                <div className="bg-indigo-50 p-6 rounded-2xl border border-indigo-200 flex flex-col relative overflow-hidden">
+                   <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-200/50 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2" />
+                   <span className="text-indigo-700 text-xs font-bold uppercase tracking-wider mb-2 relative z-10">Текущая Маржа</span>
+                   <span className="text-3xl font-black text-indigo-700 mb-1 relative z-10">{margin > 0 ? "+" : ""}{margin.toFixed(2)} ₴</span>
+                   <div className="flex items-center gap-2 mt-auto pt-2 relative z-10">
+                     <span className="bg-indigo-200 text-indigo-800 text-xs font-black px-2 py-1 rounded-md">ROI {currentRoi.toFixed(1)}%</span>
+                     <span className="text-indigo-700/80 text-xs font-medium">Уже продано</span>
+                   </div>
+                </div>
               </div>
-              <p className="text-blue-400/60 text-sm mt-2">
-                Продано {totals.totalSells} из {totals.totalPurchased} шт
-              </p>
-            </div>
-          </div>
 
-          {/* Variants Summary */}
-          {variants.length > 0 && (
-            <div className="z-10 bg-white/5 backdrop-blur-md rounded-2xl p-5 border border-white/10 shadow-lg">
-              <h3 className="text-white/80 font-bold mb-4 uppercase tracking-wider text-sm flex items-center gap-2">
-                <Package className="w-4 h-4" />
-                Версии товара ({variants.length})
-              </h3>
-              <div className="grid grid-cols-1 gap-3">
-                {variants.map((v: any, i: number) => {
-                  if (v.isIncluded === false) return null;
-                  const priceCNY = Number(v.priceCNY) || 0;
-                  const priceInUA = Number(v.priceInUA) || 0;
-                  const purchased = Number(v.purchasedCount) || 0;
-                  const sells = Number(v.sellsCount) || 0;
-
-                  return (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between py-2 border-b border-white/10 last:border-0"
-                    >
-                      <div className="flex flex-col">
-                        <span className="text-white font-medium">
-                          Версия {i + 1}
-                        </span>
-                        <span className="text-white/50 text-xs truncate max-w-[200px]">
-                          {v.pddSearchQuery || "Без названия"}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-6 text-sm">
-                        <div className="flex flex-col items-end">
-                          <span className="text-white/60 text-xs">Закупка</span>
-                          <span className="text-white font-semibold">
-                            {priceCNY} ¥
-                          </span>
+              {/* Variants Summary */}
+              {variants.length > 0 && (
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm mt-1 overflow-hidden flex flex-col relative z-10">
+                  <div className="p-4 border-b border-slate-100 bg-slate-50/80">
+                     <h3 className="text-slate-800 font-black uppercase tracking-wider text-xs flex items-center gap-2">
+                       <Package className="w-4 h-4" />
+                       Версии товара ({variants.length})
+                     </h3>
+                  </div>
+                  <div className="flex-1 p-4 grid grid-cols-1 gap-2">
+                    {variants.map((v: any, i: number) => {
+                      if (v.isIncluded === false) return null;
+                      const priceCNY = Number(v.priceCNY) || 0;
+                      const priceInUA = Number(v.priceInUA) || 0;
+                      const purchased = Number(v.purchasedCount) || 0;
+                      const sells = Number(v.sellsCount) || 0;
+                      
+                      return (
+                        <div key={i} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0 last:pb-0">
+                          <div className="flex flex-col">
+                            <span className="text-slate-900 font-bold text-sm">Версия {i + 1}</span>
+                            <span className="text-slate-500 text-xs truncate max-w-[150px]">{v.pddSearchQuery || "Без названия"}</span>
+                          </div>
+                          <div className="flex items-center gap-5 text-sm">
+                            <div className="flex flex-col items-end">
+                              <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Закупка</span>
+                              <span className="text-slate-800 font-black">{priceCNY} ¥</span>
+                            </div>
+                            <div className="flex flex-col items-end">
+                              <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Продажа</span>
+                              <span className="text-slate-800 font-black">{priceInUA > 0 ? `${priceInUA} ₴` : "—"}</span>
+                            </div>
+                            <div className="flex flex-col items-end min-w-[70px]">
+                              <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Куп/Прод</span>
+                              <span className="text-slate-800 font-black">{purchased} / {sells}</span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex flex-col items-end">
-                          <span className="text-white/60 text-xs">Продажа</span>
-                          <span className="text-white font-semibold">
-                            {priceInUA > 0 ? `${priceInUA} ₴` : "—"}
-                          </span>
-                        </div>
-                        <div className="flex flex-col items-end min-w-[80px]">
-                          <span className="text-white/60 text-xs">
-                            Куплено/Продано
-                          </span>
-                          <span className="text-white font-semibold">
-                            {purchased} / {sells}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Footer watermark */}
-          <div className="flex justify-between items-center z-10 pt-4 border-t border-white/10">
-            <div className="flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-indigo-400" />
-              <span className="font-bold tracking-tight text-white/80">
-                Pinduoduo Analytics
-              </span>
-            </div>
-            <div className="text-white/40 text-sm font-medium">
-              Сгенерировано {new Date().toLocaleDateString("ru-RU")}
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
