@@ -457,17 +457,33 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
           ref={exportRef}
           className="w-[1000px] bg-white text-slate-900 flex shadow-2xl rounded-none"
         >
-          {/* Left Column: Huge Image */}
-          <div className="w-[420px] bg-slate-100 shrink-0 relative">
+          {/* Left Column: Images */}
+          <div className="w-[420px] bg-slate-900 shrink-0 relative overflow-hidden flex flex-col">
             {images.length > 0 ? (
-              <img
-                src={images[0]}
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover"
-                crossOrigin="anonymous"
-              />
+              <div className="w-full h-full flex flex-col absolute inset-0">
+                <img
+                  src={images[0]}
+                  alt=""
+                  className="w-full h-auto object-cover shrink-0"
+                  style={{ maxHeight: images.length > 1 ? '60%' : '100%' }}
+                  crossOrigin="anonymous"
+                />
+                {images.length > 1 && (
+                  <div className={`grid ${images.length === 2 ? 'grid-cols-1' : 'grid-cols-2'} gap-0 w-full flex-1 min-h-0`}>
+                    {images.slice(1, 3).map((src, i) => (
+                      <img
+                        key={i}
+                        src={src}
+                        alt=""
+                        className="w-full h-full object-cover"
+                        crossOrigin="anonymous"
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-slate-200">
+              <div className="absolute inset-0 flex items-center justify-center bg-slate-800">
                 <Package className="w-20 h-20 text-slate-400" />
               </div>
             )}
