@@ -457,14 +457,27 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
           ref={exportRef}
           className="w-[1000px] bg-white text-slate-900 flex shadow-2xl rounded-none"
         >
-          {/* Left Column: Images */}
-          <div className="w-[420px] bg-slate-900 shrink-0 relative overflow-hidden flex flex-col">
-            {images.length > 0 ? (
-              <div className="w-full h-full flex flex-col absolute inset-0">
+          {/* Left Column: Ambient Background + Images + Overlay */}
+          <div className="w-[420px] shrink-0 relative overflow-hidden flex flex-col bg-slate-900">
+            {/* Ambient background matching product image */}
+            {images.length > 0 && (
+              <div className="absolute inset-0 z-0 bg-black overflow-hidden">
                 <img
                   src={images[0]}
                   alt=""
-                  className="w-full h-auto object-cover shrink-0"
+                  className="w-full h-full object-cover blur-[50px] opacity-60 scale-[2] saturate-150"
+                  crossOrigin="anonymous"
+                />
+              </div>
+            )}
+
+            {/* Images Container */}
+            {images.length > 0 ? (
+              <div className="w-full h-full flex flex-col absolute inset-0 z-10">
+                <img
+                  src={images[0]}
+                  alt=""
+                  className="w-full h-auto object-cover shrink-0 shadow-2xl"
                   style={{ maxHeight: images.length > 1 ? '60%' : '100%' }}
                   crossOrigin="anonymous"
                 />
@@ -475,7 +488,7 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
                         key={i}
                         src={src}
                         alt=""
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover shadow-2xl"
                         crossOrigin="anonymous"
                       />
                     ))}
@@ -483,13 +496,13 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
                 )}
               </div>
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-slate-800">
+              <div className="absolute inset-0 flex items-center justify-center z-10 bg-slate-800">
                 <Package className="w-20 h-20 text-slate-400" />
               </div>
             )}
             
-            {/* Overlay Gradient at bottom for text */}
-            <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-8">
+            {/* Dark Overlay at bottom for text */}
+            <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-black/0 flex flex-col justify-end p-8 z-20 pointer-events-none">
               {data?.folder && (
                 <div className="text-white/80 text-sm font-bold uppercase tracking-wider mb-2 flex items-center gap-2">
                   <Package className="w-4 h-4" />
@@ -500,7 +513,7 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
                 {data?.name || "Отчет по товару"}
               </h1>
               
-              <div className="flex flex-col gap-2 mt-2 p-4 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 shadow-xl">
+              <div className="flex flex-col gap-2 mt-2 p-4 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 shadow-xl pointer-events-auto">
                 <div className="flex justify-between items-center text-white">
                   <span className="text-white/80 text-sm font-medium">Сумма за товары</span>
                   <span className="font-bold text-lg">{totals.totalGoodsCostUAH.toFixed(2)} ₴</span>
