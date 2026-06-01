@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import html2canvas from "html2canvas";
+import * as htmlToImage from "html-to-image";
 import { Card } from "@/components/ui/card";
 import {
   Check,
@@ -38,15 +38,13 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
     try {
       // Small delay to ensure styles and images are fully rendered
       await new Promise((resolve) => setTimeout(resolve, 300));
-      const canvas = await html2canvas(exportRef.current, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: null,
+      const dataUrl = await htmlToImage.toPng(exportRef.current, {
+        pixelRatio: 2,
+        backgroundColor: "transparent",
       });
-      const image = canvas.toDataURL("image/png", 1.0);
       const link = document.createElement("a");
       link.download = `statistics-${data?.name || "product"}.png`;
-      link.href = image;
+      link.href = dataUrl;
       link.click();
     } catch (error) {
       console.error("Failed to export image", error);
