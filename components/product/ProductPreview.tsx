@@ -95,6 +95,8 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
       acc.totalCosts += costs;
       acc.totalPotentialRevenue += purchased * actualNetPrice;
       acc.totalWeight += unitWeight * purchased;
+      acc.totalGoodsCostUAH += goodsCost;
+      acc.totalShippingUAH += shippingUA;
       return acc;
     },
     {
@@ -104,12 +106,16 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
       totalCosts: 0,
       totalPotentialRevenue: 0,
       totalWeight: 0,
+      totalGoodsCostUAH: 0,
+      totalShippingUAH: 0,
     },
   );
 
   const potentialProfit = totals.totalPotentialRevenue - totals.totalCosts;
   const margin = totals.totalIncome - totals.totalCosts;
   const remainingStock = totals.totalPurchased - totals.totalSells;
+  const totalShippingUSD = rates?.usd ? totals.totalShippingUAH / rates.usd : 0;
+  
   const roi =
     totals.totalCosts > 0
       ? (totals.totalPotentialRevenue / totals.totalCosts - 1) * 100
@@ -467,16 +473,32 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
             )}
             
             {/* Overlay Gradient at bottom for text */}
-            <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-8">
-              <h1 className="text-3xl font-black text-white leading-tight mb-3 drop-shadow-lg">
-                {data?.name || "Отчет по товару"}
-              </h1>
+            <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-8">
               {data?.folder && (
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/20 backdrop-blur-md text-white border border-white/20 w-fit text-sm font-medium shadow-lg">
+                <div className="text-white/80 text-sm font-bold uppercase tracking-wider mb-2 flex items-center gap-2">
                   <Package className="w-4 h-4" />
                   {data.folder.name}
                 </div>
               )}
+              <h1 className="text-3xl font-black text-white leading-tight mb-4 drop-shadow-lg">
+                {data?.name || "Отчет по товару"}
+              </h1>
+              
+              <div className="flex flex-col gap-2 mt-2 p-4 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 shadow-xl">
+                <div className="flex justify-between items-center text-white">
+                  <span className="text-white/80 text-sm font-medium">Сумма за товары</span>
+                  <span className="font-bold text-lg">{totals.totalGoodsCostUAH.toFixed(2)} ₴</span>
+                </div>
+                <div className="flex justify-between items-center text-white">
+                  <span className="text-white/80 text-sm font-medium">Доставка</span>
+                  <div className="flex items-end gap-2">
+                    <span className="font-bold text-lg">{totals.totalShippingUAH.toFixed(2)} ₴</span>
+                    {totalShippingUSD > 0 && (
+                       <span className="text-white/50 text-sm font-medium mb-[2px]">(${totalShippingUSD.toFixed(2)})</span>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
