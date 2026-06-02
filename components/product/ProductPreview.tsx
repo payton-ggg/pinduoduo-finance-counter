@@ -122,8 +122,18 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
         backgroundColor: "transparent",
       });
 
-      // 4. Set the generated image URI to show the preview/download modal
-      setExportedImageUri(dataUrl);
+      // 4. Handle saving based on device type
+      const isMobileDevice = typeof window !== "undefined" && 
+        /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+      if (isMobileDevice) {
+        setExportedImageUri(dataUrl);
+      } else {
+        const link = document.createElement("a");
+        link.download = `statistics-${data?.name || "product"}.png`;
+        link.href = dataUrl;
+        link.click();
+      }
     } catch (error) {
       console.error("Failed to export image", error);
     } finally {
