@@ -525,7 +525,7 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
       <div className="overflow-hidden h-0 w-0 absolute left-[-9999px] top-[-9999px]">
         <div
           ref={exportRef}
-          className="w-[1000px] bg-white text-slate-900 flex shadow-2xl rounded-none"
+          className="w-[1000px] bg-white text-slate-900 flex rounded-none border border-slate-200"
         >
           {/* Left Column: Ambient Background + Images + Overlay */}
           <div className="w-[420px] shrink-0 relative overflow-hidden flex flex-col bg-slate-900">
@@ -547,7 +547,7 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
                 <img
                   src={displayImages[0]}
                   alt=""
-                  className="w-full h-auto object-cover shrink-0 shadow-2xl"
+                  className="w-full h-auto object-cover shrink-0"
                   style={{
                     maxHeight: displayImages.length > 1 ? "60%" : "100%",
                   }}
@@ -562,7 +562,7 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
                         key={i}
                         src={src}
                         alt=""
-                        className="w-full h-full object-cover shadow-2xl"
+                        className="w-full h-full object-cover"
                         crossOrigin="anonymous"
                       />
                     ))}
@@ -583,11 +583,14 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
                   {data.folder.name}
                 </div>
               )}
-              <h1 className="text-3xl font-black text-white leading-tight mb-4 drop-shadow-lg">
+              <h1
+                className="text-3xl font-black text-white leading-tight mb-4"
+                style={{ textShadow: "0 2px 4px rgba(0, 0, 0, 0.8)" }}
+              >
                 {data?.name || "Отчет по товару"}
               </h1>
 
-              <div className="flex flex-col gap-2 mt-2 p-4 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 shadow-xl pointer-events-auto">
+              <div className="flex flex-col gap-2 mt-2 p-4 bg-slate-950/85 rounded-xl border border-white/10 pointer-events-auto">
                 <div className="flex justify-between items-center text-white">
                   <span className="text-white/80 text-sm font-medium">
                     Сумма за товары
@@ -632,7 +635,7 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
             <div className="flex flex-col gap-5 flex-1">
               {/* Key Metrics */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 flex flex-col">
                   <span className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
                     Доход (чистый)
                   </span>
@@ -640,7 +643,7 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
                     {totals.totalIncome.toFixed(2)} ₴
                   </span>
                 </div>
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 flex flex-col">
                   <span className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
                     Расходы (всего)
                   </span>
@@ -648,7 +651,7 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
                     {totals.totalCosts.toFixed(2)} ₴
                   </span>
                 </div>
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 flex flex-col">
                   <span className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
                     Продано / Куплено
                   </span>
@@ -658,7 +661,7 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
                     {totals.totalPurchased}
                   </span>
                 </div>
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 flex flex-col">
                   <span className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
                     Остаток на складе
                   </span>
@@ -710,7 +713,7 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
 
               {/* Variants Summary */}
               {variants.length > 0 && (
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm mt-1 overflow-hidden flex flex-col relative z-10">
+                <div className="bg-white rounded-2xl border border-slate-200 mt-1 overflow-hidden flex flex-col relative z-10">
                   <div className="p-4 border-b border-slate-100 bg-slate-50/80">
                     <h3 className="text-slate-800 font-black uppercase tracking-wider text-xs flex items-center gap-2">
                       <Package className="w-4 h-4" />
