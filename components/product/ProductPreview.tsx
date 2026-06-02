@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import * as htmlToImage from "html-to-image";
@@ -17,6 +17,7 @@ import {
   ChevronDown,
   Camera,
   Loader2,
+  Share2,
 } from "lucide-react";
 
 type ProductPreviewProps = {
