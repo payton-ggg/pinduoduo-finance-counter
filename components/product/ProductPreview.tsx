@@ -32,21 +32,94 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const exportRef = useRef<HTMLDivElement>(null);
+  const [exportImages, setExportImages] = useState<string[]>([]);
+  const [exportedImageUri, setExportedImageUri] = useState<string | null>(null);
+  const [shareSupported, setShareSupported] = useState(false);
+
+  useEffect(() => {
+    if (typeof navigator !== "undefined" && "share" in navigator) {
+      setShareSupported(true);
+    }
+  }, []);
+
+  const images: string[] = Array.isArray(data?.images)
+    ? data.images
+        .map((img: any) => (typeof img === "string" ? img : (img?.url ?? "")))
+        .filter(Boolean)
+    : [];
+
+  const variants: any[] = Array.isArray(data?.variants) ? data.variants : [];
+
+  const displayImages = exportImages.length > 0 ? exportImages : images;
+
+  const handleShare = async () => {
+    if (!exportedImageUri) return;
+    try {
+      const response = await fetch(exportedImageUri);
+      const blob = await response.blob();
+      const file = new File([blob], `statistics-${data?.name || "product"}.png`, { type: "image/png" });
+      
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: `Статистика - ${data?.name || "product"}`,
+          text: `Отчет по товару ${data?.name || ""}`,
+        });
+      } else {
+        await navigator.share({
+          title: `Статистика - ${data?.name || "product"}`,
+          text: `Отчет по товару ${data?.name || ""}`,
+          url: window.location.href,
+        });
+      }
+    } catch (error) {
+      console.error("Error sharing:", error);
+    }
+  };
 
   const handleExport = async () => {
-    if (!exportRef.current) return;
     setIsExporting(true);
     try {
-      // Small delay to ensure styles and images are fully rendered
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      // 1. Convert active images to base64 to prevent CORS taint and Safari rendering issues
+      const activeImages = images.slice(0, 3);
+      const base64Images = await Promise.all(
+        activeImages.map(async (url) => {
+          try {
+            const res = await fetch(url, { mode: 'cors' });
+            const blob = await res.blob();
+            return new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.onerror = reject;
+              reader.readAsDataURL(blob);
+            });
+          } catch (e) {
+            console.error("CORS fetch failed, using fallback URL:", url, e);
+            return url;
+          }
+        })
+      );
+      
+      setExportImages(base64Images);
+      
+      // 2. Wait for state and DOM to update
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      
+      if (!exportRef.current) return;
+
+      // 3. For Safari, call html-to-image twice to prime rendering cache
+      await htmlToImage.toPng(exportRef.current, {
+        pixelRatio: 2,
+        backgroundColor: "transparent",
+      });
+      
       const dataUrl = await htmlToImage.toPng(exportRef.current, {
         pixelRatio: 2,
         backgroundColor: "transparent",
       });
-      const link = document.createElement("a");
-      link.download = `statistics-${data?.name || "product"}.png`;
-      link.href = dataUrl;
-      link.click();
+
+      // 4. Set the generated image URI to show the preview/download modal
+      setExportedImageUri(dataUrl);
     } catch (error) {
       console.error("Failed to export image", error);
     } finally {
@@ -61,14 +134,6 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
       setTimeout(() => setCopiedField(null), 2000);
     }
   };
-
-  const images: string[] = Array.isArray(data?.images)
-    ? data.images
-        .map((img: any) => (typeof img === "string" ? img : (img?.url ?? "")))
-        .filter(Boolean)
-    : [];
-
-  const variants: any[] = Array.isArray(data?.variants) ? data.variants : [];
 
   const totals = variants.reduce(
     (acc, v) => {
@@ -461,10 +526,10 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
           {/* Left Column: Ambient Background + Images + Overlay */}
           <div className="w-[420px] shrink-0 relative overflow-hidden flex flex-col bg-slate-900">
             {/* Ambient background matching product image */}
-            {images.length > 0 && (
+            {displayImages.length > 0 && (
               <div className="absolute inset-0 z-0 bg-black overflow-hidden">
                 <img
-                  src={images[0]}
+                  src={displayImages[0]}
                   alt=""
                   className="w-full h-full object-cover blur-[50px] opacity-60 scale-[2] saturate-150"
                   crossOrigin="anonymous"
@@ -473,18 +538,18 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
             )}
 
             {/* Images Container */}
-            {images.length > 0 ? (
+            {displayImages.length > 0 ? (
               <div className="w-full h-full flex flex-col absolute inset-0 z-10">
                 <img
-                  src={images[0]}
+                  src={displayImages[0]}
                   alt=""
                   className="w-full h-auto object-cover shrink-0 shadow-2xl"
-                  style={{ maxHeight: images.length > 1 ? '60%' : '100%' }}
+                  style={{ maxHeight: displayImages.length > 1 ? '60%' : '100%' }}
                   crossOrigin="anonymous"
                 />
-                {images.length > 1 && (
-                  <div className={`grid ${images.length === 2 ? 'grid-cols-1' : 'grid-cols-2'} gap-0 w-full flex-1 min-h-0`}>
-                    {images.slice(1, 3).map((src, i) => (
+                {displayImages.length > 1 && (
+                  <div className={`grid ${displayImages.length === 2 ? 'grid-cols-1' : 'grid-cols-2'} gap-0 w-full flex-1 min-h-0`}>
+                    {displayImages.slice(1, 3).map((src, i) => (
                       <img
                         key={i}
                         src={src}
@@ -633,10 +698,71 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
                   </div>
                 </div>
               )}
-            </div>
           </div>
         </div>
       </div>
+    </div>
+      {exportedImageUri && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-background border border-border w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200 text-foreground">
+            {/* Header */}
+            <div className="p-4 border-b border-border flex items-center justify-between">
+              <h3 className="font-bold text-lg text-foreground">Готовый отчет</h3>
+              <button
+                onClick={() => setExportedImageUri(null)}
+                className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+              >
+                ✕
+              </button>
+            </div>
+            
+            {/* Content */}
+            <div className="p-6 overflow-y-auto flex-1 flex flex-col items-center gap-4 text-center">
+              <div className="bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-semibold px-4 py-3 rounded-xl w-full flex flex-col gap-1 items-center justify-center">
+                <span>📱 Сохранение на iPhone:</span>
+                <span className="font-normal text-muted-foreground mt-0.5">
+                  Зажмите пальцем картинку и выберите <strong>«Сохранить в Фото»</strong>, либо нажмите кнопку <strong>«Поделиться»</strong> ниже и выберите <strong>«Сохранить изображение»</strong>.
+                </span>
+              </div>
+
+              <div className="relative border rounded-xl overflow-hidden shadow-md max-w-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center min-h-[200px]">
+                <img
+                  src={exportedImageUri}
+                  alt="Статистика товара"
+                  className="max-w-full max-h-[50vh] object-contain"
+                />
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-border bg-muted/30 flex flex-col sm:flex-row gap-2">
+              {shareSupported ? (
+                <button
+                  onClick={handleShare}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md transition-all font-semibold text-sm active:scale-98"
+                >
+                  <Share2 className="w-4 h-4" />
+                  Поделиться / Сохранить
+                </button>
+              ) : (
+                <a
+                  href={exportedImageUri}
+                  download={`statistics-${data?.name || "product"}.png`}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md transition-all font-semibold text-sm active:scale-98 text-center"
+                >
+                  Скачать файл
+                </a>
+              )}
+              <button
+                onClick={() => setExportedImageUri(null)}
+                className="px-4 py-2.5 bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-xl transition-all font-semibold text-sm"
+              >
+                Закрыть
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
