@@ -57,8 +57,12 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
     try {
       const response = await fetch(exportedImageUri);
       const blob = await response.blob();
-      const file = new File([blob], `statistics-${data?.name || "product"}.png`, { type: "image/png" });
-      
+      const file = new File(
+        [blob],
+        `statistics-${data?.name || "product"}.png`,
+        { type: "image/png" },
+      );
+
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           files: [file],
@@ -85,7 +89,7 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
       const base64Images = await Promise.all(
         activeImages.map(async (url) => {
           try {
-            const res = await fetch(url, { mode: 'cors' });
+            const res = await fetch(url, { mode: "cors" });
             const blob = await res.blob();
             return new Promise<string>((resolve, reject) => {
               const reader = new FileReader();
@@ -97,14 +101,14 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
             console.error("CORS fetch failed, using fallback URL:", url, e);
             return url;
           }
-        })
+        }),
       );
-      
+
       setExportImages(base64Images);
-      
+
       // 2. Wait for state and DOM to update
       await new Promise((resolve) => setTimeout(resolve, 500));
-      
+
       if (!exportRef.current) return;
 
       // 3. For Safari, call html-to-image twice to prime rendering cache
@@ -112,7 +116,7 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
         pixelRatio: 2,
         backgroundColor: "transparent",
       });
-      
+
       const dataUrl = await htmlToImage.toPng(exportRef.current, {
         pixelRatio: 2,
         backgroundColor: "transparent",
@@ -181,7 +185,7 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
   const margin = totals.totalIncome - totals.totalCosts;
   const remainingStock = totals.totalPurchased - totals.totalSells;
   const totalShippingUSD = rates?.usd ? totals.totalShippingUAH / rates.usd : 0;
-  
+
   const roi =
     totals.totalCosts > 0
       ? (totals.totalPotentialRevenue / totals.totalCosts - 1) * 100
@@ -544,11 +548,15 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
                   src={displayImages[0]}
                   alt=""
                   className="w-full h-auto object-cover shrink-0 shadow-2xl"
-                  style={{ maxHeight: displayImages.length > 1 ? '60%' : '100%' }}
+                  style={{
+                    maxHeight: displayImages.length > 1 ? "60%" : "100%",
+                  }}
                   crossOrigin="anonymous"
                 />
                 {displayImages.length > 1 && (
-                  <div className={`grid ${displayImages.length === 2 ? 'grid-cols-1' : 'grid-cols-2'} gap-0 w-full flex-1 min-h-0`}>
+                  <div
+                    className={`grid ${displayImages.length === 2 ? "grid-cols-1" : "grid-cols-2"} gap-0 w-full flex-1 min-h-0`}
+                  >
                     {displayImages.slice(1, 3).map((src, i) => (
                       <img
                         key={i}
@@ -566,7 +574,7 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
                 <Package className="w-20 h-20 text-slate-400" />
               </div>
             )}
-            
+
             {/* Dark Overlay at bottom for text */}
             <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-black/0 flex flex-col justify-end p-8 z-20 pointer-events-none">
               {data?.folder && (
@@ -578,18 +586,28 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
               <h1 className="text-3xl font-black text-white leading-tight mb-4 drop-shadow-lg">
                 {data?.name || "Отчет по товару"}
               </h1>
-              
+
               <div className="flex flex-col gap-2 mt-2 p-4 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 shadow-xl pointer-events-auto">
                 <div className="flex justify-between items-center text-white">
-                  <span className="text-white/80 text-sm font-medium">Сумма за товары</span>
-                  <span className="font-bold text-lg">{totals.totalGoodsCostUAH.toFixed(2)} ₴</span>
+                  <span className="text-white/80 text-sm font-medium">
+                    Сумма за товары
+                  </span>
+                  <span className="font-bold text-lg">
+                    {totals.totalGoodsCostUAH.toFixed(2)} ₴
+                  </span>
                 </div>
                 <div className="flex justify-between items-center text-white">
-                  <span className="text-white/80 text-sm font-medium">Доставка</span>
+                  <span className="text-white/80 text-sm font-medium">
+                    Доставка
+                  </span>
                   <div className="flex items-end gap-2">
-                    <span className="font-bold text-lg">{totals.totalShippingUAH.toFixed(2)} ₴</span>
+                    <span className="font-bold text-lg">
+                      {totals.totalShippingUAH.toFixed(2)} ₴
+                    </span>
                     {totalShippingUSD > 0 && (
-                       <span className="text-white/50 text-sm font-medium mb-[2px]">(${totalShippingUSD.toFixed(2)})</span>
+                      <span className="text-white/50 text-sm font-medium mb-[2px]">
+                        (${totalShippingUSD.toFixed(2)})
+                      </span>
                     )}
                   </div>
                 </div>
@@ -600,58 +618,93 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
           {/* Right Column: Content */}
           <div className="w-[580px] p-10 flex flex-col bg-slate-50">
             <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-200">
-               <div className="flex items-center gap-2">
-                 <BarChart3 className="w-6 h-6 text-indigo-600" />
-                 <span className="text-xl font-black tracking-tight text-slate-800">
-                   Pinduoduo Analytics
-                 </span>
-               </div>
-               <div className="text-slate-500 text-sm font-medium">
-                 {new Date().toLocaleDateString("ru-RU")}
-               </div>
+              <div className="flex items-center gap-2">
+                <BarChart3 className="w-6 h-6 text-indigo-600" />
+                <span className="text-xl font-black tracking-tight text-slate-800">
+                  Pinduoduo Analytics
+                </span>
+              </div>
+              <div className="text-slate-500 text-sm font-medium">
+                {new Date().toLocaleDateString("ru-RU")}
+              </div>
             </div>
-            
+
             <div className="flex flex-col gap-5 flex-1">
               {/* Key Metrics */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-                  <span className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Доход (чистый)</span>
-                  <span className="text-2xl font-black text-green-600">{totals.totalIncome.toFixed(2)} ₴</span>
+                  <span className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
+                    Доход (чистый)
+                  </span>
+                  <span className="text-2xl font-black text-green-600">
+                    {totals.totalIncome.toFixed(2)} ₴
+                  </span>
                 </div>
                 <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-                  <span className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Расходы (всего)</span>
-                  <span className="text-2xl font-black text-rose-600">{totals.totalCosts.toFixed(2)} ₴</span>
+                  <span className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
+                    Расходы (всего)
+                  </span>
+                  <span className="text-2xl font-black text-rose-600">
+                    {totals.totalCosts.toFixed(2)} ₴
+                  </span>
                 </div>
                 <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-                  <span className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Продано / Куплено</span>
-                  <span className="text-2xl font-black text-blue-600">{totals.totalSells} <span className="text-slate-300">/</span> {totals.totalPurchased}</span>
+                  <span className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
+                    Продано / Куплено
+                  </span>
+                  <span className="text-2xl font-black text-blue-600">
+                    {totals.totalSells}{" "}
+                    <span className="text-slate-300">/</span>{" "}
+                    {totals.totalPurchased}
+                  </span>
                 </div>
                 <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-                  <span className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Остаток на складе</span>
-                  <span className="text-2xl font-black text-orange-600">{remainingStock} шт</span>
+                  <span className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
+                    Остаток на складе
+                  </span>
+                  <span className="text-2xl font-black text-orange-600">
+                    {remainingStock} шт
+                  </span>
                 </div>
               </div>
 
               {/* ROI & Projections */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-green-50 p-6 rounded-2xl border border-green-200 flex flex-col relative overflow-hidden">
-                   <div className="absolute top-0 right-0 w-32 h-32 bg-green-200/50 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2" />
-                   <span className="text-green-700 text-xs font-bold uppercase tracking-wider mb-2 relative z-10">Прогноз прибыли</span>
-                   <span className="text-3xl font-black text-green-700 mb-1 relative z-10">+{potentialProfit.toFixed(2)} ₴</span>
-                   <div className="flex items-center gap-2 mt-auto pt-2 relative z-10">
-                     <span className="bg-green-200 text-green-800 text-xs font-black px-2 py-1 rounded-md">ROI {roi.toFixed(1)}%</span>
-                     <span className="text-green-700/80 text-xs font-medium">Если продать все</span>
-                   </div>
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-green-200/50 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2" />
+                  <span className="text-green-700 text-xs font-bold uppercase tracking-wider mb-2 relative z-10">
+                    Прогноз прибыли
+                  </span>
+                  <span className="text-3xl font-black text-green-700 mb-1 relative z-10">
+                    +{potentialProfit.toFixed(2)} ₴
+                  </span>
+                  <div className="flex items-center gap-2 mt-auto pt-2 relative z-10">
+                    <span className="bg-green-200 text-green-800 text-xs font-black px-2 py-1 rounded-md">
+                      ROI {roi.toFixed(1)}%
+                    </span>
+                    <span className="text-green-700/80 text-xs font-medium">
+                      Если продать все
+                    </span>
+                  </div>
                 </div>
-                
+
                 <div className="bg-indigo-50 p-6 rounded-2xl border border-indigo-200 flex flex-col relative overflow-hidden">
-                   <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-200/50 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2" />
-                   <span className="text-indigo-700 text-xs font-bold uppercase tracking-wider mb-2 relative z-10">Текущая Маржа</span>
-                   <span className="text-3xl font-black text-indigo-700 mb-1 relative z-10">{margin > 0 ? "+" : ""}{margin.toFixed(2)} ₴</span>
-                   <div className="flex items-center gap-2 mt-auto pt-2 relative z-10">
-                     <span className="bg-indigo-200 text-indigo-800 text-xs font-black px-2 py-1 rounded-md">ROI {currentRoi.toFixed(1)}%</span>
-                     <span className="text-indigo-700/80 text-xs font-medium">Уже продано</span>
-                   </div>
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-200/50 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2" />
+                  <span className="text-indigo-700 text-xs font-bold uppercase tracking-wider mb-2 relative z-10">
+                    Текущая Маржа
+                  </span>
+                  <span className="text-3xl font-black text-indigo-700 mb-1 relative z-10">
+                    {margin > 0 ? "+" : ""}
+                    {margin.toFixed(2)} ₴
+                  </span>
+                  <div className="flex items-center gap-2 mt-auto pt-2 relative z-10">
+                    <span className="bg-indigo-200 text-indigo-800 text-xs font-black px-2 py-1 rounded-md">
+                      ROI {currentRoi.toFixed(1)}%
+                    </span>
+                    <span className="text-indigo-700/80 text-xs font-medium">
+                      Уже продано
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -659,10 +712,10 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
               {variants.length > 0 && (
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm mt-1 overflow-hidden flex flex-col relative z-10">
                   <div className="p-4 border-b border-slate-100 bg-slate-50/80">
-                     <h3 className="text-slate-800 font-black uppercase tracking-wider text-xs flex items-center gap-2">
-                       <Package className="w-4 h-4" />
-                       Версии товара ({variants.length})
-                     </h3>
+                    <h3 className="text-slate-800 font-black uppercase tracking-wider text-xs flex items-center gap-2">
+                      <Package className="w-4 h-4" />
+                      Версии товара ({variants.length})
+                    </h3>
                   </div>
                   <div className="flex-1 p-4 grid grid-cols-1 gap-2">
                     {variants.map((v: any, i: number) => {
@@ -671,25 +724,44 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
                       const priceInUA = Number(v.priceInUA) || 0;
                       const purchased = Number(v.purchasedCount) || 0;
                       const sells = Number(v.sellsCount) || 0;
-                      
+
                       return (
-                        <div key={i} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0 last:pb-0">
+                        <div
+                          key={i}
+                          className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0 last:pb-0"
+                        >
                           <div className="flex flex-col">
-                            <span className="text-slate-900 font-bold text-sm">Версия {i + 1}</span>
-                            <span className="text-slate-500 text-xs truncate max-w-[150px]">{v.pddSearchQuery || "Без названия"}</span>
+                            <span className="text-slate-900 font-bold text-sm">
+                              Версия {i + 1}
+                            </span>
+                            <span className="text-slate-500 text-xs truncate max-w-[150px]">
+                              {v.pddSearchQuery || "Без названия"}
+                            </span>
                           </div>
                           <div className="flex items-center gap-5 text-sm">
                             <div className="flex flex-col items-end">
-                              <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Закупка</span>
-                              <span className="text-slate-800 font-black">{priceCNY} ¥</span>
+                              <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">
+                                Закупка
+                              </span>
+                              <span className="text-slate-800 font-black">
+                                {priceCNY} ¥
+                              </span>
                             </div>
                             <div className="flex flex-col items-end">
-                              <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Продажа</span>
-                              <span className="text-slate-800 font-black">{priceInUA > 0 ? `${priceInUA} ₴` : "—"}</span>
+                              <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">
+                                Продажа
+                              </span>
+                              <span className="text-slate-800 font-black">
+                                {priceInUA > 0 ? `${priceInUA} ₴` : "—"}
+                              </span>
                             </div>
                             <div className="flex flex-col items-end min-w-[70px]">
-                              <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Куп/Прод</span>
-                              <span className="text-slate-800 font-black">{purchased} / {sells}</span>
+                              <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">
+                                Куп/Прод
+                              </span>
+                              <span className="text-slate-800 font-black">
+                                {purchased} / {sells}
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -698,16 +770,18 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
                   </div>
                 </div>
               )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
       {exportedImageUri && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-xs animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/80 p-4 backdrop-blur-xs animate-in fade-in duration-200">
           <div className="bg-background border border-border w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200 text-foreground">
             {/* Header */}
             <div className="p-4 border-b border-border flex items-center justify-between">
-              <h3 className="font-bold text-lg text-foreground">Готовый отчет</h3>
+              <h3 className="font-bold text-lg text-foreground">
+                Готовый отчет
+              </h3>
               <button
                 onClick={() => setExportedImageUri(null)}
                 className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
@@ -715,13 +789,16 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
                 ✕
               </button>
             </div>
-            
+
             {/* Content */}
             <div className="p-6 overflow-y-auto flex-1 flex flex-col items-center gap-4 text-center">
               <div className="bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-semibold px-4 py-3 rounded-xl w-full flex flex-col gap-1 items-center justify-center">
                 <span>📱 Сохранение на iPhone:</span>
                 <span className="font-normal text-muted-foreground mt-0.5">
-                  Зажмите пальцем картинку и выберите <strong>«Сохранить в Фото»</strong>, либо нажмите кнопку <strong>«Поделиться»</strong> ниже и выберите <strong>«Сохранить изображение»</strong>.
+                  Зажмите пальцем картинку и выберите{" "}
+                  <strong>«Сохранить в Фото»</strong>, либо нажмите кнопку{" "}
+                  <strong>«Поделиться»</strong> ниже и выберите{" "}
+                  <strong>«Сохранить изображение»</strong>.
                 </span>
               </div>
 
