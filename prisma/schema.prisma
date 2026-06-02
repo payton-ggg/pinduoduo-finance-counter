@@ -1,73 +1,69 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "binary"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-  engineType = "binary"
-}
-
 model Product {
-  id        String   @id @default(uuid())
-  name      String
-  images    String[]
+  id           String    @id @default(uuid())
+  name         String
+  createdAt    DateTime  @default(now())
+  images       String[]
   pinduoduoUrl String?
-  archive   Int?
-
-  folderId  String?
-  folder    Folder?   @relation(fields: [folderId], references: [id])
-
-  variants  Variant[]
-  expenses  Expense[]
-  incomes   Income[]
-  createdAt DateTime @default(now())
+  archive      Int?
+  folderId     String?
+  expenses     Expense[]
+  incomes      Income[]
+  folder       Folder?   @relation(fields: [folderId], references: [id])
+  variants     Variant[]
 }
 
 model Variant {
-  id        String   @id @default(uuid())
-  productId String
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  priceCNY  Float
-  priceInUA Float?
-  netPrice  Float?
-  weight    Float?
-  pddSearchQuery String?
-  sellsCount     Int?
-  purchasedCount Int?    @default(0)
-  shippingUA     Float?
-  managementUAH  Float?
-  rateCNY   Float?
-  rateUSD   Float?
-  shippingType String?
+  id                 String   @id @default(uuid())
+  productId          String
+  priceCNY           Float
+  priceInUA          Float?
+  netPrice           Float?
+  weight             Float?
+  pddSearchQuery     String?
+  sellsCount         Int?
+  purchasedCount     Int?     @default(0)
+  shippingUA         Float?
+  managementUAH      Float?
+  rateCNY            Float?
+  rateUSD            Float?
+  shippingType       String?
   customShippingRate Float?
-  isIncluded Boolean @default(true)
-
-  createdAt DateTime @default(now())
+  createdAt          DateTime @default(now())
+  isIncluded         Boolean  @default(true)
+  product            Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
 model Folder {
   id        String    @id @default(uuid())
   name      String
-  order     Int       @default(0)
   createdAt DateTime  @default(now())
+  order     Int       @default(0)
   products  Product[]
 }
 
 model Expense {
   id        String   @id @default(uuid())
   productId String
-  product   Product  @relation(fields: [productId], references: [id])
   amount    Float
   type      String
   createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id])
 }
 
 model Income {
   id        String   @id @default(uuid())
   productId String
-  product   Product  @relation(fields: [productId], references: [id])
   amount    Float
   createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id])
 }
