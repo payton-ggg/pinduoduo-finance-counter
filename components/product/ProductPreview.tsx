@@ -625,6 +625,18 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
                     )}
                   </div>
                 </div>
+                {totals.totalWeight > 0 && (
+                  <div className="flex justify-between items-center text-white">
+                    <span className="text-white/80 text-sm font-medium">
+                      Вес посылки
+                    </span>
+                    <span className="font-bold text-lg">
+                      {totals.totalWeight >= 1000
+                        ? `${(totals.totalWeight / 1000).toFixed(2)} кг`
+                        : `${totals.totalWeight} г`}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -738,13 +750,15 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
                       const priceInUA = Number(v.priceInUA) || 0;
                       const purchased = Number(v.purchasedCount) || 0;
                       const sells = Number(v.sellsCount) || 0;
+                      const unitWeight = Number(v.weight) || 0;
+                      const packageWeight = unitWeight * purchased;
 
                       return (
                         <div
                           key={i}
                           className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0 last:pb-0"
                         >
-                          <div className="flex flex-col">
+                          <div className="flex flex-col flex-1 min-w-0 pr-2">
                             <span className="text-slate-900 font-bold text-sm">
                               Версия {i + 1}
                             </span>
@@ -752,7 +766,7 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
                               {v.pddSearchQuery || "Без названия"}
                             </span>
                           </div>
-                          <div className="flex items-center gap-5 text-sm">
+                          <div className="flex items-center gap-4 text-sm shrink-0">
                             <div className="flex flex-col items-end">
                               <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">
                                 Закупка
@@ -769,7 +783,23 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
                                 {priceInUA > 0 ? `${priceInUA} ₴` : "—"}
                               </span>
                             </div>
-                            <div className="flex flex-col items-end min-w-[70px]">
+                            <div className="flex flex-col items-end">
+                              <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">
+                                Вес (шт/пос)
+                              </span>
+                              <span className="text-slate-800 font-black whitespace-nowrap">
+                                {unitWeight > 0 ? (
+                                  <>
+                                    {unitWeight >= 1000 ? `${(unitWeight / 1000).toFixed(2)}кг` : `${unitWeight}г`}
+                                    {" / "}
+                                    {packageWeight >= 1000 ? `${(packageWeight / 1000).toFixed(2)}кг` : `${packageWeight}г`}
+                                  </>
+                                ) : (
+                                  "—"
+                                )}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-end min-w-[50px]">
                               <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">
                                 Куп/Прод
                               </span>
