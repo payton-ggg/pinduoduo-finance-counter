@@ -123,7 +123,8 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
       });
 
       // 4. Handle saving based on device type
-      const isMobileDevice = typeof window !== "undefined" && 
+      const isMobileDevice =
+        typeof window !== "undefined" &&
         /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
       if (isMobileDevice) {
