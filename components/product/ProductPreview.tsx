@@ -67,12 +67,10 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
         await navigator.share({
           files: [file],
           title: `Статистика - ${data?.name || "product"}`,
-          text: `Отчет по товару ${data?.name || ""}`,
         });
       } else {
         await navigator.share({
           title: `Статистика - ${data?.name || "product"}`,
-          text: `Отчет по товару ${data?.name || ""}`,
           url: window.location.href,
         });
       }
@@ -338,13 +336,22 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
               const unitWeight = Number(v.weight) || 0;
               const purchaseUAH = priceCNY * (rateCNY > 0 ? rateCNY : 1);
 
-              const unitShippingUAH = purchased > 0
-                ? (shippingUA / purchased)
-                : (unitWeight > 0 && (v.rateUSD || rates?.usd || 0) > 0)
-                  ? ((unitWeight / 1000) * (v.shippingType === "sea" ? 7.1 : v.shippingType === "custom" ? (v.customShippingRate || 0) : 18.3) * (v.rateUSD || rates?.usd || 0))
-                  : 0;
-              const unitManagementUAH = purchased > 0 ? (managementUAH / purchased) : 0;
-              const unitCostPriceUAH = purchaseUAH + unitShippingUAH + unitManagementUAH;
+              const unitShippingUAH =
+                purchased > 0
+                  ? shippingUA / purchased
+                  : unitWeight > 0 && (v.rateUSD || rates?.usd || 0) > 0
+                    ? (unitWeight / 1000) *
+                      (v.shippingType === "sea"
+                        ? 7.1
+                        : v.shippingType === "custom"
+                          ? v.customShippingRate || 0
+                          : 18.3) *
+                      (v.rateUSD || rates?.usd || 0)
+                    : 0;
+              const unitManagementUAH =
+                purchased > 0 ? managementUAH / purchased : 0;
+              const unitCostPriceUAH =
+                purchaseUAH + unitShippingUAH + unitManagementUAH;
 
               const shippingLabel =
                 v.shippingType === "sea"
@@ -806,9 +813,13 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
                               <span className="text-slate-800 font-black whitespace-nowrap">
                                 {unitWeight > 0 ? (
                                   <>
-                                    {unitWeight >= 1000 ? `${(unitWeight / 1000).toFixed(2)}кг` : `${unitWeight}г`}
+                                    {unitWeight >= 1000
+                                      ? `${(unitWeight / 1000).toFixed(2)}кг`
+                                      : `${unitWeight}г`}
                                     {" / "}
-                                    {packageWeight >= 1000 ? `${(packageWeight / 1000).toFixed(2)}кг` : `${packageWeight}г`}
+                                    {packageWeight >= 1000
+                                      ? `${(packageWeight / 1000).toFixed(2)}кг`
+                                      : `${packageWeight}г`}
                                   </>
                                 ) : (
                                   "—"
