@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Eye, Pencil, Calculator, ArrowLeft } from "lucide-react";
+import { Eye, Pencil, Calculator, ArrowLeft, Copy, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
@@ -33,6 +33,13 @@ export function ProductPageClient({
   const [formKey, setFormKey] = useState(0);
   const router = useRouter();
 
+  // Copy modal state
+  const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
+  const [folders, setFolders] = useState<{ id: string; name: string }[]>([]);
+  const [selectedFolderId, setSelectedFolderId] = useState<string>("");
+  const [copyName, setCopyName] = useState("");
+  const [isSubmittingCopy, setIsSubmittingCopy] = useState(false);
+
   useEffect(() => {
     setLocalProduct(product);
   }, [product]);
@@ -42,6 +49,57 @@ export function ProductPageClient({
       setHasOpenedEdit(true);
     }
   }, [mode]);
+
+  const handleOpenCopyModal = async () => {
+    setCopyName(localProduct?.name ? `${localProduct.name} - Копия` : "Копия");
+    setSelectedFolderId(localProduct?.folderId || "");
+    setIsCopyModalOpen(true);
+
+    try {
+      const res = await fetch("/api/folders");
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setFolders(data);
+      }
+    } catch (err) {
+      console.error("Failed to load folders:", err);
+    }
+  };
+
+  const handleConfirmCopy = async () => {
+    if (!copyName.trim()) {
+      alert("Пожалуйста, введите название товара");
+      return;
+    }
+    setIsSubmittingCopy(true);
+    try {
+      const res = await fetch(`/api/products/${id}/copy`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: copyName,
+          folderId: selectedFolderId || null,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to copy product");
+      }
+
+      const newProduct = await res.json();
+      setIsCopyModalOpen(false);
+      router.push(`/product/${newProduct.id}`);
+      router.refresh();
+    } catch (err) {
+      console.error(err);
+      alert(err instanceof Error ? err.message : "Не удалось скопировать товар");
+    } finally {
+      setIsSubmittingCopy(false);
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-0">
@@ -58,6 +116,16 @@ export function ProductPageClient({
           {localProduct?.name || "Продукт"}
         </h1>
         <div className="flex items-center gap-2 shrink-0">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleOpenCopyModal}
+            className="gap-1.5"
+            title="Копировать товар"
+          >
+            <Copy className="h-4 w-4" />
+            <span className="hidden sm:inline">Копировать</span>
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -118,6 +186,93 @@ export function ProductPageClient({
             }}
             onValuesChange={setLocalProduct}
           />
+        </div>
+      )}
+
+      {/* Copy Product Modal */}
+      {isCopyModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
+          onClick={() => setIsCopyModalOpen(false)}
+        >
+          <div
+            className="bg-background border border-border shadow-2xl rounded-2xl w-full max-w-md overflow-hidden flex flex-col transition-all transform scale-100"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-5 border-b border-border">
+              <h2 className="text-lg font-bold flex items-center gap-2">
+                <Copy className="w-5 h-5 text-indigo-500" />
+                Копировать товар
+              </h2>
+              <button
+                onClick={() => setIsCopyModalOpen(false)}
+                className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-5 space-y-4">
+              <div>
+                <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">
+                  Название копии
+                </label>
+                <input
+                  type="text"
+                  className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
+                  value={copyName}
+                  onChange={(e) => setCopyName(e.target.value)}
+                  placeholder="Введите название нового товара..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">
+                  Папка назначения
+                </label>
+                <select
+                  className="w-full bg-background border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
+                  value={selectedFolderId}
+                  onChange={(e) => setSelectedFolderId(e.target.value)}
+                >
+                  <option value="">Без папки</option>
+                  {folders.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-5 border-t border-border flex items-center justify-end gap-3 bg-muted/20">
+              <Button
+                variant="outline"
+                onClick={() => setIsCopyModalOpen(false)}
+                disabled={isSubmittingCopy}
+                className="font-semibold"
+              >
+                Отмена
+              </Button>
+              <Button
+                onClick={handleConfirmCopy}
+                disabled={isSubmittingCopy}
+                className="bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold transition-all"
+              >
+                {isSubmittingCopy ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
+                    Копирование...
+                  </>
+                ) : (
+                  "Создать копию"
+                )}
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>
