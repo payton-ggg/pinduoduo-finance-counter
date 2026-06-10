@@ -338,6 +338,14 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
               const unitWeight = Number(v.weight) || 0;
               const purchaseUAH = priceCNY * (rateCNY > 0 ? rateCNY : 1);
 
+              const unitShippingUAH = purchased > 0
+                ? (shippingUA / purchased)
+                : (unitWeight > 0 && (v.rateUSD || rates?.usd || 0) > 0)
+                  ? ((unitWeight / 1000) * (v.shippingType === "sea" ? 7.1 : v.shippingType === "custom" ? (v.customShippingRate || 0) : 18.3) * (v.rateUSD || rates?.usd || 0))
+                  : 0;
+              const unitManagementUAH = purchased > 0 ? (managementUAH / purchased) : 0;
+              const unitCostPriceUAH = purchaseUAH + unitShippingUAH + unitManagementUAH;
+
               const shippingLabel =
                 v.shippingType === "sea"
                   ? "Море (7.1$/кг)"
@@ -460,8 +468,16 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
                         sub={shippingLabel}
                       />
                       <InfoRow
+                        label="Доставка (1 шт)"
+                        value={`${unitShippingUAH.toFixed(2)} ₴`}
+                      />
+                      <InfoRow
                         label="Управление"
                         value={`${managementUAH.toFixed(2)} ₴`}
+                      />
+                      <InfoRow
+                        label="Себестоимость (1 шт)"
+                        value={`${unitCostPriceUAH.toFixed(2)} ₴`}
                       />
                     </div>
                   </div>
