@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import { getAuthRole } from "@/lib/auth";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -14,15 +15,22 @@ import {
 export default async function CompareVersionsPage(props: {
   params: Promise<{ id: string }>;
 }) {
+  const role = await getAuthRole();
+  if (!role) return notFound();
+
   const params = await props.params;
   const productId = params.id;
 
   const product = await prisma.product.findUnique({
     where: { id: productId },
-    include: { variants: true },
+    include: { variants: true, folder: true },
   });
 
   if (!product) return notFound();
+
+  if (role === "restricted" && !product.folder.allowedForSecondPassword) {
+    return notFound();
+  }
 
   const variants = product.variants;
   if (variants.length === 0) {

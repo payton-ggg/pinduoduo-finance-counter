@@ -151,13 +151,19 @@ function SortableFolderItem({
           </button>
           {isAdmin && (
             <button
-              onClick={() => toggleFolderAccess(folder.id, !folder.allowedForSecondPassword)}
+              onClick={() =>
+                toggleFolderAccess(folder.id, !folder.allowedForSecondPassword)
+              }
               className={`px-1.5 py-1.5 text-xs transition-all duration-200 hover:bg-foreground/10 ${
                 isActive
                   ? "bg-primary/80 text-primary-foreground"
                   : "bg-foreground/5 text-muted-foreground"
               }`}
-              title={folder.allowedForSecondPassword ? "Доступ разрешен для второго пароля" : "Доступ закрыт для второго пароля"}
+              title={
+                folder.allowedForSecondPassword
+                  ? "Доступ разрешен для второго пароля"
+                  : "Доступ закрыт для второго пароля"
+              }
             >
               {folder.allowedForSecondPassword ? (
                 <Unlock className="w-3.5 h-3.5 text-green-500" />
@@ -210,9 +216,13 @@ export function DashboardClient({
   const [selectedIds, setSelectedIds] = useState<Set<string | number>>(
     () => new Set(initialProducts.map((p) => p.id)),
   );
-  const [activeTab, setActiveTab] = useState<"active" | "archive">(initialActiveTab);
+  const [activeTab, setActiveTab] = useState<"active" | "archive">(
+    initialActiveTab,
+  );
   const [folders, setFolders] = useState<FolderItem[]>([]);
-  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(initialFolderId);
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(
+    initialFolderId,
+  );
   const [showFolderDropdown, setShowFolderDropdown] = useState(false);
   const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
   const [editingFolderName, setEditingFolderName] = useState("");
@@ -271,7 +281,10 @@ export function DashboardClient({
     }
 
     if (!tab) {
-      const savedTab = sessionStorage.getItem("activeTab") as "active" | "archive" | null;
+      const savedTab = sessionStorage.getItem("activeTab") as
+        | "active"
+        | "archive"
+        | null;
       if (savedTab === "active" || savedTab === "archive") {
         tab = savedTab;
         setActiveTab(tab);
@@ -420,7 +433,9 @@ export function DashboardClient({
     const folder = folders.find((f) => f.id === folderId);
     const productCount = folder?._count?.products || 0;
     if (productCount > 0) {
-      alert(`Нельзя удалить папку "${folder?.name}", так как в ней есть товары (${productCount} шт.). Сначала переместите их или удалите.`);
+      alert(
+        `Нельзя удалить папку "${folder?.name}", так как в ней есть товары (${productCount} шт.). Сначала переместите их или удалите.`,
+      );
       return;
     }
     if (!confirm(`Удалить папку "${folder?.name}"?`)) return;
@@ -469,7 +484,10 @@ export function DashboardClient({
       const res = await fetch("/api/folders", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: folderId, allowedForSecondPassword: allowed }),
+        body: JSON.stringify({
+          id: folderId,
+          allowedForSecondPassword: allowed,
+        }),
       });
       if (!res.ok) {
         throw new Error("Failed to toggle folder access");
@@ -495,10 +513,23 @@ export function DashboardClient({
     return products.filter((p) => {
       const matchesTab = activeTab === "active" ? !p.archive : p.archive;
       if (!matchesTab) return false;
-      if (selectedFolderId === null) return true;
+      if (selectedFolderId === null) {
+        if (role === "restricted") {
+          return folders.some((f) => f.id === p.folderId);
+        }
+        return true;
+      }
       return p.folderId === selectedFolderId;
     });
-  }, [products, debouncedSearchQuery, activeTab, selectedFolderId, fuse]);
+  }, [
+    products,
+    debouncedSearchQuery,
+    activeTab,
+    selectedFolderId,
+    folders,
+    role,
+    fuse,
+  ]);
 
   const selectedProducts = filteredProducts.filter((p) =>
     selectedIds.has(p.id),
@@ -518,10 +549,7 @@ export function DashboardClient({
 
   const totalProjectedProfit = totalProjectedRevenue - totalSpent;
 
-  const folderOrder: (string | null)[] = [
-    null,
-    ...folders.map((f) => f.id),
-  ];
+  const folderOrder: (string | null)[] = [null, ...folders.map((f) => f.id)];
 
   const swipeFolder = useCallback(
     (direction: "left" | "right") => {
@@ -554,7 +582,9 @@ export function DashboardClient({
     <div className="py-4 space-y-4">
       <Header
         onAdd={() => {
-          const params = selectedFolderId ? `?folderId=${selectedFolderId}` : "";
+          const params = selectedFolderId
+            ? `?folderId=${selectedFolderId}`
+            : "";
           router.push(`/product${params}`);
         }}
         onClearSelection={clearSelection}

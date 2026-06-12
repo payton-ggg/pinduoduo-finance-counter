@@ -5,6 +5,7 @@ import { DashboardClient } from "@/components/dashboard/DashboardClient";
 import type { ProductUI } from "@/components/dashboard/ProductCard";
 import { getExchangeRates } from "@/lib/rates";
 import { AuthGate } from "@/components/auth/AuthGate";
+import { getAuthRole } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -19,7 +20,20 @@ async function DashboardDataWrapper({
   const rates = await getExchangeRates();
   const rate = rates.cny;
 
+  const role = await getAuthRole();
+  if (!role) {
+    return (
+      <DashboardClient
+        initialProducts={[]}
+        globalRate={rate}
+        initialFolderId={initialFolderId}
+        initialActiveTab={initialActiveTab}
+      />
+    );
+  }
+
   const data = await prisma.product.findMany({
+    where: role === "restricted" ? { folder: { allowedForSecondPassword: true } } : undefined,
     include: {
       variants: true,
       expenses: true,
