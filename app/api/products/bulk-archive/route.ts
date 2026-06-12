@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getAuthRole } from "@/lib/auth";
 
 export async function POST(req: Request) {
+  const role = await getAuthRole();
+  if (!role) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const { ids, archive } = await req.json();
 
@@ -10,6 +16,21 @@ export async function POST(req: Request) {
         { error: "Invalid ids array" },
         { status: 400 }
       );
+    }
+
+    // Verify access to products
+    if (role === "restricted") {
+      const allowedProductsCount = await prisma.product.count({
+        where: {
+          id: { in: ids },
+          folder: {
+            allowedForSecondPassword: true,
+          },
+        },
+      });
+      if (allowedProductsCount !== ids.length) {
+        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      }
     }
 
     await prisma.product.updateMany({

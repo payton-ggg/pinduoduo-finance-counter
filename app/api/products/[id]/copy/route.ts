@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getAuthRole } from "@/lib/auth";
 
 export async function POST(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
+  const role = await getAuthRole();
+  if (!role) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { id } = await context.params;
   try {
     const { folderId, name } = await req.json();
@@ -19,11 +25,24 @@ export async function POST(
 
     const sourceProduct = await prisma.product.findUnique({
       where: { id },
-      include: { variants: true },
+      include: { variants: true, folder: true },
     });
 
     if (!sourceProduct) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    if (role === "restricted" && !sourceProduct.folder.allowedForSecondPassword) {
+      return NextResponse.json({ error: "Access denied to source product" }, { status: 403 });
+    }
+
+    const destFolder = await prisma.folder.findUnique({ where: { id: folderId } });
+    if (!destFolder) {
+      return NextResponse.json({ error: "Destination folder not found" }, { status: 404 });
+    }
+
+    if (role === "restricted" && !destFolder.allowedForSecondPassword) {
+      return NextResponse.json({ error: "Access denied to destination folder" }, { status: 403 });
     }
 
     // Create duplicate product with new name and selected folder

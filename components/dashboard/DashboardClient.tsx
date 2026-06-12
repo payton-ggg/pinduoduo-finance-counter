@@ -18,6 +18,8 @@ import {
   Pencil,
   Check,
   GripVertical,
+  Lock,
+  Unlock,
 } from "lucide-react";
 import {
   DndContext,
@@ -39,6 +41,7 @@ import { CSS } from "@dnd-kit/utilities";
 type FolderItem = {
   id: string;
   name: string;
+  allowedForSecondPassword: boolean;
   _count: { products: number };
 };
 
@@ -53,6 +56,8 @@ type SortableFolderProps = {
   setSelectedFolderId: (id: string) => void;
   renameFolder: (id: string, name: string) => void;
   deleteFolder: (id: string) => void;
+  isAdmin: boolean;
+  toggleFolderAccess: (id: string, allowed: boolean) => void;
 };
 
 function SortableFolderItem({
@@ -66,6 +71,8 @@ function SortableFolderItem({
   setSelectedFolderId,
   renameFolder,
   deleteFolder,
+  isAdmin,
+  toggleFolderAccess,
 }: SortableFolderProps) {
   const {
     attributes,
@@ -142,6 +149,23 @@ function SortableFolderItem({
             {folder.name} ({count})
             {isActive && <Pencil className="w-3 h-3 opacity-60" />}
           </button>
+          {isAdmin && (
+            <button
+              onClick={() => toggleFolderAccess(folder.id, !folder.allowedForSecondPassword)}
+              className={`px-1.5 py-1.5 text-xs transition-all duration-200 hover:bg-foreground/10 ${
+                isActive
+                  ? "bg-primary/80 text-primary-foreground"
+                  : "bg-foreground/5 text-muted-foreground"
+              }`}
+              title={folder.allowedForSecondPassword ? "Доступ разрешен для второго пароля" : "Доступ закрыт для второго пароля"}
+            >
+              {folder.allowedForSecondPassword ? (
+                <Unlock className="w-3.5 h-3.5 text-green-500" />
+              ) : (
+                <Lock className="w-3.5 h-3.5 opacity-60" />
+              )}
+            </button>
+          )}
           <button
             onClick={() => deleteFolder(folder.id)}
             className={`px-1.5 py-1.5 rounded-r-xl text-xs transition-all duration-200 hover:bg-destructive/20 hover:text-destructive ${
@@ -173,6 +197,16 @@ export function DashboardClient({
 }: DashboardClientProps) {
   const router = useRouter();
   const [products, setProducts] = useState<ProductUI[]>(initialProducts);
+  const [role, setRole] = useState<string>("admin");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedRole = localStorage.getItem("site_role");
+      if (savedRole) {
+        setRole(savedRole);
+      }
+    }
+  }, []);
   const [selectedIds, setSelectedIds] = useState<Set<string | number>>(
     () => new Set(initialProducts.map((p) => p.id)),
   );
@@ -430,6 +464,23 @@ export function DashboardClient({
     setEditingFolderId(null);
   };
 
+  const toggleFolderAccess = async (folderId: string, allowed: boolean) => {
+    try {
+      const res = await fetch("/api/folders", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: folderId, allowedForSecondPassword: allowed }),
+      });
+      if (!res.ok) {
+        throw new Error("Failed to toggle folder access");
+      }
+      await fetchFolders();
+    } catch (err) {
+      console.error(err);
+      alert("Не удалось изменить доступ к папке");
+    }
+  };
+
   const fuse = useMemo(() => {
     return new Fuse(products, {
       keys: ["name", "folderName"],
@@ -577,6 +628,8 @@ export function DashboardClient({
                   setSelectedFolderId={updateFolderId}
                   renameFolder={renameFolder}
                   deleteFolder={deleteFolder}
+                  isAdmin={role === "admin"}
+                  toggleFolderAccess={toggleFolderAccess}
                 />
               );
             })}
