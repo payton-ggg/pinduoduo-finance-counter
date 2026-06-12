@@ -2,22 +2,17 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
-  const products = await prisma.product.findMany({
-    include: {
-      variants: true
-    }
+  const folders = await prisma.folder.findMany();
+  const nullFolderProducts = await prisma.product.findMany({
+    where: { folderId: null }
   });
-  console.log("Found products count:", products.length);
-  for (const p of products) {
-    console.log(`Product: ${p.name}`);
-    for (const v of p.variants) {
-      console.log(`  Variant: ${v.pddSearchQuery || 'Unnamed'}, Weight: ${v.weight}, PurchasedCount: ${v.purchasedCount}`);
-    }
-  }
+  console.log('--- DATABASE STATUS ---');
+  console.log('Folders count:', folders.length);
+  console.log('Folders list:', folders.map(f => ({ id: f.id, name: f.name })));
+  console.log('Products without folder count:', nullFolderProducts.length);
+  console.log('Products without folder names:', nullFolderProducts.map(p => p.name));
 }
 
 main()
-  .catch(e => console.error(e))
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+  .catch(console.error)
+  .finally(() => prisma.$disconnect());
