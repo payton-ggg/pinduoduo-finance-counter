@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getAuthRole } from "@/lib/auth";
 
 export async function GET(
   _req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
+  const role = await getAuthRole();
+  if (!role) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { id } = await context.params;
   try {
     const product = await prisma.product.findUnique({
@@ -14,6 +20,11 @@ export async function GET(
     if (!product) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
+
+    if (role === "restricted" && !product.folder.allowedForSecondPassword) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+    }
+
     return NextResponse.json(product);
   } catch (e) {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
@@ -24,6 +35,11 @@ export async function PATCH(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
+  const role = await getAuthRole();
+  if (!role) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { id } = await context.params;
 
   try {
@@ -31,6 +47,29 @@ export async function PATCH(
 
     if (data.folderId !== undefined && (!data.folderId || typeof data.folderId !== "string" || data.folderId.trim().length === 0)) {
       return NextResponse.json({ error: "Folder ID is required" }, { status: 400 });
+    }
+
+    const existing = await prisma.product.findUnique({
+      where: { id },
+      include: { folder: true },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    if (role === "restricted" && !existing.folder.allowedForSecondPassword) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+    }
+
+    if (data.folderId !== undefined && data.folderId !== existing.folderId) {
+      const destFolder = await prisma.folder.findUnique({ where: { id: data.folderId } });
+      if (!destFolder) {
+        return NextResponse.json({ error: "Destination folder not found" }, { status: 404 });
+      }
+      if (role === "restricted" && !destFolder.allowedForSecondPassword) {
+        return NextResponse.json({ error: "Access denied to destination folder" }, { status: 403 });
+      }
     }
 
     let imagesUpdate: { set: string[] } | undefined;
@@ -124,9 +163,27 @@ export async function DELETE(
   _req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
+  const role = await getAuthRole();
+  if (!role) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { id } = await context.params;
 
   try {
+    const existing = await prisma.product.findUnique({
+      where: { id },
+      include: { folder: true },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    if (role === "restricted" && !existing.folder.allowedForSecondPassword) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+    }
+
     await prisma.expense.deleteMany({ where: { productId: id } });
     await prisma.income.deleteMany({ where: { productId: id } });
     await prisma.variant.deleteMany({ where: { productId: id } });

@@ -32,6 +32,7 @@ export function LoginScreen({ onSuccess }: LoginScreenProps) {
 
       if (data.ok) {
         localStorage.setItem("site_auth", "true");
+        localStorage.setItem("site_role", data.role || "admin");
         onSuccess();
       } else {
         setError(data.error || "Неверный пароль");

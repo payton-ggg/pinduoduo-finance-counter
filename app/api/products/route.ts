@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getAuthRole } from "@/lib/auth";
 
 export async function GET() {
+  const role = await getAuthRole();
+  if (!role) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const products = await prisma.product.findMany({
+    where: role === "restricted" ? { folder: { allowedForSecondPassword: true } } : undefined,
     include: {
       variants: true,
       expenses: true,
@@ -14,9 +21,23 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const role = await getAuthRole();
+  if (!role) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const data = await req.json();
   if (!data.folderId || typeof data.folderId !== "string" || data.folderId.trim().length === 0) {
     return NextResponse.json({ error: "Folder ID is required" }, { status: 400 });
+  }
+
+  // Verify folder access
+  const folder = await prisma.folder.findUnique({ where: { id: data.folderId } });
+  if (!folder) {
+    return NextResponse.json({ error: "Folder not found" }, { status: 404 });
+  }
+  if (role === "restricted" && !folder.allowedForSecondPassword) {
+    return NextResponse.json({ error: "Access denied to folder" }, { status: 403 });
   }
 
   const images: string[] = Array.isArray(data.images)
@@ -78,7 +99,25 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  const role = await getAuthRole();
+  if (!role) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { id } = await req.json();
+  const product = await prisma.product.findUnique({
+    where: { id },
+    include: { folder: true },
+  });
+
+  if (!product) {
+    return NextResponse.json({ error: "Product not found" }, { status: 404 });
+  }
+
+  if (role === "restricted" && !product.folder.allowedForSecondPassword) {
+    return NextResponse.json({ error: "Access denied" }, { status: 403 });
+  }
+
   await prisma.variant.deleteMany({ where: { productId: id } });
   await prisma.product.delete({ where: { id } });
   return NextResponse.json({ message: "Product deleted" });
