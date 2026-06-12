@@ -28,6 +28,11 @@ export async function PATCH(
 
   try {
     const data = await req.json();
+
+    if (data.folderId !== undefined && (!data.folderId || typeof data.folderId !== "string" || data.folderId.trim().length === 0)) {
+      return NextResponse.json({ error: "Folder ID is required" }, { status: 400 });
+    }
+
     let imagesUpdate: { set: string[] } | undefined;
     if (Array.isArray(data.images)) {
       const urls = (data.images as any[])
@@ -45,7 +50,7 @@ export async function PATCH(
         images: imagesUpdate,
         pinduoduoUrl: data.pinduoduoUrl,
         archive: data.archive,
-        folderId: data.folderId !== undefined ? (data.folderId || null) : undefined,
+        folderId: data.folderId !== undefined ? data.folderId : undefined,
       },
     });
 

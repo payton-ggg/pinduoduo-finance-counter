@@ -12,6 +12,13 @@ export async function POST(req: Request) {
       );
     }
 
+    if (!folderId || typeof folderId !== "string" || folderId.trim().length === 0) {
+      return NextResponse.json(
+        { error: "Folder ID is required" },
+        { status: 400 }
+      );
+    }
+
     await prisma.product.updateMany({
       where: {
         id: {
@@ -19,7 +26,7 @@ export async function POST(req: Request) {
         },
       },
       data: {
-        folderId: folderId ?? null,
+        folderId: folderId,
       },
     });
 

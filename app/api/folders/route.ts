@@ -54,10 +54,17 @@ export async function DELETE(req: Request) {
   if (!id) {
     return NextResponse.json({ error: "ID is required" }, { status: 400 });
   }
-  await prisma.product.updateMany({
+  
+  const productCount = await prisma.product.count({
     where: { folderId: id },
-    data: { folderId: null },
   });
+  if (productCount > 0) {
+    return NextResponse.json(
+      { error: `Нельзя удалить папку, так как в ней содержатся товары (${productCount} шт.). Сначала переместите их или удалите.` },
+      { status: 400 }
+    );
+  }
+
   await prisma.folder.delete({ where: { id } });
   return NextResponse.json({ success: true });
 }

@@ -15,6 +15,10 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const data = await req.json();
+  if (!data.folderId || typeof data.folderId !== "string" || data.folderId.trim().length === 0) {
+    return NextResponse.json({ error: "Folder ID is required" }, { status: 400 });
+  }
+
   const images: string[] = Array.isArray(data.images)
     ? (data.images as any[])
         .map((v) => (typeof v === "string" ? v : v?.url))
@@ -31,7 +35,7 @@ export async function POST(req: Request) {
       name: data.name,
       images,
       pinduoduoUrl: data.pinduoduoUrl,
-      folderId: data.folderId || null,
+      folderId: data.folderId,
       variants: {
         create: variants.length > 0
           ? variants.map((v: any) => ({

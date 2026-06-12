@@ -44,7 +44,7 @@ type FormValues = {
   incomes: { id?: string; amount: number }[];
   expenses: { id?: string; amount: number; type: string }[];
   archive?: number | null;
-  folderId?: string | null;
+  folderId?: string;
 };
 
 type ProductFormProps = {
@@ -131,7 +131,7 @@ export default function ProductForm({
       type: e.type,
     })),
     archive: initialData?.archive ?? null,
-    folderId: initialData?.folderId ?? null,
+    folderId: initialData?.folderId ?? "",
   };
 
   const {
@@ -301,7 +301,7 @@ export default function ProductForm({
       name: values.name,
       pinduoduoUrl: values.pinduoduoUrl || null,
       archive: values.archive ?? null,
-      folderId: values.folderId || null,
+      folderId: values.folderId || "",
       images: (values.images || [])
         .map((i) => i.url.trim())
         .filter((u) => u.length > 0),
@@ -640,16 +640,20 @@ export default function ProductForm({
           <select
             id="folderId"
             className="w-full border rounded p-2 text-sm bg-background"
-            value={watch("folderId") ?? ""}
-            onChange={(e) => setValue("folderId", e.target.value || null)}
+            {...register("folderId", { required: "Выберите папку" })}
           >
-            <option value="">Без папки</option>
+            <option value="">Выберите папку...</option>
             {folders.map((f) => (
               <option key={f.id} value={f.id}>
                 {f.name}
               </option>
             ))}
           </select>
+          {errors.folderId && (
+            <p className="text-red-600 text-sm mt-1">
+              {String(errors.folderId.message)}
+            </p>
+          )}
         </div>
 
         {id && (

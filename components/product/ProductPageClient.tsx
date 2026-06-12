@@ -71,6 +71,10 @@ export function ProductPageClient({
       alert("Пожалуйста, введите название товара");
       return;
     }
+    if (!selectedFolderId) {
+      alert("Пожалуйста, выберите папку назначения");
+      return;
+    }
     setIsSubmittingCopy(true);
     try {
       const res = await fetch(`/api/products/${id}/copy`, {
@@ -80,7 +84,7 @@ export function ProductPageClient({
         },
         body: JSON.stringify({
           name: copyName,
-          folderId: selectedFolderId || null,
+          folderId: selectedFolderId,
         }),
       });
 
@@ -237,7 +241,7 @@ export function ProductPageClient({
                   value={selectedFolderId}
                   onChange={(e) => setSelectedFolderId(e.target.value)}
                 >
-                  <option value="">Без папки</option>
+                  <option value="">Выберите папку назначения...</option>
                   {folders.map((f) => (
                     <option key={f.id} value={f.id}>
                       {f.name}

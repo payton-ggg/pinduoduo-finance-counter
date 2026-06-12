@@ -383,13 +383,23 @@ export function DashboardClient({
   };
 
   const deleteFolder = async (folderId: string) => {
-    if (!confirm("Удалить папку? Товары останутся без папки.")) return;
+    const folder = folders.find((f) => f.id === folderId);
+    const productCount = folder?._count?.products || 0;
+    if (productCount > 0) {
+      alert(`Нельзя удалить папку "${folder?.name}", так как в ней есть товары (${productCount} шт.). Сначала переместите их или удалите.`);
+      return;
+    }
+    if (!confirm(`Удалить папку "${folder?.name}"?`)) return;
     try {
-      await fetch("/api/folders", {
+      const res = await fetch("/api/folders", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: folderId }),
       });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Ошибка удаления");
+      }
       if (selectedFolderId === folderId) {
         updateFolderId(null);
       }
@@ -397,6 +407,7 @@ export function DashboardClient({
       window.location.reload();
     } catch (err) {
       console.error("Failed to delete folder", err);
+      alert(err instanceof Error ? err.message : "Не удалось удалить папку");
     }
   };
 
@@ -434,7 +445,6 @@ export function DashboardClient({
       const matchesTab = activeTab === "active" ? !p.archive : p.archive;
       if (!matchesTab) return false;
       if (selectedFolderId === null) return true;
-      if (selectedFolderId === "__none__") return !p.folderId;
       return p.folderId === selectedFolderId;
     });
   }, [products, debouncedSearchQuery, activeTab, selectedFolderId, fuse]);
@@ -460,7 +470,6 @@ export function DashboardClient({
   const folderOrder: (string | null)[] = [
     null,
     ...folders.map((f) => f.id),
-    "__none__",
   ];
 
   const swipeFolder = useCallback(
@@ -480,9 +489,7 @@ export function DashboardClient({
   const currentFolderName =
     selectedFolderId === null
       ? "Все"
-      : selectedFolderId === "__none__"
-        ? "Без папки"
-        : (folders.find((f) => f.id === selectedFolderId)?.name ?? "");
+      : (folders.find((f) => f.id === selectedFolderId)?.name ?? "");
 
   useEffect(() => {
     setProducts(initialProducts);
@@ -495,7 +502,10 @@ export function DashboardClient({
   return (
     <div className="py-4 space-y-4">
       <Header
-        onAdd={() => router.push("/product")}
+        onAdd={() => {
+          const params = selectedFolderId ? `?folderId=${selectedFolderId}` : "";
+          router.push(`/product${params}`);
+        }}
         onClearSelection={clearSelection}
         onSelectAll={selectAll}
         hasSelection={selectedIds.size > 0}
@@ -573,16 +583,6 @@ export function DashboardClient({
           </SortableContext>
         </DndContext>
         <button
-          onClick={() => updateFolderId("__none__")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 ${
-            selectedFolderId === "__none__"
-              ? "bg-primary text-primary-foreground shadow-md"
-              : "bg-foreground/5 text-muted-foreground hover:bg-foreground/10"
-          }`}
-        >
-          Без папки ({tabProducts.filter((p) => !p.folderId).length})
-        </button>
-        <button
           onClick={createFolder}
           className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-muted-foreground bg-foreground/5 hover:bg-foreground/10 transition-all duration-200"
         >
@@ -655,15 +655,6 @@ export function DashboardClient({
                     Нет папок
                   </p>
                 )}
-                <button
-                  onClick={() => {
-                    bulkMoveToFolder(null);
-                    setShowFolderDropdown(false);
-                  }}
-                  className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium hover:bg-foreground/5 transition-colors"
-                >
-                  Без папки
-                </button>
               </div>
             )}
           </div>

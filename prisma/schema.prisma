@@ -15,10 +15,10 @@ model Product {
   images       String[]
   pinduoduoUrl String?
   archive      Int?
-  folderId     String?
+  folderId     String
   expenses     Expense[]
   incomes      Income[]
-  folder       Folder?   @relation(fields: [folderId], references: [id])
+  folder       Folder    @relation(fields: [folderId], references: [id])
   variants     Variant[]
 }
 

@@ -13,6 +13,10 @@ export async function POST(
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
 
+    if (!folderId || typeof folderId !== "string" || folderId.trim().length === 0) {
+      return NextResponse.json({ error: "Folder ID is required" }, { status: 400 });
+    }
+
     const sourceProduct = await prisma.product.findUnique({
       where: { id },
       include: { variants: true },
@@ -28,7 +32,7 @@ export async function POST(
         name: name.trim(),
         images: sourceProduct.images,
         pinduoduoUrl: sourceProduct.pinduoduoUrl,
-        folderId: folderId || null,
+        folderId: folderId,
         variants: {
           create: sourceProduct.variants.map((v) => ({
             priceCNY: v.priceCNY,
