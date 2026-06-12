@@ -44,11 +44,12 @@ model Variant {
 }
 
 model Folder {
-  id        String    @id @default(uuid())
-  name      String
-  createdAt DateTime  @default(now())
-  order     Int       @default(0)
-  products  Product[]
+  id                      String    @id @default(uuid())
+  name                    String
+  createdAt               DateTime  @default(now())
+  order                   Int       @default(0)
+  allowedForSecondPassword Boolean   @default(false)
+  products                Product[]
 }
 
 model Expense {
