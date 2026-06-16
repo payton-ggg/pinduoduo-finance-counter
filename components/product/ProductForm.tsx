@@ -641,6 +641,7 @@ export default function ProductForm({
             id="folderId"
             className="w-full border rounded p-2 text-sm bg-background"
             {...register("folderId", { required: "Выберите папку" })}
+            value={watch("folderId") || ""}
           >
             <option value="">Выберите папку...</option>
             {folders.map((f) => (
