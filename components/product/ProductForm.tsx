@@ -622,6 +622,7 @@ export default function ProductForm({
               <div className="p-4 sm:p-5 relative bg-background/30">
                 <div className="transition-all">
                   <VariantFields
+                    key={activeVariantIndex}
                     prefix={`variants.${activeVariantIndex}`}
                     register={register}
                     setValue={setValue}
