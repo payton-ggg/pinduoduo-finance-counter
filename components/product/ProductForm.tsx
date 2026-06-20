@@ -54,6 +54,7 @@ type ProductFormProps = {
   onSuccess?: () => void;
   onCancel?: () => void;
   onValuesChange?: (values: any) => void;
+  onDirtyChange?: (isDirty: boolean) => void;
 };
 
 const emptyVariant = (): VariantValues => ({
@@ -69,6 +70,7 @@ export default function ProductForm({
   onSuccess,
   onCancel,
   onValuesChange,
+  onDirtyChange,
 }: ProductFormProps) {
   const router = useRouter();
   const [folders, setFolders] = useState<{ id: string; name: string }[]>([]);
@@ -138,11 +140,17 @@ export default function ProductForm({
     register,
     control,
     handleSubmit,
-    formState: { isSubmitting, errors },
+    formState: { isSubmitting, errors, isDirty },
     setValue,
     watch,
     reset,
   } = useForm<FormValues>({ defaultValues });
+
+  useEffect(() => {
+    if (onDirtyChange) {
+      onDirtyChange(isDirty);
+    }
+  }, [isDirty, onDirtyChange]);
 
   const watchedValues = watch();
   const serializedValues = JSON.stringify(watchedValues);
@@ -470,7 +478,7 @@ export default function ProductForm({
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form id="product-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div>
           <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">
             Название

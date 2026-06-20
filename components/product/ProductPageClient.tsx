@@ -31,6 +31,8 @@ export function ProductPageClient({
   const [hasOpenedEdit, setHasOpenedEdit] = useState(false);
   const [localProduct, setLocalProduct] = useState(product);
   const [formKey, setFormKey] = useState(0);
+  const [isFormDirty, setIsFormDirty] = useState(false);
+  const [isUnsavedModalOpen, setIsUnsavedModalOpen] = useState(false);
   const router = useRouter();
 
   // Copy modal state
@@ -147,7 +149,13 @@ export function ProductPageClient({
             <Button
               variant={mode === "preview" ? "default" : "ghost"}
               size="sm"
-              onClick={() => setMode("preview")}
+              onClick={() => {
+                if (mode === "edit" && isFormDirty) {
+                  setIsUnsavedModalOpen(true);
+                } else {
+                  setMode("preview");
+                }
+              }}
               className="gap-1.5"
             >
               <Eye className="h-4 w-4" />
@@ -179,16 +187,19 @@ export function ProductPageClient({
             initialData={product}
             initialRates={rates}
             onSuccess={() => {
+              setIsFormDirty(false);
               router.refresh();
               setFormKey((prev) => prev + 1);
               setMode("preview");
             }}
             onCancel={() => {
+              setIsFormDirty(false);
               setLocalProduct(product);
               setFormKey((prev) => prev + 1);
               setMode("preview");
             }}
             onValuesChange={setLocalProduct}
+            onDirtyChange={setIsFormDirty}
           />
         </div>
       )}
@@ -274,6 +285,71 @@ export function ProductPageClient({
                 ) : (
                   "Создать копию"
                 )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Unsaved Changes Confirmation Modal */}
+      {isUnsavedModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
+          onClick={() => {}} // Non-closable by clicking outside
+        >
+          <div
+            className="bg-background border border-border shadow-2xl rounded-2xl w-full max-w-md overflow-hidden flex flex-col transition-all transform scale-100"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-5 border-b border-border">
+              <h2 className="text-lg font-bold flex items-center gap-2 text-foreground">
+                <span className="p-1 rounded-md bg-amber-500/10 text-amber-500">⚠️</span>
+                Несохраненные изменения
+              </h2>
+            </div>
+
+            {/* Body */}
+            <div className="p-5">
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Вы изменили информацию о товаре. Хотите сохранить изменения перед переходом в режим просмотра?
+              </p>
+            </div>
+
+            {/* Footer */}
+            <div className="p-5 border-t border-border flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 bg-muted/20">
+              <Button
+                variant="ghost"
+                onClick={() => setIsUnsavedModalOpen(false)}
+                className="font-semibold order-3 sm:order-1"
+              >
+                Отмена
+              </Button>
+              <Button
+                onClick={() => {
+                  // Discard changes
+                  setIsFormDirty(false);
+                  setLocalProduct(product);
+                  setFormKey((prev) => prev + 1);
+                  setIsUnsavedModalOpen(false);
+                  setMode("preview");
+                }}
+                className="bg-red-600 hover:bg-red-700 text-white font-semibold order-2"
+              >
+                Забить хуй
+              </Button>
+              <Button
+                onClick={() => {
+                  // Trigger form submit programmatically
+                  const formElement = document.getElementById("product-form") as HTMLFormElement | null;
+                  if (formElement) {
+                    formElement.requestSubmit();
+                  }
+                  setIsUnsavedModalOpen(false);
+                }}
+                className="bg-primary text-primary-foreground font-semibold order-1 sm:order-3"
+              >
+                Сохранить
               </Button>
             </div>
           </div>
