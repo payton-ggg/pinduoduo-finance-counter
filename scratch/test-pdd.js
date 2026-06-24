@@ -3,8 +3,7 @@ const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 
 async function run() {
-  const query = "iphone 13";
-  const url = `https://mobile.yangkeduo.com/search_result.html?search_key=${encodeURIComponent(query)}`;
+  const url = `https://mobile.yangkeduo.com/`;
   console.log("Launching browser...");
   const browser = await puppeteer.launch({
     headless: true,
@@ -21,26 +20,15 @@ async function run() {
     await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1');
     await page.setViewport({ width: 375, height: 667, isMobile: true });
     
-    console.log("Navigating to:", url);
-    const res = await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+    console.log("Navigating to home page:", url);
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+    console.log("Final URL after home navigation:", page.url());
     
-    console.log("Response status:", res ? res.status() : "No response");
-    console.log("Final URL after navigation:", page.url());
-    
-    // Save screenshot
-    const screenshotPath = 'C:/Users/plato/.gemini/antigravity-ide/brain/43f4d0d4-0e51-415c-a5cf-0d460ecf37de/pdd-screenshot.png';
-    console.log("Saving screenshot to:", screenshotPath);
-    await page.screenshot({ path: screenshotPath });
-
     const html = await page.content();
-    console.log("Is verification/login wall:", html.includes("verify") || html.includes("login") || html.includes("safe.yangkeduo.com"));
-    
-    const rawData = await page.evaluate(() => {
-      return window.rawData || window.state || null;
-    });
-    console.log("Is rawData available:", !!rawData);
+    console.log("Home page HTML length:", html.length);
+    console.log("Home page is redirect to login/verification:", page.url().includes("login") || page.url().includes("safe.yangkeduo.com"));
   } catch (err) {
-    console.error("Scraping failed:", err);
+    console.error("Home navigation failed:", err);
   } finally {
     await browser.close();
     console.log("Browser closed.");
