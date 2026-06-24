@@ -1,7 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Eye, Pencil, Calculator, ArrowLeft, Copy, X, Loader2, TrendingUp } from "lucide-react";
+import {
+  Eye,
+  Pencil,
+  Calculator,
+  ArrowLeft,
+  Copy,
+  X,
+  Loader2,
+  TrendingUp,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
@@ -103,7 +112,9 @@ export function ProductPageClient({
       router.refresh();
     } catch (err) {
       console.error(err);
-      alert(err instanceof Error ? err.message : "Не удалось скопировать товар");
+      alert(
+        err instanceof Error ? err.message : "Не удалось скопировать товар",
+      );
     } finally {
       setIsSubmittingCopy(false);
     }
@@ -113,12 +124,12 @@ export function ProductPageClient({
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-0">
       <div className="flex items-center justify-between mb-6">
         <Button
-          variant="default"
-          size="lg"
+          variant="outline"
+          size="icon"
           onClick={() => router.push("/")}
-          className="gap-1.5"
+          className="rounded-xl hover:bg-muted hover:scale-105 active:scale-95 transition-all duration-200"
         >
-          <ArrowLeft className="h-6 w-6" />
+          <ArrowLeft className="h-4 w-4" />
         </Button>
         <h1 className="text-2xl sm:text-3xl font-bold truncate mr-4">
           {localProduct?.name || "Продукт"}
@@ -316,7 +327,9 @@ export function ProductPageClient({
             {/* Header */}
             <div className="flex items-center justify-between p-5 border-b border-border">
               <h2 className="text-lg font-bold flex items-center gap-2 text-foreground">
-                <span className="p-1 rounded-md bg-amber-500/10 text-amber-500">⚠️</span>
+                <span className="p-1 rounded-md bg-amber-500/10 text-amber-500">
+                  ⚠️
+                </span>
                 Несохраненные изменения
               </h2>
             </div>
@@ -324,7 +337,8 @@ export function ProductPageClient({
             {/* Body */}
             <div className="p-5">
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Вы изменили информацию о товаре. Хотите сохранить изменения перед переходом в режим просмотра?
+                Вы изменили информацию о товаре. Хотите сохранить изменения
+                перед переходом в режим просмотра?
               </p>
             </div>
 
@@ -353,7 +367,9 @@ export function ProductPageClient({
               <Button
                 onClick={() => {
                   // Trigger form submit programmatically
-                  const formElement = document.getElementById("product-form") as HTMLFormElement | null;
+                  const formElement = document.getElementById(
+                    "product-form",
+                  ) as HTMLFormElement | null;
                   if (formElement) {
                     formElement.requestSubmit();
                   }
