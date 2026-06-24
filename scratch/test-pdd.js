@@ -8,7 +8,11 @@ async function run() {
   console.log("Launching browser...");
   const browser = await puppeteer.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    args: [
+      '--no-sandbox', 
+      '--disable-setuid-sandbox',
+      '--disable-blink-features=AutomationControlled'
+    ]
   });
 
   try {
@@ -18,56 +22,23 @@ async function run() {
     await page.setViewport({ width: 375, height: 667, isMobile: true });
     
     console.log("Navigating to:", url);
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+    const res = await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
     
-    console.log("Evaluating page state...");
+    console.log("Response status:", res.status());
+    console.log("Final URL after navigation:", page.url());
+    
+    // Save screenshot
+    const screenshotPath = 'C:/Users/plato/.gemini/antigravity-ide/brain/43f4d0d4-0e51-415c-a5cf-0d460ecf37de/pdd-screenshot.png';
+    console.log("Saving screenshot to:", screenshotPath);
+    await page.screenshot({ path: screenshotPath });
+
+    const html = await page.content();
+    console.log("Is verification/login wall:", html.includes("verify") || html.includes("login") || html.includes("safe.yangkeduo.com"));
+    
     const rawData = await page.evaluate(() => {
       return window.rawData || window.state || null;
     });
-
-    if (rawData) {
-      console.log("Found rawData!");
-      // Let's log some details of the object keys
-      console.log("Keys in rawData:", Object.keys(rawData));
-      
-      // Let's try to find goods list
-      // In mobile PDD, search results are usually under rawData.store.items, rawData.goods_list, rawData.goodsList, or rawData.items
-      let goodsList = null;
-      
-      // We will search recursively or print rawData structure
-      if (rawData.items) goodsList = rawData.items;
-      else if (rawData.goods_list) goodsList = rawData.goods_list;
-      else if (rawData.goodsList) goodsList = rawData.goodsList;
-      else if (rawData.store && rawData.store.goodsList) goodsList = rawData.store.goodsList;
-      
-      // Let's print rawData keys and nested details
-      console.log("rawData preview (first 500 chars):", JSON.stringify(rawData).substring(0, 500));
-      
-      if (goodsList && Array.isArray(goodsList)) {
-        console.log(`Found goods list of length: ${goodsList.length}`);
-        goodsList.slice(0, 5).forEach((item, idx) => {
-          console.log(`\nItem #${idx + 1}:`);
-          console.log(`- Title: ${item.goods_name || item.goodsName || item.title}`);
-          const priceVal = item.price || item.price_info || item.group_price;
-          // PDD prices are in cents (fen), e.g. 5900 = 59 CNY
-          const parsedPrice = typeof priceVal === 'number' ? (priceVal / 100).toFixed(2) : priceVal;
-          console.log(`- Price: ${parsedPrice} CNY`);
-          console.log(`- Image: ${item.hd_thumb_url || item.thumb_url || item.imgUrl}`);
-          console.log(`- Link: ${item.link_url || item.link || item.url}`);
-        });
-      } else {
-        console.log("Could not locate items list in rawData directly. Let's inspect store values if they exist.");
-        if (rawData.store) {
-          console.log("Store keys:", Object.keys(rawData.store));
-        }
-      }
-    } else {
-      console.log("No rawData or state object found on window context.");
-      // Let's print page content length
-      const html = await page.content();
-      console.log("HTML length:", html.length);
-      console.log("HTML preview:", html.substring(0, 1000));
-    }
+    console.log("Is rawData available:", !!rawData);
   } catch (err) {
     console.error("Scraping failed:", err);
   } finally {
