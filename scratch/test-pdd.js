@@ -3,7 +3,8 @@ const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 
 async function run() {
-  const url = `https://mobile.yangkeduo.com/`;
+  const homeUrl = `https://mobile.yangkeduo.com/`;
+  const searchUrl = `https://mobile.yangkeduo.com/search_result.html?search_key=iphone%2013`;
   console.log("Launching browser...");
   const browser = await puppeteer.launch({
     headless: true,
@@ -20,15 +21,26 @@ async function run() {
     await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1');
     await page.setViewport({ width: 375, height: 667, isMobile: true });
     
-    console.log("Navigating to home page:", url);
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
-    console.log("Final URL after home navigation:", page.url());
+    console.log("Navigating to home page first...");
+    await page.goto(homeUrl, { waitUntil: 'networkidle2', timeout: 30000 });
+    console.log("Current URL:", page.url());
+    
+    console.log("Waiting 2 seconds...");
+    await new Promise(r => setTimeout(r, 2000));
+    
+    console.log("Navigating to search page...");
+    await page.goto(searchUrl, { waitUntil: 'networkidle2', timeout: 30000 });
+    console.log("Final URL:", page.url());
     
     const html = await page.content();
-    console.log("Home page HTML length:", html.length);
-    console.log("Home page is redirect to login/verification:", page.url().includes("login") || page.url().includes("safe.yangkeduo.com"));
+    console.log("Is redirect to login/verification:", page.url().includes("login") || page.url().includes("safe.yangkeduo.com"));
+    
+    const rawData = await page.evaluate(() => {
+      return window.rawData || window.state || null;
+    });
+    console.log("Is rawData available:", !!rawData);
   } catch (err) {
-    console.error("Home navigation failed:", err);
+    console.error("Navigation failed:", err);
   } finally {
     await browser.close();
     console.log("Browser closed.");
