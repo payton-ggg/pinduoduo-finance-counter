@@ -24,7 +24,7 @@ async function run() {
     console.log("Navigating to:", url);
     const res = await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
     
-    console.log("Response status:", res.status());
+    console.log("Response status:", res ? res.status() : "No response");
     console.log("Final URL after navigation:", page.url());
     
     // Save screenshot
