@@ -260,13 +260,13 @@ export function OlxResearchDialog({
                       className="flex items-center justify-between py-3 gap-3 first:pt-0"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-muted shrink-0 border border-foreground/5">
+                        <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-muted shrink-0 border border-foreground/5">
                           {ad.photo ? (
                             <Image
                               src={ad.photo}
                               alt={ad.title}
                               fill
-                              sizes="48px"
+                              sizes="80px"
                               className="object-cover"
                             />
                           ) : (
