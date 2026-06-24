@@ -126,15 +126,15 @@ export function OlxResearchDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-300"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-300"
       onClick={onClose}
     >
       <div
-        className="bg-background border border-foreground/10 shadow-2xl rounded-2xl w-full max-w-2xl overflow-hidden flex flex-col transition-all transform scale-100 max-h-[85vh] md:max-h-[80vh]"
+        className="bg-background border border-foreground/10 shadow-2xl rounded-2xl w-full max-w-2xl overflow-hidden flex flex-col transition-all transform scale-100 max-h-[92vh] sm:max-h-[85vh] md:max-h-[80vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-foreground/10 bg-linear-to-r from-primary/5 to-secondary/5">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-foreground/10 bg-linear-to-r from-primary/5 to-secondary/5">
           <div className="space-y-1">
             <h2 className="text-xl font-black flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-primary" />
@@ -154,7 +154,7 @@ export function OlxResearchDialog({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
           {loading && (
             <div className="flex flex-col items-center justify-center py-20 space-y-4">
               <Loader2 className="w-12 h-12 animate-spin text-primary" />
@@ -186,40 +186,40 @@ export function OlxResearchDialog({
           {!loading && !error && stats && (
             <>
               {/* Stats Cards */}
-              <div className="grid grid-cols-3 gap-3">
-                <div className="p-4 rounded-xl bg-primary/5 border border-primary/10 flex flex-col justify-between">
-                  <span className="text-[10px] uppercase font-black text-primary/70 tracking-wider">
-                    Средняя цена
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                <div className="p-3 sm:p-4 rounded-xl bg-primary/5 border border-primary/10 flex flex-col justify-between">
+                  <span className="text-[9px] sm:text-[10px] uppercase font-black text-primary/70 tracking-wider">
+                    Средняя
                   </span>
-                  <span className="text-lg md:text-xl font-black text-foreground mt-1">
+                  <span className="text-base sm:text-lg md:text-xl font-black text-foreground mt-0.5 sm:mt-1">
                     {stats.avg.toLocaleString()} ₴
                   </span>
-                  <span className="text-[9px] text-muted-foreground mt-2 font-medium">
-                    Базовый ориентир
+                  <span className="text-[8px] sm:text-[9px] text-muted-foreground mt-1.5 sm:mt-2 font-medium">
+                    Ориентир
                   </span>
                 </div>
 
-                <div className="p-4 rounded-xl bg-green-500/5 border border-green-500/10 flex flex-col justify-between">
-                  <span className="text-[10px] uppercase font-black text-green-500/80 tracking-wider">
+                <div className="p-3 sm:p-4 rounded-xl bg-green-500/5 border border-green-500/10 flex flex-col justify-between">
+                  <span className="text-[9px] sm:text-[10px] uppercase font-black text-green-500/80 tracking-wider">
                     Минимум
                   </span>
-                  <span className="text-lg md:text-xl font-black text-foreground mt-1">
+                  <span className="text-base sm:text-lg md:text-xl font-black text-foreground mt-0.5 sm:mt-1">
                     {stats.min.toLocaleString()} ₴
                   </span>
-                  <span className="text-[9px] text-muted-foreground mt-2 font-medium">
-                    Нижняя граница
+                  <span className="text-[8px] sm:text-[9px] text-muted-foreground mt-1.5 sm:mt-2 font-medium">
+                    Мин. цена
                   </span>
                 </div>
 
-                <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/10 flex flex-col justify-between">
-                  <span className="text-[10px] uppercase font-black text-amber-500/80 tracking-wider">
+                <div className="p-3 sm:p-4 rounded-xl bg-amber-500/5 border border-amber-500/10 flex flex-col justify-between">
+                  <span className="text-[9px] sm:text-[10px] uppercase font-black text-amber-500/80 tracking-wider">
                     Максимум
                   </span>
-                  <span className="text-lg md:text-xl font-black text-foreground mt-1">
+                  <span className="text-base sm:text-lg md:text-xl font-black text-foreground mt-0.5 sm:mt-1">
                     {stats.max.toLocaleString()} ₴
                   </span>
-                  <span className="text-[9px] text-muted-foreground mt-2 font-medium">
-                    Верхняя граница ({stats.count} объв.)
+                  <span className="text-[8px] sm:text-[9px] text-muted-foreground mt-1.5 sm:mt-2 font-medium">
+                    Макс. ({stats.count})
                   </span>
                 </div>
               </div>
@@ -253,7 +253,7 @@ export function OlxResearchDialog({
                   Найденные предложения на OLX ({ads.length})
                 </h3>
 
-                <div className="space-y-2 divide-y divide-foreground/5 max-h-[30vh] overflow-y-auto pr-1">
+                <div className="space-y-2 divide-y divide-foreground/5 max-h-[45vh] sm:max-h-[30vh] overflow-y-auto pr-1">
                   {ads.map((ad) => (
                     <div
                       key={ad.id}
@@ -316,12 +316,12 @@ export function OlxResearchDialog({
 
         {/* Footer */}
         {!loading && !error && stats && (
-          <div className="p-5 border-t border-foreground/10 flex items-center justify-between bg-muted/20">
-            <span className="text-[10px] font-bold text-muted-foreground max-w-[250px] leading-tight">
+          <div className="p-4 sm:p-5 border-t border-foreground/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-muted/20">
+            <span className="text-[10px] font-bold text-muted-foreground sm:max-w-[250px] leading-tight">
               Применение установит розничную цену {stats.avg.toLocaleString()} ₴
               для выбранной вариации товара.
             </span>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center justify-end gap-2 sm:gap-3">
               <Button
                 variant="outline"
                 onClick={onClose}
