@@ -72,22 +72,31 @@ async function run() {
     if (rawData) {
       console.log("Success! Found rawData!");
       console.log("Top-level keys of rawData:", Object.keys(rawData));
-      if (rawData.store) {
-        console.log("Store keys:", Object.keys(rawData.store));
-      }
-      
-      // Let's recursively search for any arrays of objects that look like goods lists
-      // Often in yangkeduo search it's located inside some deeply nested object
-      // e.g. rawData.store.goodsList or rawData.store.searchResults etc.
-      // Let's look for a key with "goods" or "items" or "list"
-      for (const key of Object.keys(rawData)) {
-        const val = rawData[key];
-        if (val && typeof val === 'object') {
-          console.log(`Key "${key}" is object. Nested keys:`, Object.keys(val).slice(0, 10));
+      if (rawData.stores) {
+        console.log("stores keys:", Object.keys(rawData.stores));
+        if (rawData.stores.store) {
+          console.log("stores.store keys:", Object.keys(rawData.stores.store));
+          // Let's print nested properties of stores.store to see if there is goods/items/results list
+          for (const key of Object.keys(rawData.stores.store)) {
+            const val = rawData.stores.store[key];
+            if (val && typeof val === 'object') {
+              console.log(`- stores.store.${key} is object/array. Keys:`, Array.isArray(val) ? `Array(length: ${val.length})` : Object.keys(val).slice(0, 8));
+            } else {
+              console.log(`- stores.store.${key}:`, val);
+            }
+          }
         }
       }
 
-      const itemsList = rawData.items || rawData.goods_list || rawData.goodsList || (rawData.store && rawData.store.goodsList) || [];
+      // Let's dynamically resolve the items list from various possible locations in rawData.stores
+      const itemsList = 
+        (rawData.stores && rawData.stores.store && rawData.stores.store.goodsList) ||
+        (rawData.stores && rawData.stores.store && rawData.stores.store.goods_list) ||
+        rawData.items || 
+        rawData.goods_list || 
+        rawData.goodsList || 
+        (rawData.store && rawData.store.goodsList) || 
+        [];
       console.log(`Found ${itemsList.length} items.`);
       itemsList.slice(0, 5).forEach((item, idx) => {
         console.log(`\nItem #${idx + 1}:`);
