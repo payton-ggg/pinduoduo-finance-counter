@@ -235,7 +235,7 @@ export function PddResearchDialog({
                   >
                     {variants.map((v, i) => (
                       <option key={v.id} value={v.id}>
-                        Вариант #{i + 1} (Закупка: {v.priceCNY}¥, Курс: {v.rateCNY || rates?.cny || "глоб."} грн/¥)
+                        Вариант #{i + 1} {v.pddSearchQuery ? `("${v.pddSearchQuery}")` : ""} (Закупка: {v.priceCNY}¥, Курс: {v.rateCNY || rates?.cny || "глоб."} грн/¥)
                       </option>
                     ))}
                   </select>
