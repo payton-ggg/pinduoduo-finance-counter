@@ -54,15 +54,25 @@ export async function GET(
       );
     }
 
-    // Launch puppeteer
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-blink-features=AutomationControlled",
-      ],
-    });
+    // Launch puppeteer (connect to Browserless if key exists, otherwise launch locally)
+    let browser;
+    const browserlessKey = process.env.BROWSERLESS_API_KEY || "";
+    if (browserlessKey) {
+      console.log(`[PDD Scraper] Connecting to remote Browserless instance...`);
+      browser = await puppeteer.connect({
+        browserWSEndpoint: `wss://chrome.browserless.io?token=${browserlessKey}`,
+      });
+    } else {
+      console.log(`[PDD Scraper] Launching local Puppeteer instance...`);
+      browser = await puppeteer.launch({
+        headless: true,
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-blink-features=AutomationControlled",
+        ],
+      });
+    }
 
     try {
       const page = await browser.newPage();
