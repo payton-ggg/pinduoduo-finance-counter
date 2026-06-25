@@ -27,9 +27,9 @@ async function run() {
   console.log("Launching/Connecting browser...");
   let browser;
   if (browserlessKey) {
-    console.log("Connecting to remote Browserless instance with stealth parameters...");
+    console.log("Connecting to remote Browserless instance with stealth and proxy parameters...");
     browser = await puppeteer.connect({
-      browserWSEndpoint: `wss://chrome.browserless.io/stealth?token=${browserlessKey}&stealth=true&blockAds=true&--disable-blink-features=AutomationControlled`
+      browserWSEndpoint: `wss://chrome.browserless.io/stealth?token=${browserlessKey}&stealth=true&blockAds=true&proxy=residential&proxyCountry=cn&--disable-blink-features=AutomationControlled`
     });
   } else {
     console.log("Launching local browser...");
@@ -68,7 +68,7 @@ async function run() {
     }
     
     console.log("Navigating to search page:", url);
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
     console.log("Final URL:", page.url());
     
     const html = await page.content();
