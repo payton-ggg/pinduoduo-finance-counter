@@ -27,7 +27,7 @@ export async function GET(
   try {
     const product = await prisma.product.findUnique({
       where: { id },
-      include: { folder: true },
+      include: { folder: true, variants: true },
     });
 
     if (!product) {
@@ -38,10 +38,14 @@ export async function GET(
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    const query = product.name;
+    // Find first variant's pddSearchQuery, fallback to product.name
+    const firstVariantWithQuery = product.variants.find(
+      (v) => v.pddSearchQuery && v.pddSearchQuery.trim().length > 0
+    );
+    const query = firstVariantWithQuery?.pddSearchQuery || product.name;
     const searchUrl = `https://mobile.yangkeduo.com/search_result.html?search_key=${encodeURIComponent(query)}`;
 
-    console.log(`[PDD Scraper] Starting search for product: "${query}"`);
+    console.log(`[PDD Scraper] Starting search for query: "${query}" (PDD Search Query: ${firstVariantWithQuery?.pddSearchQuery || 'none'}, fallback to name: ${product.name})`);
 
     // Load cookie from .env
     const pddCookie = process.env.PDD_COOKIE || "";
@@ -97,9 +101,9 @@ export async function GET(
         console.log(`[PDD Scraper] Injected ${cookies.length} cookies.`);
       }
 
-      // Go to page
+      // Go to page using domcontentloaded to prevent frame detached errors on Browserless
       console.log(`[PDD Scraper] Navigating to search URL...`);
-      await page.goto(searchUrl, { waitUntil: "networkidle2", timeout: 30000 });
+      await page.goto(searchUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
 
       // Check if redirected to login page anyway (cookie expired)
       const finalUrl = page.url();
@@ -113,10 +117,18 @@ export async function GET(
         );
       }
 
-      // Evaluate rawData
-      const rawData: any = await page.evaluate(() => {
-        return (window as any).rawData || (window as any).state || null;
-      });
+      // Dynamic polling for rawData (up to 5 seconds) to allow JS execution
+      console.log(`[PDD Scraper] Polling for rawData on page context...`);
+      let rawData: any = null;
+      let pollingRetries = 5;
+      while (pollingRetries > 0) {
+        rawData = await page.evaluate(() => {
+          return (window as any).rawData || (window as any).state || null;
+        });
+        if (rawData) break;
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        pollingRetries--;
+      }
 
       if (!rawData) {
         console.log(`[PDD Scraper] rawData is not found on page context.`);
