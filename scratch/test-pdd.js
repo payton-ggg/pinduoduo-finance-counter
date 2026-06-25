@@ -5,34 +5,48 @@ const path = require('path');
 puppeteer.use(StealthPlugin());
 
 async function run() {
-  const query = "iphone 13";
+  const query = "美式字母印花长袖纯棉T恤女秋季2024新款韩版宽松百搭灰色上衣";
   const url = `https://mobile.yangkeduo.com/search_result.html?search_key=${encodeURIComponent(query)}`;
   
-  // Read PDD_COOKIE from .env
+  // Read PDD_COOKIE and BROWSERLESS_API_KEY from .env
   let pddCookie = '';
+  let browserlessKey = '';
   try {
     const dotenvContent = fs.readFileSync(path.join(__dirname, '../.env'), 'utf8');
     const pddCookieMatch = dotenvContent.match(/PDD_COOKIE="?([^"\n]+)"?/);
     pddCookie = pddCookieMatch ? pddCookieMatch[1] : '';
-    console.log("Loaded cookie from .env. Cookie length:", pddCookie.length);
+    
+    const browserlessMatch = dotenvContent.match(/BROWSERLESS_API_KEY="?([^"\n]+)"?/);
+    browserlessKey = browserlessMatch ? browserlessMatch[1] : '';
+    
+    console.log("Loaded configs from .env. Cookie length:", pddCookie.length, "Browserless Key length:", browserlessKey.length);
   } catch (err) {
     console.error("Failed to read .env file:", err.message);
   }
 
-  console.log("Launching browser...");
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: [
-      '--no-sandbox', 
-      '--disable-setuid-sandbox',
-      '--disable-blink-features=AutomationControlled'
-    ]
-  });
+  console.log("Launching/Connecting browser...");
+  let browser;
+  if (browserlessKey) {
+    console.log("Connecting to remote Browserless instance with stealth parameters...");
+    browser = await puppeteer.connect({
+      browserWSEndpoint: `wss://chrome.browserless.io/stealth?token=${browserlessKey}&stealth=true&blockAds=true&--disable-blink-features=AutomationControlled`
+    });
+  } else {
+    console.log("Launching local browser...");
+    browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        '--no-sandbox', 
+        '--disable-setuid-sandbox',
+        '--disable-blink-features=AutomationControlled'
+      ]
+    });
+  }
 
   try {
     const page = await browser.newPage();
     console.log("Setting viewport and user agent...");
-    await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1');
+    await page.setUserAgent('Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36');
     await page.setViewport({ width: 375, height: 667, isMobile: true });
     
     // Inject cookies
