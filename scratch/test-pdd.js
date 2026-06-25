@@ -71,40 +71,60 @@ async function run() {
     
     if (rawData) {
       console.log("Success! Found rawData!");
-      console.log("Top-level keys of rawData:", Object.keys(rawData));
-      if (rawData.stores) {
-        console.log("stores keys:", Object.keys(rawData.stores));
-        if (rawData.stores.store) {
-          console.log("stores.store keys:", Object.keys(rawData.stores.store));
-          // Let's print nested properties of stores.store to see if there is goods/items/results list
-          for (const key of Object.keys(rawData.stores.store)) {
-            const val = rawData.stores.store[key];
-            if (val && typeof val === 'object') {
-              console.log(`- stores.store.${key} is object/array. Keys:`, Array.isArray(val) ? `Array(length: ${val.length})` : Object.keys(val).slice(0, 8));
-            } else {
-              console.log(`- stores.store.${key}:`, val);
+      if (rawData.stores && rawData.stores.store && rawData.stores.store.data) {
+        const storeData = rawData.stores.store.data;
+        console.log("stores.store.data keys:", Object.keys(storeData));
+        if (storeData.ssrListData) {
+          const ssrList = storeData.ssrListData;
+          console.log("ssrListData type/keys:", Array.isArray(ssrList) ? `Array(length: ${ssrList.length})` : Object.keys(ssrList));
+          
+          if (Array.isArray(ssrList)) {
+            console.log("ssrListData elements preview:", ssrList.slice(0, 2));
+          } else if (ssrList && typeof ssrList === 'object') {
+            // Check subfields like list, items, etc.
+            for (const key of Object.keys(ssrList)) {
+              const val = ssrList[key];
+              console.log(`- ssrListData.${key}:`, Array.isArray(val) ? `Array(length: ${val.length})` : typeof val === 'object' ? `Object(keys: ${Object.keys(val).slice(0,5)})` : val);
+            }
+            // Is there a goods_list or list inside ssrList?
+            const innerList = ssrList.list || ssrList.goods_list || ssrList.goodsList || ssrList.items || [];
+            if (Array.isArray(innerList) && innerList.length > 0) {
+              console.log("Found inner list elements preview:", innerList.slice(0, 2));
             }
           }
         }
       }
 
-      // Let's dynamically resolve the items list from various possible locations in rawData.stores
-      const itemsList = 
-        (rawData.stores && rawData.stores.store && rawData.stores.store.goodsList) ||
-        (rawData.stores && rawData.stores.store && rawData.stores.store.goods_list) ||
-        rawData.items || 
-        rawData.goods_list || 
-        rawData.goodsList || 
-        (rawData.store && rawData.store.goodsList) || 
-        [];
+      // Let's resolve the items list from stores.store.data.ssrListData
+      let itemsList = [];
+      if (rawData.stores && rawData.stores.store && rawData.stores.store.data) {
+        const d = rawData.stores.store.data;
+        if (d.ssrListData) {
+          if (Array.isArray(d.ssrListData)) {
+            itemsList = d.ssrListData;
+          } else if (typeof d.ssrListData === 'object') {
+            itemsList = d.ssrListData.list || d.ssrListData.goods_list || d.ssrListData.goodsList || d.ssrListData.items || [];
+          }
+        }
+      }
+      
+      if (itemsList.length === 0) {
+        itemsList = 
+          (rawData.stores && rawData.stores.store && rawData.stores.store.goodsList) ||
+          rawData.items || 
+          rawData.goods_list || 
+          rawData.goodsList || 
+          [];
+      }
+      
       console.log(`Found ${itemsList.length} items.`);
       itemsList.slice(0, 5).forEach((item, idx) => {
         console.log(`\nItem #${idx + 1}:`);
-        console.log(`- Title: ${item.goods_name || item.goodsName || item.title}`);
-        const priceVal = item.price || item.price_info || item.group_price;
+        console.log(`- Title: ${item.goods_name || item.goodsName || item.title || item.goods_title}`);
+        const priceVal = item.price || item.price_info || item.group_price || item.price_amount;
         const parsedPrice = typeof priceVal === 'number' ? (priceVal / 100).toFixed(2) : priceVal;
         console.log(`- Price: ${parsedPrice} CNY`);
-        console.log(`- Link: ${item.link_url || item.link || item.url}`);
+        console.log(`- Link: ${item.link_url || item.link || item.url || item.goods_link}`);
       });
     } else {
       console.log("No rawData found on window context.");

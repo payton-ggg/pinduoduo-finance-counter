@@ -117,24 +117,46 @@ export async function GET(
       }
 
       // Resolve listings from different possible schema locations
-      const itemsList = 
-        rawData.items || 
-        rawData.goods_list || 
-        rawData.goodsList || 
-        (rawData.store && rawData.store.goodsList) || 
-        [];
+      let itemsList = [];
+      if (rawData.stores && rawData.stores.store && rawData.stores.store.data) {
+        const d = rawData.stores.store.data;
+        if (d.ssrListData) {
+          if (Array.isArray(d.ssrListData)) {
+            itemsList = d.ssrListData;
+          } else if (typeof d.ssrListData === "object") {
+            itemsList = d.ssrListData.list || d.ssrListData.goods_list || d.ssrListData.goodsList || d.ssrListData.items || [];
+          }
+        }
+      }
+
+      if (!itemsList || itemsList.length === 0) {
+        itemsList = 
+          rawData.items || 
+          rawData.goods_list || 
+          rawData.goodsList || 
+          (rawData.store && rawData.store.goodsList) || 
+          [];
+      }
 
       console.log(`[PDD Scraper] Found ${itemsList.length} items in rawData.`);
 
       const parsedItems = itemsList.map((item: any) => {
-        const goodsId = item.goods_id || item.goodsId || "";
-        const title = item.goods_name || item.goodsName || item.title || "";
-        const priceVal = item.price || item.price_info || item.group_price || 0;
+        const goodsId = item.goodsID || item.goods_id || item.goodsId || "";
+        const title = item.goodsName || item.goods_name || item.title || item.goods_title || "";
+        const priceVal = item.price || item.price_info || item.group_price || item.price_amount || 0;
         
         // Pinduoduo prices are in cents (fen)
         const priceYuan = typeof priceVal === "number" ? priceVal / 100 : parseFloat(String(priceVal)) / 100;
-        const photo = item.hd_thumb_url || item.thumb_url || item.imgUrl || item.image_url || null;
-        const url = goodsId ? `https://mobile.yangkeduo.com/goods.html?goods_id=${goodsId}` : (item.link_url || item.link || "");
+        const photo = item.imgUrl || item.hd_thumb_url || item.thumb_url || item.image_url || null;
+        
+        // Construct absolute URL
+        let url = "";
+        if (goodsId) {
+          url = `https://mobile.yangkeduo.com/goods.html?goods_id=${goodsId}`;
+        } else {
+          const l = item.linkURL || item.link_url || item.link || "";
+          url = l.startsWith("http") ? l : `https://mobile.yangkeduo.com/${l}`;
+        }
 
         return {
           id: goodsId,
@@ -143,7 +165,7 @@ export async function GET(
           priceLabel: `${priceYuan.toFixed(1)} ¥`,
           url,
           photo,
-          salesLabel: item.sales_tip || item.salesTip || null,
+          salesLabel: item.salesTip || item.sales_tip || null,
         };
       }).filter((item: any) => item.title && !isNaN(item.price) && item.price > 0);
 
