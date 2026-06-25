@@ -62,9 +62,9 @@ export async function GET(
     let browser;
     const browserlessKey = process.env.BROWSERLESS_API_KEY || "";
     if (browserlessKey) {
-      console.log(`[PDD Scraper] Connecting to remote Browserless instance...`);
+      console.log(`[PDD Scraper] Connecting to remote Browserless instance with stealth options...`);
       browser = await puppeteer.connect({
-        browserWSEndpoint: `wss://chrome.browserless.io?token=${browserlessKey}`,
+        browserWSEndpoint: `wss://chrome.browserless.io/stealth?token=${browserlessKey}&stealth=true&blockAds=true&--disable-blink-features=AutomationControlled`,
       });
     } else {
       console.log(`[PDD Scraper] Launching local Puppeteer instance...`);
@@ -81,7 +81,7 @@ export async function GET(
     try {
       const page = await browser.newPage();
       await page.setUserAgent(
-        "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1"
+        "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"
       );
       await page.setViewport({ width: 375, height: 667, isMobile: true });
 
@@ -105,27 +105,39 @@ export async function GET(
       console.log(`[PDD Scraper] Navigating to search URL...`);
       await page.goto(searchUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
 
-      // Check if redirected to login page anyway (cookie expired)
-      const finalUrl = page.url();
-      if (finalUrl.includes("login.html") || finalUrl.includes("safe.yangkeduo.com")) {
-        console.log(`[PDD Scraper] Redirected to login page. Cookie might be expired.`);
-        return NextResponse.json(
-          { 
-            error: "Сессия Pinduoduo истекла или заблокирована. Пожалуйста, откройте mobile.yangkeduo.com в браузере, войдите заново и обновите куки PDD_COOKIE в файле .env." 
-          },
-          { status: 401 }
-        );
-      }
-
-      // Dynamic polling for rawData (up to 5 seconds) to allow JS execution
+      // Dynamic polling for rawData (up to 7 seconds) to allow JS execution
       console.log(`[PDD Scraper] Polling for rawData on page context...`);
       let rawData: any = null;
-      let pollingRetries = 5;
+      let pollingRetries = 7;
       while (pollingRetries > 0) {
-        rawData = await page.evaluate(() => {
-          return (window as any).rawData || (window as any).state || null;
-        });
-        if (rawData) break;
+        try {
+          const currentUrl = page.url();
+          if (currentUrl.includes("login.html") || currentUrl.includes("safe.yangkeduo.com")) {
+            console.log(`[PDD Scraper] Redirected to verification/login page: ${currentUrl}`);
+            return NextResponse.json(
+              { 
+                error: "Сессия Pinduoduo заблокирована или истекла (произошло перенаправление на страницу проверки). Откройте mobile.yangkeduo.com в браузере, войдите заново и обновите PDD_COOKIE в .env." 
+              },
+              { status: 401 }
+            );
+          }
+
+          rawData = await page.evaluate(() => {
+            return (window as any).rawData || (window as any).state || null;
+          });
+          if (rawData) {
+            console.log(`[PDD Scraper] Successfully retrieved rawData.`);
+            break;
+          }
+        } catch (e: any) {
+          console.log(`[PDD Scraper] Polling evaluation warning: ${e.message}`);
+          if (e.message.includes("Target closed") || e.message.includes("Protocol error")) {
+            break;
+          }
+          // If frame was detached or execution context was destroyed, wait 1.5 seconds
+          // to let the navigation settle so that page.url() updates correctly.
+          await new Promise((resolve) => setTimeout(resolve, 1500));
+        }
         await new Promise((resolve) => setTimeout(resolve, 1000));
         pollingRetries--;
       }
@@ -133,7 +145,7 @@ export async function GET(
       if (!rawData) {
         console.log(`[PDD Scraper] rawData is not found on page context.`);
         return NextResponse.json(
-          { error: "Не удалось получить структурированные данные с Pinduoduo. Попробуйте обновить страницу." },
+          { error: "Не удалось получить структурированные данные с Pinduoduo. Попробуйте повторить запрос." },
           { status: 502 }
         );
       }
