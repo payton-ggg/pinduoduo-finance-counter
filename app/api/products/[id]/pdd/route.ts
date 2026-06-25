@@ -145,6 +145,21 @@ export async function GET(
             );
           }
 
+          // Check if page returned anti-bot System Busy page
+          const isBusy = await page.evaluate(() => {
+            const text = document.body?.innerText || "";
+            return text.includes("系统繁忙") || text.includes("请稍后");
+          });
+          if (isBusy) {
+            console.log(`[PDD Scraper] Detected 'System Busy' anti-bot message on page.`);
+            return NextResponse.json(
+              { 
+                error: "Сессия Pinduoduo временно заблокирована или куки истекли (сервер вернул ошибку безопасности 'Система занята'). Войдите в аккаунт на mobile.yangkeduo.com в браузере и обновите PDD_COOKIE в .env." 
+              },
+              { status: 401 }
+            );
+          }
+
           rawData = await page.evaluate(() => {
             return (window as any).rawData || (window as any).state || null;
           });

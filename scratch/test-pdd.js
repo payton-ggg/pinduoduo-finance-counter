@@ -5,7 +5,7 @@ const path = require('path');
 puppeteer.use(StealthPlugin());
 
 async function run() {
-  const query = "美式字母印花长袖纯棉T恤女秋季2024新款韩版宽松百搭灰色上衣";
+  const query = "iphone 13";
   const url = `https://mobile.yangkeduo.com/search_result.html?search_key=${encodeURIComponent(query)}`;
   
   // Read PDD_COOKIE and BROWSERLESS_API_KEY from .env
@@ -26,7 +26,7 @@ async function run() {
 
   console.log("Launching/Connecting browser...");
   let browser;
-  if (browserlessKey) {
+  if (false && browserlessKey) {
     console.log("Connecting to remote Browserless instance with stealth and proxy parameters...");
     browser = await puppeteer.connect({
       browserWSEndpoint: `wss://chrome.browserless.io/stealth?token=${browserlessKey}&stealth=true&blockAds=true&proxy=residential&proxyCountry=cn&--disable-blink-features=AutomationControlled`
