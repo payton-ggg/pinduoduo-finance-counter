@@ -27,7 +27,7 @@ interface PddResearchDialogProps {
   onClose: () => void;
   productId: string;
   productName: string;
-  variants: Array<{ id: string; priceCNY: number; priceInUA?: number; rateCNY?: number }>;
+  variants: Array<{ id: string; priceCNY: number; priceInUA?: number; rateCNY?: number; pddSearchQuery?: string | null }>;
   rates?: { cny?: number; usd?: number };
   onSuccess: () => void;
 }
@@ -48,6 +48,7 @@ export function PddResearchDialog({
   const [selectedVariantId, setSelectedVariantId] = useState<string>(
     variants[0]?.id || ""
   );
+  const [actualQuery, setActualQuery] = useState<string | null>(null);
   const [updating, setUpdating] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
 
@@ -62,7 +63,7 @@ export function PddResearchDialog({
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`/api/products/${productId}/pdd`);
+        const res = await fetch(`/api/products/${productId}/pdd?variantId=${selectedVariantId}`);
         if (!res.ok) {
           const data = await res.json();
           throw new Error(data.error || `HTTP error! status: ${res.status}`);
@@ -73,6 +74,7 @@ export function PddResearchDialog({
         }
         setStats(data.stats);
         setAds(data.ads || []);
+        setActualQuery(data.query || null);
       } catch (err: any) {
         console.error(err);
         setError(err.message || "Не удалось загрузить данные с Pinduoduo");
@@ -82,7 +84,7 @@ export function PddResearchDialog({
     };
 
     fetchData();
-  }, [isOpen, productId]);
+  }, [isOpen, productId, selectedVariantId]);
 
   const handleApplyPrice = async () => {
     if (!stats || !selectedVariantId) return;
@@ -142,7 +144,7 @@ export function PddResearchDialog({
               Анализ цен Pinduoduo
             </h2>
             <p className="text-xs text-muted-foreground font-semibold truncate max-w-[450px]">
-              Запрос: <span className="text-foreground font-bold">{productName}</span>
+              Запрос: <span className="text-foreground font-bold">{actualQuery || productName}</span>
             </p>
           </div>
           <button

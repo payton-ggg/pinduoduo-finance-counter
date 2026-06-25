@@ -38,14 +38,37 @@ export async function GET(
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    // Find first variant's pddSearchQuery, fallback to product.name
-    const firstVariantWithQuery = product.variants.find(
-      (v) => v.pddSearchQuery && v.pddSearchQuery.trim().length > 0
-    );
-    const query = firstVariantWithQuery?.pddSearchQuery || product.name;
+    const { searchParams } = new URL(_req.url);
+    const variantId = searchParams.get("variantId");
+
+    let query = "";
+    let sourceInfo = "";
+
+    if (variantId) {
+      const selectedVariant = product.variants.find((v) => v.id === variantId);
+      if (selectedVariant?.pddSearchQuery && selectedVariant.pddSearchQuery.trim().length > 0) {
+        query = selectedVariant.pddSearchQuery.trim();
+        sourceInfo = `selected variant ${variantId} pddSearchQuery`;
+      } else {
+        query = product.name;
+        sourceInfo = `fallback to product name (selected variant pddSearchQuery is empty)`;
+      }
+    } else {
+      const firstVariantWithQuery = product.variants.find(
+        (v) => v.pddSearchQuery && v.pddSearchQuery.trim().length > 0
+      );
+      if (firstVariantWithQuery?.pddSearchQuery) {
+        query = firstVariantWithQuery.pddSearchQuery.trim();
+        sourceInfo = `first variant with query`;
+      } else {
+        query = product.name;
+        sourceInfo = `fallback to product name (no variants have query)`;
+      }
+    }
+
     const searchUrl = `https://mobile.yangkeduo.com/search_result.html?search_key=${encodeURIComponent(query)}`;
 
-    console.log(`[PDD Scraper] Starting search for query: "${query}" (PDD Search Query: ${firstVariantWithQuery?.pddSearchQuery || 'none'}, fallback to name: ${product.name})`);
+    console.log(`[PDD Scraper] Starting search for query: "${query}" (Source: ${sourceInfo})`);
 
     // Load cookie from .env
     const pddCookie = process.env.PDD_COOKIE || "";
