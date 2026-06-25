@@ -10,6 +10,7 @@ import {
   X,
   Loader2,
   TrendingUp,
+  ShoppingBag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -25,6 +26,7 @@ const ProductForm = dynamic(() => import("./ProductForm"), {
 import { ProductPreview } from "./ProductPreview";
 import { DeleteProductButton } from "./DeleteProductButton";
 import { OlxResearchDialog } from "./OlxResearchDialog";
+import { PddResearchDialog } from "./PddResearchDialog";
 
 type ProductPageClientProps = {
   id: string;
@@ -48,6 +50,7 @@ export function ProductPageClient({
   // Copy modal state
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const [isOlxModalOpen, setIsOlxModalOpen] = useState(false);
+  const [isPddModalOpen, setIsPddModalOpen] = useState(false);
   const [folders, setFolders] = useState<{ id: string; name: string }[]>([]);
   const [selectedFolderId, setSelectedFolderId] = useState<string>("");
   const [copyName, setCopyName] = useState("");
@@ -154,6 +157,16 @@ export function ProductPageClient({
           >
             <TrendingUp className="h-4 w-4 text-primary" />
             <span className="hidden sm:inline">Исследовать OLX</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsPddModalOpen(true)}
+            className="gap-1.5"
+            title="Исследовать цены на Pinduoduo"
+          >
+            <ShoppingBag className="h-4 w-4 text-red-500" />
+            <span className="hidden sm:inline">Исследовать PDD</span>
           </Button>
           <Button
             variant="outline"
@@ -391,6 +404,19 @@ export function ProductPageClient({
         productId={id}
         productName={localProduct?.name || ""}
         variants={localProduct?.variants || []}
+        onSuccess={() => {
+          router.refresh();
+        }}
+      />
+
+      {/* PDD Price Research Dialog */}
+      <PddResearchDialog
+        isOpen={isPddModalOpen}
+        onClose={() => setIsPddModalOpen(false)}
+        productId={id}
+        productName={localProduct?.name || ""}
+        variants={localProduct?.variants || []}
+        rates={rates}
         onSuccess={() => {
           router.refresh();
         }}

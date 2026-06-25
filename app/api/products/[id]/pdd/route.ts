@@ -5,14 +5,10 @@ import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 
 // Register stealth plugin
-if (puppeteer.customQueryHandlers) {
-  // Check to prevent multiple registrations in dev hot-reload
-} else {
-  try {
-    puppeteer.use(StealthPlugin());
-  } catch (e) {
-    // Already registered
-  }
+try {
+  puppeteer.use(StealthPlugin());
+} catch (e) {
+  // Silent fail if already registered
 }
 
 export const dynamic = "force-dynamic";
