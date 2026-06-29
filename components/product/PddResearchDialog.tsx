@@ -250,9 +250,9 @@ export function PddResearchDialog({
                 </h3>
 
                 <div className="space-y-2 divide-y divide-foreground/5 max-h-[45vh] sm:max-h-[30vh] overflow-y-auto pr-1">
-                  {ads.map((ad) => (
+                  {ads.map((ad, idx) => (
                     <div
-                      key={ad.id}
+                      key={`${ad.id}-${idx}`}
                       className="flex items-center justify-between py-3 gap-3 first:pt-0"
                     >
                       <div className="flex items-center gap-3 min-w-0">
