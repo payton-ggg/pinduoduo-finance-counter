@@ -148,7 +148,7 @@ export function ProductPageClient({
   };
 
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4 sm:px-0">
+    <div className="max-w-5xl mx-auto py-8 px-4 sm:px-0">
       <div className="flex items-center justify-between mb-6">
         <Button
           variant="outline"
@@ -437,7 +437,6 @@ export function ProductPageClient({
           router.refresh();
         }}
       />
-
     </div>
   );
 }
