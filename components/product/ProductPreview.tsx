@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import * as htmlToImage from "html-to-image";
@@ -18,16 +18,23 @@ import {
   Camera,
   Loader2,
   Share2,
+  ShoppingBag,
 } from "lucide-react";
 
 type ProductPreviewProps = {
   data: any;
   rates?: { cny?: number; usd?: number };
+  activeVariantIndex: number;
+  setActiveVariantIndex: React.Dispatch<React.SetStateAction<number>>;
 };
 
-export function ProductPreview({ data, rates }: ProductPreviewProps) {
+export function ProductPreview({
+  data,
+  rates,
+  activeVariantIndex,
+  setActiveVariantIndex,
+}: ProductPreviewProps) {
   const [copiedField, setCopiedField] = useState<string | null>(null);
-  const [activeVariantIndex, setActiveVariantIndex] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -436,12 +443,36 @@ export function ProductPreview({ data, rates }: ProductPreviewProps) {
                               handleCopy(v.pddSearchQuery, `pdd-${i}`)
                             }
                             className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors bg-background border shadow-sm ml-2"
+                            title="Копировать запрос"
                           >
                             {copiedField === `pdd-${i}` ? (
                               <Check className="h-3.5 w-3.5 text-green-500" />
                             ) : (
                               <Copy className="h-3.5 w-3.5" />
                             )}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const encodedQuery = encodeURIComponent(v.pddSearchQuery);
+                              const appUrl = `pinduoduo://yangkeduo.com/search_result.html?search_key=${encodedQuery}`;
+                              const webUrl = `https://mobile.yangkeduo.com/search_result.html?search_key=${encodedQuery}`;
+                              const isMobile = typeof window !== "undefined" && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                              if (isMobile) {
+                                window.location.href = appUrl;
+                                setTimeout(() => {
+                                  if (!document.hidden) {
+                                    window.open(webUrl, "_blank");
+                                  }
+                                }, 1500);
+                              } else {
+                                window.open(webUrl, "_blank");
+                              }
+                            }}
+                            className="p-1 rounded text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors bg-background border shadow-sm ml-1"
+                            title="Открыть в приложении Pinduoduo"
+                          >
+                            <ShoppingBag className="h-3.5 w-3.5" />
                           </button>
                         </div>
                       )}

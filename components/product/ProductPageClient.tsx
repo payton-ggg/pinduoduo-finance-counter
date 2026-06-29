@@ -26,7 +26,6 @@ const ProductForm = dynamic(() => import("./ProductForm"), {
 import { ProductPreview } from "./ProductPreview";
 import { DeleteProductButton } from "./DeleteProductButton";
 import { OlxResearchDialog } from "./OlxResearchDialog";
-import { PddResearchDialog } from "./PddResearchDialog";
 
 type ProductPageClientProps = {
   id: string;
@@ -50,7 +49,7 @@ export function ProductPageClient({
   // Copy modal state
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const [isOlxModalOpen, setIsOlxModalOpen] = useState(false);
-  const [isPddModalOpen, setIsPddModalOpen] = useState(false);
+  const [activeVariantIndex, setActiveVariantIndex] = useState(0);
   const [folders, setFolders] = useState<{ id: string; name: string }[]>([]);
   const [selectedFolderId, setSelectedFolderId] = useState<string>("");
   const [copyName, setCopyName] = useState("");
@@ -123,6 +122,31 @@ export function ProductPageClient({
     }
   };
 
+  const handlePddResearch = () => {
+    const activeVariant = localProduct?.variants?.[activeVariantIndex];
+    const query = activeVariant?.pddSearchQuery || localProduct?.name || "";
+    if (!query) return;
+
+    const encodedQuery = encodeURIComponent(query);
+    const appUrl = `pinduoduo://yangkeduo.com/search_result.html?search_key=${encodedQuery}`;
+    const webUrl = `https://mobile.yangkeduo.com/search_result.html?search_key=${encodedQuery}`;
+
+    const isMobile =
+      typeof window !== "undefined" &&
+      /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      window.location.href = appUrl;
+      setTimeout(() => {
+        if (!document.hidden) {
+          window.open(webUrl, "_blank");
+        }
+      }, 1500);
+    } else {
+      window.open(webUrl, "_blank");
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-0">
       <div className="flex items-center justify-between mb-6">
@@ -161,7 +185,7 @@ export function ProductPageClient({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setIsPddModalOpen(true)}
+            onClick={handlePddResearch}
             className="gap-1.5"
             title="Исследовать цены на Pinduoduo"
           >
@@ -212,7 +236,12 @@ export function ProductPageClient({
       </div>
 
       <div className={mode === "preview" ? "block" : "hidden"}>
-        <ProductPreview data={localProduct} rates={rates} />
+        <ProductPreview
+          data={localProduct}
+          rates={rates}
+          activeVariantIndex={activeVariantIndex}
+          setActiveVariantIndex={setActiveVariantIndex}
+        />
       </div>
 
       {hasOpenedEdit && (
@@ -409,18 +438,6 @@ export function ProductPageClient({
         }}
       />
 
-      {/* PDD Price Research Dialog */}
-      <PddResearchDialog
-        isOpen={isPddModalOpen}
-        onClose={() => setIsPddModalOpen(false)}
-        productId={id}
-        productName={localProduct?.name || ""}
-        variants={localProduct?.variants || []}
-        rates={rates}
-        onSuccess={() => {
-          router.refresh();
-        }}
-      />
     </div>
   );
 }
