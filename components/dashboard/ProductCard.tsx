@@ -12,6 +12,7 @@ import {
   Layers,
   ChevronLeft,
   ChevronRight,
+  Copy,
 } from "lucide-react";
 
 export type ProductUI = {
@@ -45,6 +46,7 @@ type ProductCardProps = {
   product: ProductUI;
   isSelected?: boolean;
   onToggle?: () => void;
+  onCopy?: (product: ProductUI) => void;
   globalRate?: number;
 };
 
@@ -52,6 +54,7 @@ export const ProductCard = memo(function ProductCard({
   product,
   isSelected,
   onToggle,
+  onCopy,
   globalRate,
 }: ProductCardProps) {
   const [imgSrc, setImgSrc] = useState(product.img || "/placeholder.png");
@@ -134,6 +137,20 @@ export const ProductCard = memo(function ProductCard({
             </div>
           )}
         </div>
+
+        {onCopy && (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onCopy(product);
+            }}
+            className="absolute bottom-2 left-2 z-20 cursor-pointer p-1.5 rounded-lg bg-black/40 backdrop-blur-md border border-white/20 hover:bg-black/60 text-white/90 transition-all duration-200 hover:scale-110 active:scale-95"
+            title="Копировать товар"
+          >
+            <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          </button>
+        )}
       </div>
 
       <CardContent className="p-3 sm:p-5 space-y-3 sm:space-y-4 flex-1 flex flex-col relative">
