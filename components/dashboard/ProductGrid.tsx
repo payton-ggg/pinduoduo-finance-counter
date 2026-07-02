@@ -7,6 +7,7 @@ type ProductGridProps = {
   products: ProductUI[];
   selectedIds?: Set<string | number>;
   onToggle?: (id: string | number) => void;
+  onCopy?: (product: ProductUI) => void;
   globalRate?: number;
 };
 
@@ -14,6 +15,7 @@ export function ProductGrid({
   products,
   selectedIds,
   onToggle,
+  onCopy,
   globalRate,
 }: ProductGridProps) {
   return (
@@ -29,6 +31,7 @@ export function ProductGrid({
             product={p}
             isSelected={selectedIds ? selectedIds.has(p.id) : false}
             onToggle={onToggle ? () => onToggle(p.id) : undefined}
+            onCopy={onCopy}
             globalRate={globalRate}
           />
         </Link>
