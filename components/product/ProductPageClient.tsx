@@ -148,7 +148,7 @@ export function ProductPageClient({
   };
 
   return (
-    <div className="max-w-5xl mx-auto py-8 px-4 sm:px-0">
+    <div className="max-w-5xl mx-auto py-8 px-4 md:px-0">
       <div className="flex items-center justify-between mb-6">
         <Button
           variant="outline"
@@ -231,7 +231,6 @@ export function ProductPageClient({
               <span className="hidden sm:inline">Редактировать</span>
             </Button>
           </div>
-          <DeleteProductButton id={id} />
         </div>
       </div>
 
@@ -243,6 +242,7 @@ export function ProductPageClient({
           setActiveVariantIndex={setActiveVariantIndex}
         />
       </div>
+      <DeleteProductButton id={id} />
 
       {hasOpenedEdit && (
         <div className={mode === "edit" ? "block" : "hidden"}>
