@@ -447,16 +447,16 @@ export function ProductOverviewClient({
                     className={`rounded-2xl border overflow-hidden transition-all ${v.isIncluded === false ? "opacity-50 border-dashed border-border/40" : "border-border/60 bg-card/50 hover:border-border"}`}
                   >
                     {/* Variant header */}
-                    <div className="flex items-center justify-between px-4 py-3 bg-muted/30 border-b border-border/40">
-                      <div className="flex items-center gap-2">
-                        <span className="flex items-center justify-center h-6 w-6 rounded-lg bg-primary/10 text-primary text-xs font-black">
+                    <div className="flex items-center justify-between px-5 py-4 bg-muted/30 border-b border-border/40">
+                      <div className="flex items-center gap-3">
+                        <span className="flex items-center justify-center h-8 w-8 rounded-xl bg-primary/10 text-primary text-sm font-black shrink-0">
                           {i + 1}
                         </span>
-                        <span className="font-bold text-sm text-foreground truncate max-w-[200px]">
+                        <span className="font-bold text-base text-foreground truncate max-w-[260px]">
                           {v.pddSearchQuery || `Версия ${i + 1}`}
                         </span>
                         {v.isIncluded === false && (
-                          <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full font-semibold">
+                          <span className="text-xs bg-muted text-muted-foreground px-2.5 py-1 rounded-full font-semibold shrink-0">
                             Исключена
                           </span>
                         )}
@@ -514,12 +514,12 @@ export function ProductOverviewClient({
                     {/* Variant body — buy + sell side by side */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border/30">
                       {/* Buy side */}
-                      <div className="p-4 space-y-3">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
-                          <Tag className="h-3 w-3" />
+                      <div className="p-5 space-y-4">
+                        <p className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                          <Tag className="h-3.5 w-3.5" />
                           Закупка
                         </p>
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                        <div className="grid grid-cols-2 gap-x-6 gap-y-4">
                           <MiniRow label="Цена" value={`${priceCNY} ¥`} />
                           <MiniRow
                             label="≈ в UAH"
@@ -537,7 +537,7 @@ export function ProductOverviewClient({
                             />
                           )}
                           <MiniRow
-                            label="Доставка"
+                            label="Доставка (всего)"
                             value={`${shippingUA.toFixed(2)} ₴`}
                             sub={shippingLabel}
                           />
@@ -560,12 +560,12 @@ export function ProductOverviewClient({
                       </div>
 
                       {/* Sell side */}
-                      <div className="p-4 space-y-3">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
-                          <TrendingUp className="h-3 w-3" />
+                      <div className="p-5 space-y-4">
+                        <p className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                          <TrendingUp className="h-3.5 w-3.5" />
                           Продажа
                         </p>
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                        <div className="grid grid-cols-2 gap-x-6 gap-y-4">
                           <MiniRow
                             label="Цена продажи"
                             value={priceInUA > 0 ? `${priceInUA} ₴` : "—"}
@@ -687,12 +687,12 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <span className="flex items-center justify-center h-7 w-7 rounded-xl bg-primary/10 text-primary">
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <span className="flex items-center justify-center h-8 w-8 rounded-xl bg-primary/10 text-primary">
           {icon}
         </span>
-        <h2 className="text-sm font-black uppercase tracking-wider text-foreground">
+        <h2 className="text-base font-black uppercase tracking-wider text-foreground">
           {title}
         </h2>
       </div>
@@ -720,13 +720,13 @@ function StatPill({
   };
   return (
     <div
-      className={`flex flex-col gap-1 p-4 rounded-2xl border ${colorMap[color]}`}
+      className={`flex flex-col gap-2 p-5 rounded-2xl border ${colorMap[color]}`}
     >
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-2">
         {icon}
-        <p className="text-xs font-semibold text-muted-foreground">{label}</p>
+        <p className="text-sm font-semibold text-muted-foreground">{label}</p>
       </div>
-      <p className="text-xl font-black text-foreground leading-none">{value}</p>
+      <p className="text-2xl font-black text-foreground leading-none">{value}</p>
     </div>
   );
 }
@@ -743,18 +743,18 @@ function DetailCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-2 p-4 rounded-2xl border border-border/50 bg-card/60">
+    <div className="flex flex-col gap-3 p-5 rounded-2xl border border-border/50 bg-card/60">
       <div className="flex items-center gap-2">
-        <span className="flex items-center justify-center h-7 w-7 rounded-xl bg-muted/50">
+        <span className="flex items-center justify-center h-8 w-8 rounded-xl bg-muted/50">
           {icon}
         </span>
-        <p className="text-xs font-semibold text-muted-foreground leading-tight">
+        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide leading-tight">
           {label}
         </p>
       </div>
-      <p className="text-lg font-black text-foreground">{value}</p>
+      <p className="text-2xl font-black text-foreground">{value}</p>
       {sub && (
-        <p className="text-xs font-medium text-muted-foreground">{sub}</p>
+        <p className="text-sm font-medium text-muted-foreground">{sub}</p>
       )}
     </div>
   );
@@ -774,12 +774,12 @@ function MiniRow({
   positive?: boolean;
 }) {
   return (
-    <div>
-      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide leading-tight">
+    <div className="flex flex-col gap-0.5">
+      <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider leading-tight">
         {label}
       </p>
       <p
-        className={`text-sm font-black leading-tight ${
+        className={`text-base font-black leading-snug ${
           highlight
             ? positive === false
               ? "text-rose-500"
@@ -792,7 +792,7 @@ function MiniRow({
         {value}
       </p>
       {sub && (
-        <p className="text-[10px] text-muted-foreground font-medium">{sub}</p>
+        <p className="text-xs text-muted-foreground font-medium">{sub}</p>
       )}
     </div>
   );
