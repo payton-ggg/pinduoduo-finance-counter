@@ -5,19 +5,10 @@ import { ProductPageClient } from "@/components/product/ProductPageClient";
 import { notFound, redirect } from "next/navigation";
 import { getExchangeRates } from "@/lib/rates";
 import { getAuthRole } from "@/lib/auth";
+import { Suspense } from "react";
+import Loading from "@/app/loading";
 
-export default async function ProductId({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const role = await getAuthRole();
-  if (!role) {
-    redirect("/");
-  }
-
-  const { id } = await params;
-
+async function ProductDataWrapper({ id, role }: { id: string, role: string }) {
   const [rates, product] = await Promise.all([
     getExchangeRates(),
     prisma.product.findUnique({
@@ -45,5 +36,24 @@ export default async function ProductId({
       product={JSON.parse(JSON.stringify(product))}
       rates={rates}
     />
+  );
+}
+
+export default async function ProductId({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const role = await getAuthRole();
+  if (!role) {
+    redirect("/");
+  }
+
+  const { id } = await params;
+
+  return (
+    <Suspense fallback={<Loading />}>
+      <ProductDataWrapper id={id} role={role} />
+    </Suspense>
   );
 }

@@ -12,15 +12,10 @@ import {
   Check,
 } from "lucide-react";
 
-export default async function CompareVersionsPage(props: {
-  params: Promise<{ id: string }>;
-}) {
-  const role = await getAuthRole();
-  if (!role) return notFound();
+import { Suspense } from "react";
+import Loading from "@/app/loading";
 
-  const params = await props.params;
-  const productId = params.id;
-
+async function CompareDataWrapper({ productId, role }: { productId: string; role: string }) {
   const product = await prisma.product.findUnique({
     where: { id: productId },
     include: { variants: true, folder: true },
@@ -405,5 +400,21 @@ function WinnerCard({
         </div>
       )}
     </div>
+  );
+}
+
+export default async function CompareVersionsPage(props: {
+  params: Promise<{ id: string }>;
+}) {
+  const role = await getAuthRole();
+  if (!role) return notFound();
+
+  const params = await props.params;
+  const productId = params.id;
+
+  return (
+    <Suspense fallback={<Loading />}>
+      <CompareDataWrapper productId={productId} role={role} />
+    </Suspense>
   );
 }
