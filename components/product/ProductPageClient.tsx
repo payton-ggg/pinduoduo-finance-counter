@@ -11,6 +11,7 @@ import {
   Loader2,
   TrendingUp,
   ShoppingBag,
+  LayoutDashboard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -192,6 +193,7 @@ export function ProductPageClient({
             <ShoppingBag className="h-4 w-4 text-red-500" />
             <span className="hidden sm:inline">Исследовать PDD</span>
           </Button>
+
           <Button
             variant="outline"
             size="sm"
