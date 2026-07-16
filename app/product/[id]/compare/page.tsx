@@ -15,7 +15,13 @@ import {
 import { Suspense } from "react";
 import Loading from "@/app/loading";
 
-async function CompareDataWrapper({ productId, role }: { productId: string; role: string }) {
+async function CompareDataWrapper({
+  productId,
+  role,
+}: {
+  productId: string;
+  role: string;
+}) {
   const product = await prisma.product.findUnique({
     where: { id: productId },
     include: { variants: true, folder: true },
@@ -37,7 +43,7 @@ async function CompareDataWrapper({ productId, role }: { productId: string; role
   }
 
   // Pre-calculate metrics for all variants
-  const computedVariants = variants.map((v, idx) => {
+  const computedVariants = variants.map((v: any, idx: number) => {
     const rateCNY = v.rateCNY || 0;
     const priceCNY = Number(v.priceCNY) || 0;
     const priceInUA = Number(v.priceInUA) || 0;
@@ -52,7 +58,8 @@ async function CompareDataWrapper({ productId, role }: { productId: string; role
     const totalPurchaseUAH = unitPurchaseUAH * purchased;
     const totalExpenses = totalPurchaseUAH + shippingUA + managementUAH;
 
-    const actualNetPrice = v.netPrice || (priceInUA > 0 ? priceInUA * 0.98 - 20 : 0);
+    const actualNetPrice =
+      v.netPrice || (priceInUA > 0 ? priceInUA * 0.98 - 20 : 0);
     const potentialRevenue = actualNetPrice * purchased;
     const totalRevenue = actualNetPrice * sells;
 
@@ -62,8 +69,10 @@ async function CompareDataWrapper({ productId, role }: { productId: string; role
     const potentialNetProfit = potentialRevenue - totalExpenses;
     const currentNetProfit = totalRevenue - totalExpenses;
 
-    const potentialRoi = totalExpenses > 0 ? (potentialNetProfit / totalExpenses) * 100 : 0;
-    const currentRoi = totalExpenses > 0 ? (currentNetProfit / totalExpenses) * 100 : 0;
+    const potentialRoi =
+      totalExpenses > 0 ? (potentialNetProfit / totalExpenses) * 100 : 0;
+    const currentRoi =
+      totalExpenses > 0 ? (currentNetProfit / totalExpenses) * 100 : 0;
 
     return {
       ...v,
@@ -89,21 +98,51 @@ async function CompareDataWrapper({ productId, role }: { productId: string; role
   });
 
   // Find winners
-  const includedVariants = computedVariants.filter((v) => v.isIncluded);
+  const includedVariants = computedVariants.filter(
+    (v: { isIncluded: any }) => v.isIncluded,
+  );
 
-  const maxSells = Math.max(...includedVariants.map((v) => v.sells), 0);
-  const maxMargin = Math.max(...includedVariants.map((v) => v.potentialNetProfit), 0);
-  const maxRoi = Math.max(...includedVariants.map((v) => v.potentialRoi), 0);
+  const maxSells = Math.max(
+    ...includedVariants.map((v: { sells: number }) => v.sells),
+    0,
+  );
+  const maxMargin = Math.max(
+    ...includedVariants.map(
+      (v: { potentialNetProfit: number }) => v.potentialNetProfit,
+    ),
+    0,
+  );
+  const maxRoi = Math.max(
+    ...includedVariants.map((v: { potentialRoi: number }) => v.potentialRoi),
+    0,
+  );
 
-  const absoluteMaxSells = Math.max(...computedVariants.map((v) => v.sells), 1);
+  const absoluteMaxSells = Math.max(
+    ...computedVariants.map((v: any) => v.sells),
+    1,
+  );
   const absoluteMaxMargin = Math.max(
-    ...computedVariants.map((v) => Math.abs(v.potentialNetProfit)),
+    ...computedVariants.map((v: any) => Math.abs(v.potentialNetProfit)),
     1,
   );
 
-  const winnerSells = maxSells > 0 ? includedVariants.find((v) => v.sells === maxSells) : null;
-  const winnerMargin = maxMargin > 0 ? includedVariants.find((v) => v.potentialNetProfit === maxMargin) : null;
-  const winnerRoi = maxRoi > 0 ? includedVariants.find((v) => v.potentialRoi === maxRoi) : null;
+  const winnerSells =
+    maxSells > 0
+      ? includedVariants.find((v: { sells: number }) => v.sells === maxSells)
+      : null;
+  const winnerMargin =
+    maxMargin > 0
+      ? includedVariants.find(
+          (v: { potentialNetProfit: number }) =>
+            v.potentialNetProfit === maxMargin,
+        )
+      : null;
+  const winnerRoi =
+    maxRoi > 0
+      ? includedVariants.find(
+          (v: { potentialRoi: number }) => v.potentialRoi === maxRoi,
+        )
+      : null;
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 pb-20">
@@ -154,14 +193,20 @@ async function CompareDataWrapper({ productId, role }: { productId: string; role
           title="Макс. Потенц. Прибыль"
           icon={<DollarSign className="w-5 h-5 text-green-500" />}
           winner={winnerMargin}
-          value={winnerMargin ? `${winnerMargin.potentialNetProfit.toFixed(0)} ₴` : "Нет данных"}
+          value={
+            winnerMargin
+              ? `${winnerMargin.potentialNetProfit.toFixed(0)} ₴`
+              : "Нет данных"
+          }
           color="green"
         />
         <WinnerCard
           title="Лучший Потенц. ROI"
           icon={<TrendingUp className="w-5 h-5 text-purple-500" />}
           winner={winnerRoi}
-          value={winnerRoi ? `${winnerRoi.potentialRoi.toFixed(1)}%` : "Нет данных"}
+          value={
+            winnerRoi ? `${winnerRoi.potentialRoi.toFixed(1)}%` : "Нет данных"
+          }
           color="purple"
         />
       </div>
@@ -175,7 +220,7 @@ async function CompareDataWrapper({ productId, role }: { productId: string; role
                 <th className="p-4 font-semibold text-muted-foreground sticky left-0 bg-card z-20 min-w-[150px] shadow-[4px_0_12px_rgba(0,0,0,0.03)] border-r border-foreground/5">
                   Метрика
                 </th>
-                {computedVariants.map((v) => (
+                {computedVariants.map((v: any) => (
                   <th
                     key={v.id}
                     className={`p-4 min-w-[240px] align-top ${!v.isIncluded ? "opacity-50" : ""}`}
@@ -212,17 +257,24 @@ async function CompareDataWrapper({ productId, role }: { productId: string; role
                 <td className="p-4 font-medium sticky left-0 bg-card z-20 shadow-[4px_0_12px_rgba(0,0,0,0.03)] border-r border-foreground/5">
                   Продажи
                 </td>
-                {computedVariants.map((v) => (
-                  <td key={v.id} className={`p-4 ${!v.isIncluded ? "opacity-50 grayscale-30" : ""}`}>
+                {computedVariants.map((v: any) => (
+                  <td
+                    key={v.id}
+                    className={`p-4 ${!v.isIncluded ? "opacity-50 grayscale-30" : ""}`}
+                  >
                     <div className="flex flex-col gap-2">
                       <div className="flex items-end gap-2">
                         <span className="text-lg font-black">{v.sells}</span>
-                        <span className="text-xs text-muted-foreground mb-0.5">из {v.purchased}</span>
+                        <span className="text-xs text-muted-foreground mb-0.5">
+                          из {v.purchased}
+                        </span>
                       </div>
                       <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                         <div
                           className="h-full bg-blue-500 rounded-full transition-all duration-1000 ease-out"
-                          style={{ width: `${(v.sells / absoluteMaxSells) * 100}%` }}
+                          style={{
+                            width: `${(v.sells / absoluteMaxSells) * 100}%`,
+                          }}
                         />
                       </div>
                     </div>
@@ -233,28 +285,43 @@ async function CompareDataWrapper({ productId, role }: { productId: string; role
               {/* Potential Net Profit Row */}
               <tr className="hover:bg-muted/5 transition-colors">
                 <td className="p-4 font-medium sticky left-0 bg-card z-20 shadow-[4px_0_12px_rgba(0,0,0,0.03)] border-r border-foreground/5">
-                  Чистая прибыль<br/>(Потенциал)
+                  Чистая прибыль
+                  <br />
+                  (Потенциал)
                 </td>
-                {computedVariants.map((v) => (
-                  <td key={v.id} className={`p-4 ${!v.isIncluded ? "opacity-50 grayscale-30" : ""}`}>
+                {computedVariants.map((v: any) => (
+                  <td
+                    key={v.id}
+                    className={`p-4 ${!v.isIncluded ? "opacity-50 grayscale-30" : ""}`}
+                  >
                     <div className="flex flex-col gap-2">
-                      <span className={`text-lg font-black ${v.potentialNetProfit >= 0 ? "text-green-600" : "text-red-600"}`}>
-                        {v.potentialNetProfit > 0 ? "+" : ""}{v.potentialNetProfit.toFixed(2)} ₴
+                      <span
+                        className={`text-lg font-black ${v.potentialNetProfit >= 0 ? "text-green-600" : "text-red-600"}`}
+                      >
+                        {v.potentialNetProfit > 0 ? "+" : ""}
+                        {v.potentialNetProfit.toFixed(2)} ₴
                       </span>
                       <div className="h-2 w-full bg-muted rounded-full overflow-hidden flex">
                         {v.potentialNetProfit >= 0 ? (
                           <div
                             className="h-full bg-green-500 rounded-full transition-all duration-1000 ease-out"
-                            style={{ width: `${(v.potentialNetProfit / absoluteMaxMargin) * 100}%` }}
+                            style={{
+                              width: `${(v.potentialNetProfit / absoluteMaxMargin) * 100}%`,
+                            }}
                           />
                         ) : (
                           <div
                             className="h-full bg-red-500 rounded-full transition-all duration-1000 ease-out"
-                            style={{ width: `${(Math.abs(v.potentialNetProfit) / absoluteMaxMargin) * 100}%` }}
+                            style={{
+                              width: `${(Math.abs(v.potentialNetProfit) / absoluteMaxMargin) * 100}%`,
+                            }}
                           />
                         )}
                       </div>
-                      <div className="text-xs text-muted-foreground">Текущая: {v.currentNetProfit > 0 ? "+" : ""}{v.currentNetProfit.toFixed(2)} ₴</div>
+                      <div className="text-xs text-muted-foreground">
+                        Текущая: {v.currentNetProfit > 0 ? "+" : ""}
+                        {v.currentNetProfit.toFixed(2)} ₴
+                      </div>
                     </div>
                   </td>
                 ))}
@@ -265,10 +332,18 @@ async function CompareDataWrapper({ productId, role }: { productId: string; role
                 <td className="p-4 font-medium sticky left-0 bg-card z-20 shadow-[4px_0_12px_rgba(0,0,0,0.03)] border-r border-foreground/5 text-xs text-muted-foreground uppercase tracking-wider">
                   Грязная прибыль
                 </td>
-                {computedVariants.map((v) => (
-                  <td key={v.id} className={`p-4 ${!v.isIncluded ? "opacity-50" : ""}`}>
-                    <div className="font-semibold">{v.potentialGrossProfit > 0 ? "+" : ""}{v.potentialGrossProfit.toFixed(2)} ₴</div>
-                    <div className="text-xs text-muted-foreground">Текущая: {v.currentGrossProfit.toFixed(2)} ₴</div>
+                {computedVariants.map((v: any) => (
+                  <td
+                    key={v.id}
+                    className={`p-4 ${!v.isIncluded ? "opacity-50" : ""}`}
+                  >
+                    <div className="font-semibold">
+                      {v.potentialGrossProfit > 0 ? "+" : ""}
+                      {v.potentialGrossProfit.toFixed(2)} ₴
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Текущая: {v.currentGrossProfit.toFixed(2)} ₴
+                    </div>
                   </td>
                 ))}
               </tr>
@@ -278,15 +353,20 @@ async function CompareDataWrapper({ productId, role }: { productId: string; role
                 <td className="p-4 font-medium sticky left-0 bg-card z-20 shadow-[4px_0_12px_rgba(0,0,0,0.03)] border-r border-foreground/5">
                   Потенциальный ROI
                 </td>
-                {computedVariants.map((v) => (
-                  <td key={v.id} className={`p-4 ${!v.isIncluded ? "opacity-50 grayscale-30" : ""}`}>
+                {computedVariants.map((v: any) => (
+                  <td
+                    key={v.id}
+                    className={`p-4 ${!v.isIncluded ? "opacity-50 grayscale-30" : ""}`}
+                  >
                     <div className="flex flex-col gap-1 items-start">
                       <span
                         className={`px-2.5 py-1 rounded-lg text-sm font-bold ${v.potentialRoi >= 100 ? "bg-purple-500/10 text-purple-600" : v.potentialRoi >= 50 ? "bg-green-500/10 text-green-600" : v.potentialRoi >= 0 ? "bg-zinc-500/10 text-zinc-600" : "bg-red-500/10 text-red-600"}`}
                       >
                         {v.potentialRoi.toFixed(1)}%
                       </span>
-                      <span className="text-[10px] text-muted-foreground px-1">Текущий: {v.currentRoi.toFixed(1)}%</span>
+                      <span className="text-[10px] text-muted-foreground px-1">
+                        Текущий: {v.currentRoi.toFixed(1)}%
+                      </span>
                     </div>
                   </td>
                 ))}
@@ -297,21 +377,34 @@ async function CompareDataWrapper({ productId, role }: { productId: string; role
                 <td className="p-4 font-medium sticky left-0 bg-card z-20 shadow-[4px_0_12px_rgba(0,0,0,0.03)] border-r border-foreground/5">
                   Расход (Всего)
                 </td>
-                {computedVariants.map((v) => (
-                  <td key={v.id} className={`p-4 ${!v.isIncluded ? "opacity-50" : ""}`}>
-                    <div className="font-bold text-base text-foreground mb-2">{v.totalExpenses.toFixed(2)} ₴</div>
+                {computedVariants.map((v: any) => (
+                  <td
+                    key={v.id}
+                    className={`p-4 ${!v.isIncluded ? "opacity-50" : ""}`}
+                  >
+                    <div className="font-bold text-base text-foreground mb-2">
+                      {v.totalExpenses.toFixed(2)} ₴
+                    </div>
                     <div className="text-xs space-y-1">
                       <div className="flex justify-between border-b border-foreground/5 pb-1">
                         <span className="text-muted-foreground">Закупка:</span>
-                        <span className="font-medium">{v.totalPurchaseUAH.toFixed(2)} ₴</span>
+                        <span className="font-medium">
+                          {v.totalPurchaseUAH.toFixed(2)} ₴
+                        </span>
                       </div>
                       <div className="flex justify-between border-b border-foreground/5 pb-1 pt-1">
                         <span className="text-muted-foreground">Доставка:</span>
-                        <span className="font-medium">{Number(v.shippingUA || 0).toFixed(2)} ₴</span>
+                        <span className="font-medium">
+                          {Number(v.shippingUA || 0).toFixed(2)} ₴
+                        </span>
                       </div>
                       <div className="flex justify-between pt-1">
-                        <span className="text-muted-foreground">Управление:</span>
-                        <span className="font-medium">{Number(v.managementUAH || 0).toFixed(2)} ₴</span>
+                        <span className="text-muted-foreground">
+                          Управление:
+                        </span>
+                        <span className="font-medium">
+                          {Number(v.managementUAH || 0).toFixed(2)} ₴
+                        </span>
                       </div>
                     </div>
                   </td>
@@ -323,22 +416,32 @@ async function CompareDataWrapper({ productId, role }: { productId: string; role
                 <td className="p-4 font-medium sticky left-0 bg-card z-20 shadow-[4px_0_12px_rgba(0,0,0,0.03)] border-r border-foreground/5 text-xs text-muted-foreground uppercase tracking-wider">
                   Вес
                 </td>
-                {computedVariants.map((v) => (
-                  <td key={v.id} className={`p-4 ${!v.isIncluded ? "opacity-50" : ""}`}>
+                {computedVariants.map((v: any) => (
+                  <td
+                    key={v.id}
+                    className={`p-4 ${!v.isIncluded ? "opacity-50" : ""}`}
+                  >
                     <div className="flex flex-col gap-1 text-sm">
                       <div className="flex gap-2">
                         <span className="text-muted-foreground">1 шт:</span>
-                        <span className="font-semibold">{v.unitWeight > 1000 ? `${(v.unitWeight/1000).toFixed(2)} кг` : `${v.unitWeight} г`}</span>
+                        <span className="font-semibold">
+                          {v.unitWeight > 1000
+                            ? `${(v.unitWeight / 1000).toFixed(2)} кг`
+                            : `${v.unitWeight} г`}
+                        </span>
                       </div>
                       <div className="flex gap-2">
                         <span className="text-muted-foreground">Посылка:</span>
-                        <span className="font-semibold">{v.packageWeight > 1000 ? `${(v.packageWeight/1000).toFixed(2)} кг` : `${v.packageWeight} г`}</span>
+                        <span className="font-semibold">
+                          {v.packageWeight > 1000
+                            ? `${(v.packageWeight / 1000).toFixed(2)} кг`
+                            : `${v.packageWeight} г`}
+                        </span>
                       </div>
                     </div>
                   </td>
                 ))}
               </tr>
-
             </tbody>
           </table>
         </div>
