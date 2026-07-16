@@ -345,8 +345,16 @@ export function DashboardClient({
   const fetchFolders = async () => {
     try {
       const res = await fetch("/api/folders");
+      if (!res.ok) {
+        console.error("Failed to fetch folders:", res.statusText);
+        return;
+      }
       const data = await res.json();
-      setFolders(data);
+      if (Array.isArray(data)) {
+        setFolders(data);
+      } else {
+        console.error("Failed to fetch folders: Response data is not an array", data);
+      }
     } catch (err) {
       console.error("Failed to fetch folders", err);
     }

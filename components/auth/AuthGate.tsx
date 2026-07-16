@@ -15,6 +15,24 @@ export function AuthGate({ children }: AuthGateProps) {
   useEffect(() => {
     const isAuth = localStorage.getItem("site_auth") === "true";
     setAuthed(isAuth);
+
+    const originalFetch = window.fetch;
+    window.fetch = async (...args) => {
+      const response = await originalFetch(...args);
+      if (response.status === 401) {
+        const url = typeof args[0] === "string" ? args[0] : (args[0] as Request).url;
+        if (!url.includes("/api/auth")) {
+          localStorage.removeItem("site_auth");
+          localStorage.removeItem("site_role");
+          setAuthed(false);
+        }
+      }
+      return response;
+    };
+
+    return () => {
+      window.fetch = originalFetch;
+    };
   }, []);
 
   if (authed === null) {

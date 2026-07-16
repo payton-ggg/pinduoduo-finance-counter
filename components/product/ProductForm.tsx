@@ -86,9 +86,18 @@ export default function ProductForm({
 
   useEffect(() => {
     fetch("/api/folders")
-      .then((res) => res.json())
-      .then((data) => setFolders(data))
-      .catch(() => {});
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch folders");
+        return res.json();
+      })
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setFolders(data);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load folders:", err);
+      });
   }, []);
 
   const normalizedImages: { url: string }[] = Array.isArray(initialData?.images)
