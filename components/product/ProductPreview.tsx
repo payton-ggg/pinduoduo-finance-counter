@@ -19,7 +19,10 @@ import {
   Loader2,
   Share2,
   ShoppingBag,
+  LayoutDashboard,
 } from "lucide-react";
+import { Button } from "../ui/button";
+import { useRouter } from "next/navigation";
 
 type ProductPreviewProps = {
   data: any;
@@ -43,6 +46,7 @@ export function ProductPreview({
   const [exportedImageUri, setExportedImageUri] = useState<string | null>(null);
   const [shareSupported, setShareSupported] = useState(false);
 
+  const router = useRouter();
   useEffect(() => {
     if (typeof navigator !== "undefined" && "share" in navigator) {
       setShareSupported(true);
@@ -319,6 +323,16 @@ export function ProductPreview({
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
               Версии ({variants.length})
             </h3>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push(`/product/${data.id}/overview`)}
+              className="gap-1.5 border-indigo-500/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:border-indigo-500/60"
+              title="Детальный обзор товара"
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              <span className="hidden sm:inline">Обзор</span>
+            </Button>
             {variants.length > 1 && (
               <Link
                 href={`/product/${data.id}/compare`}
@@ -454,10 +468,16 @@ export function ProductPreview({
                           <button
                             type="button"
                             onClick={() => {
-                              const encodedQuery = encodeURIComponent(v.pddSearchQuery);
+                              const encodedQuery = encodeURIComponent(
+                                v.pddSearchQuery,
+                              );
                               const appUrl = `pinduoduo://yangkeduo.com/search_result.html?search_key=${encodedQuery}`;
                               const webUrl = `https://mobile.yangkeduo.com/search_result.html?search_key=${encodedQuery}`;
-                              const isMobile = typeof window !== "undefined" && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                              const isMobile =
+                                typeof window !== "undefined" &&
+                                /iPhone|iPad|iPod|Android/i.test(
+                                  navigator.userAgent,
+                                );
                               if (isMobile) {
                                 window.location.href = appUrl;
                                 setTimeout(() => {
