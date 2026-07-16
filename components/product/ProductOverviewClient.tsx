@@ -24,6 +24,11 @@ import {
   CircleDollarSign,
   Percent,
   BoxSelect,
+  Calendar,
+  Coins,
+  ArrowUpRight,
+  ArrowDownRight,
+  Banknote,
 } from "lucide-react";
 
 type ProductOverviewClientProps = {
@@ -120,6 +125,55 @@ export function ProductOverviewClient({
       ? (totals.totalSells / totals.totalPurchased) * 100
       : 0;
 
+  // Average markup % across included variants
+  const markupValues = variants
+    .filter((v) => v.isIncluded !== false)
+    .map((v) => {
+      const rateCNY = v.rateCNY || rates?.cny || 0;
+      const priceCNY = Number(v.priceCNY) || 0;
+      const priceInUA = Number(v.priceInUA) || 0;
+      const purchased = Number(v.purchasedCount) || 0;
+      const shippingUA = Number(v.shippingUA) || 0;
+      const managementUAH = Number(v.managementUAH) || 0;
+      const unitWeight = Number(v.weight) || 0;
+      const purchaseUAH = priceCNY * (rateCNY > 0 ? rateCNY : 1);
+      const unitShippingUAH =
+        purchased > 0
+          ? shippingUA / purchased
+          : unitWeight > 0 && (v.rateUSD || rates?.usd || 0) > 0
+            ? (unitWeight / 1000) *
+              (v.shippingType === "sea"
+                ? 7.1
+                : v.shippingType === "custom"
+                  ? v.customShippingRate || 0
+                  : 18.3) *
+              (v.rateUSD || rates?.usd || 0)
+            : 0;
+      const unitManagementUAH = purchased > 0 ? managementUAH / purchased : 0;
+      const unitCost = purchaseUAH + unitShippingUAH + unitManagementUAH;
+      const netPrice =
+        v.netPrice || (priceInUA > 0 ? priceInUA * 0.98 - 20 : 0);
+      return unitCost > 0 && netPrice > 0
+        ? ((netPrice / unitCost - 1) * 100)
+        : null;
+    })
+    .filter((x): x is number => x !== null);
+
+  const avgMarkup =
+    markupValues.length > 0
+      ? markupValues.reduce((a, b) => a + b, 0) / markupValues.length
+      : null;
+
+  // Total incomes
+  const totalIncomes = Array.isArray(product?.incomes)
+    ? product.incomes.reduce(
+        (s: number, inc: any) => s + (Number(inc.amount) || 0),
+        0,
+      )
+    : 0;
+
+  const netProfit = margin + totalIncomes;
+
   return (
     <div className="min-h-screen bg-background">
       {/* ─── Top Navigation Bar ─────────────────────────────────────────────── */}
@@ -135,11 +189,19 @@ export function ProductOverviewClient({
             <h1 className="text-sm font-bold truncate text-foreground">
               {product?.name || "Обзор товара"}
             </h1>
-            {product?.folder && (
-              <p className="text-xs text-muted-foreground truncate">
-                {product.folder.name}
-              </p>
-            )}
+            <div className="flex items-center gap-3">
+              {product?.folder && (
+                <p className="text-xs text-muted-foreground truncate">
+                  {product.folder.name}
+                </p>
+              )}
+              {product?.createdAt && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1 shrink-0">
+                  <Calendar className="h-3 w-3" />
+                  {new Date(product.createdAt).toLocaleDateString("ru-RU")}
+                </p>
+              )}
+            </div>
           </div>
           {product?.pinduoduoUrl && (
             <a
@@ -394,6 +456,27 @@ export function ProductOverviewClient({
               value={`${totals.totalCosts.toFixed(2)} ₴`}
               icon={<TrendingDown className="h-4 w-4 text-rose-500" />}
             />
+            {avgMarkup !== null && (
+              <DetailCard
+                label="Средняя наценка"
+                value={`${avgMarkup >= 0 ? "+" : ""}${avgMarkup.toFixed(1)}%`}
+                icon={<Percent className="h-4 w-4 text-indigo-500" />}
+              />
+            )}
+            {totalIncomes > 0 && (
+              <DetailCard
+                label="Доп. доходы"
+                value={`+${totalIncomes.toFixed(2)} ₴`}
+                icon={<ArrowUpRight className="h-4 w-4 text-emerald-500" />}
+              />
+            )}
+            {totalIncomes > 0 && (
+              <DetailCard
+                label="Чистая прибыль (факт.)"
+                value={`${netProfit >= 0 ? "+" : ""}${netProfit.toFixed(2)} ₴`}
+                icon={<Banknote className="h-4 w-4 text-emerald-600" />}
+              />
+            )}
           </div>
         </Section>
 
@@ -536,6 +619,29 @@ export function ProductOverviewClient({
                               }
                             />
                           )}
+                          {unitWeight > 0 && purchased > 0 && (
+                            <MiniRow
+                              label="Вес посылки"
+                              value={(() => {
+                                const pkg = unitWeight * purchased;
+                                return pkg >= 1000
+                                  ? `${(pkg / 1000).toFixed(2)} кг`
+                                  : `${pkg} г`;
+                              })()}
+                            />
+                          )}
+                          {rateCNY > 0 && (
+                            <MiniRow
+                              label="Курс CNY"
+                              value={`${rateCNY.toFixed(2)} ₴`}
+                            />
+                          )}
+                          {(v.rateUSD || rates?.usd || 0) > 0 && (
+                            <MiniRow
+                              label="Курс USD"
+                              value={`${(v.rateUSD || rates?.usd || 0).toFixed(2)} ₴`}
+                            />
+                          )}
                           <MiniRow
                             label="Доставка (всего)"
                             value={`${shippingUA.toFixed(2)} ₴`}
@@ -587,13 +693,43 @@ export function ProductOverviewClient({
                             label="Доход (факт.)"
                             value={`${variantIncome.toFixed(2)} ₴`}
                           />
+                          {actualNetPrice > 0 && purchased > 0 && (
+                            <MiniRow
+                              label="Потенц. выручка"
+                              value={`${(actualNetPrice * purchased).toFixed(2)} ₴`}
+                            />
+                          )}
                           <MiniRow
                             label="Маржа (1 шт)"
                             value={`${unitMargin.toFixed(2)} ₴`}
                             highlight
                             positive={unitMargin >= 0}
                           />
+                          {unitCostPriceUAH > 0 && actualNetPrice > 0 && (
+                            <MiniRow
+                              label="Наценка"
+                              value={`${unitMargin >= 0 ? "+" : ""}${((actualNetPrice / unitCostPriceUAH - 1) * 100).toFixed(1)}%`}
+                              highlight
+                              positive={unitMargin >= 0}
+                            />
+                          )}
                         </div>
+
+                        {/* Sell-through mini progress bar */}
+                        {purchased > 0 && (
+                          <div className="pt-1">
+                            <div className="flex justify-between text-xs text-muted-foreground font-medium mb-1">
+                              <span>Продано {sells} из {purchased}</span>
+                              <span className="font-black text-foreground">{((sells / purchased) * 100).toFixed(0)}%</span>
+                            </div>
+                            <div className="relative h-2 w-full bg-muted rounded-full overflow-hidden">
+                              <div
+                                className="absolute inset-y-0 left-0 rounded-full bg-linear-to-r from-indigo-500 to-emerald-500"
+                                style={{ width: `${Math.min((sells / purchased) * 100, 100)}%` }}
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -603,7 +739,40 @@ export function ProductOverviewClient({
           </Section>
         )}
 
-        {/* ─── Expenses ────────────────────────────────────────────────────────── */}
+        {/* ─── Incomes ─────────────────────────────────────────────────────────── */}
+        {Array.isArray(product?.incomes) && product.incomes.length > 0 && (
+          <Section
+            title="Дополнительные доходы"
+            icon={<ArrowUpRight className="h-4 w-4" />}
+          >
+            <div className="rounded-2xl border border-border/60 overflow-hidden">
+              {product.incomes.map((inc: any, i: number) => (
+                <div
+                  key={inc.id || i}
+                  className="flex items-center justify-between px-4 py-3 border-b border-border/30 last:border-0 hover:bg-muted/30 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center justify-center h-6 w-6 rounded-lg bg-emerald-500/10">
+                      <ArrowUpRight className="h-3.5 w-3.5 text-emerald-500" />
+                    </span>
+                    <span className="text-sm font-medium text-foreground">
+                      {inc.type ||
+                        new Date(inc.createdAt).toLocaleDateString("ru-RU") ||
+                        "Без типа"}
+                    </span>
+                  </div>
+                  <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">
+                    +{Number(inc.amount).toFixed(2)} ₴
+                  </span>
+                </div>
+              ))}
+              <div className="flex items-center justify-between px-4 py-3 bg-emerald-500/5 border-t border-emerald-500/20 font-black text-sm">
+                <span className="text-emerald-700 dark:text-emerald-400">Итого доходов</span>
+                <span className="text-emerald-600 dark:text-emerald-400">+{totalIncomes.toFixed(2)} ₴</span>
+              </div>
+            </div>
+          </Section>
+        )}
         {product?.expenses && product.expenses.length > 0 && (
           <Section
             title="Детальные расходы"
