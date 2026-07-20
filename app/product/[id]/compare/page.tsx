@@ -59,7 +59,7 @@ async function CompareDataWrapper({
     const totalExpenses = totalPurchaseUAH + shippingUA + managementUAH;
 
     const actualNetPrice =
-      v.netPrice || (priceInUA > 0 ? priceInUA * 0.98 - 20 : 0);
+      v.netPrice || (priceInUA > 0 ? priceInUA * 0.98 - 30 : 0);
     const potentialRevenue = actualNetPrice * purchased;
     const totalRevenue = actualNetPrice * sells;
 
