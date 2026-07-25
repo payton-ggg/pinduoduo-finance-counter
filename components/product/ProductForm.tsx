@@ -34,6 +34,7 @@ type VariantValues = {
   shippingType?: "air" | "sea" | "custom";
   customShippingRate?: number;
   isIncluded?: boolean;
+  commissionFlat?: number;
 };
 
 type FormValues = {
@@ -124,6 +125,7 @@ export default function ProductForm({
           shippingType: v.shippingType ?? "air",
           customShippingRate: v.customShippingRate ?? undefined,
           isIncluded: v.isIncluded ?? true,
+          commissionFlat: v.commissionFlat ?? undefined,
         }))
       : [emptyVariant()];
 
@@ -231,7 +233,7 @@ export default function ProductForm({
       const goodsCost = purchased * unitCost;
       const sellingPrice = Number(v.priceInUA) || 0;
       const actualNet =
-        v.netPrice || (sellingPrice > 0 ? sellingPrice * 0.98 - 20 : 0);
+        v.netPrice || (sellingPrice > 0 ? sellingPrice * 0.97 - (v.commissionFlat ?? 30) : 0);
       const income = sells * actualNet;
       const costs =
         goodsCost +
@@ -338,6 +340,7 @@ export default function ProductForm({
         shippingType: v.shippingType || null,
         customShippingRate: v.customShippingRate ?? null,
         isIncluded: v.isIncluded ?? true,
+        commissionFlat: v.commissionFlat ?? null,
       })),
       deletedVariantIds,
     };

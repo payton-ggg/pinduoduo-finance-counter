@@ -62,7 +62,7 @@ export const ProductCard = memo(function ProductCard({
 
   const balance = product.income - product.spent;
 
-  const actualNetPrice = product.netPrice || ((product.priceInUA || 0) > 0 ? (product.priceInUA || 0) * 0.98 - 20 : 0);
+  const actualNetPrice = product.netPrice || ((product.priceInUA || 0) > 0 ? (product.priceInUA || 0) * 0.97 - 30 : 0);
   const projectedRevenue = (product.totalPurchased || 0) * actualNetPrice;
   const projectedProfit = projectedRevenue - product.spent;
 

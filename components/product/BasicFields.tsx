@@ -28,6 +28,7 @@ export function VariantFields({
   const rateUSD = watch(`${prefix}.rateUSD`);
   const shippingType = watch(`${prefix}.shippingType`) || "air";
   const customShippingRate = watch(`${prefix}.customShippingRate`);
+  const commissionFlat = watch(`${prefix}.commissionFlat`);
 
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [autoCalculate, setAutoCalculate] = useState(false);
@@ -202,7 +203,8 @@ export function VariantFields({
               onChange: (e) => {
                 const val = parseFloat(e.target.value);
                 if (val > 0) {
-                  setValue(`${prefix}.netPrice`, parseFloat((val * 0.98 - 20).toFixed(2)), { shouldDirty: true });
+                  const flat = watch(`${prefix}.commissionFlat`) ?? 30;
+                  setValue(`${prefix}.netPrice`, parseFloat((val * 0.97 - flat).toFixed(2)), { shouldDirty: true });
                 }
               }
             })}
@@ -224,6 +226,29 @@ export function VariantFields({
               valueAsNumber: true,
             })}
             placeholder="После вычета комиссии"
+          />
+        </div>
+        <div>
+          <label className="block text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">
+            Фиксированная комиссия (₴)
+          </label>
+          <input
+            type="number"
+            step="0.01"
+            className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
+            {...register(`${prefix}.commissionFlat`, {
+              valueAsNumber: true,
+              min: { value: 0, message: ">= 0" },
+              onChange: (e) => {
+                const flat = parseFloat(e.target.value);
+                const price = watch(`${prefix}.priceInUA`);
+                if (price > 0) {
+                  const effectiveFlat = isNaN(flat) ? 30 : flat;
+                  setValue(`${prefix}.netPrice`, parseFloat((price * 0.97 - effectiveFlat).toFixed(2)), { shouldDirty: true });
+                }
+              }
+            })}
+            placeholder="По умолчанию: 30"
           />
         </div>
       </div>

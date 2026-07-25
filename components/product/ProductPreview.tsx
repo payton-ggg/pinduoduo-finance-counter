@@ -175,7 +175,7 @@ export function ProductPreview({
       const purchaseUnitCostUAH = priceCNY * (rateCNY > 0 ? rateCNY : 1);
       const goodsCost = purchased * purchaseUnitCostUAH;
       const actualNetPrice =
-        v.netPrice || (priceInUA > 0 ? priceInUA * 0.98 - 20 : 0);
+        v.netPrice || (priceInUA > 0 ? priceInUA * 0.97 - (v.commissionFlat ?? 30) : 0);
       const income = sells * actualNetPrice;
       const costs = goodsCost + shippingUA + managementUAH;
 

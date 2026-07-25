@@ -80,7 +80,7 @@ export function ProductOverviewClient({
       const purchaseUnitCostUAH = priceCNY * (rateCNY > 0 ? rateCNY : 1);
       const goodsCost = purchased * purchaseUnitCostUAH;
       const actualNetPrice =
-        v.netPrice || (priceInUA > 0 ? priceInUA * 0.98 - 20 : 0);
+        v.netPrice || (priceInUA > 0 ? priceInUA * 0.97 - (v.commissionFlat ?? 30) : 0);
       const income = sells * actualNetPrice;
       const costs = goodsCost + shippingUA + managementUAH;
 
@@ -152,7 +152,7 @@ export function ProductOverviewClient({
       const unitManagementUAH = purchased > 0 ? managementUAH / purchased : 0;
       const unitCost = purchaseUAH + unitShippingUAH + unitManagementUAH;
       const netPrice =
-        v.netPrice || (priceInUA > 0 ? priceInUA * 0.98 - 20 : 0);
+        v.netPrice || (priceInUA > 0 ? priceInUA * 0.97 - (v.commissionFlat ?? 30) : 0);
       return unitCost > 0 && netPrice > 0
         ? ((netPrice / unitCost - 1) * 100)
         : null;
@@ -514,7 +514,7 @@ export function ProductOverviewClient({
                 const unitCostPriceUAH =
                   purchaseUAH + unitShippingUAH + unitManagementUAH;
                 const actualNetPrice =
-                  v.netPrice || (priceInUA > 0 ? priceInUA * 0.98 - 20 : 0);
+                  v.netPrice || (priceInUA > 0 ? priceInUA * 0.97 - (v.commissionFlat ?? 30) : 0);
                 const unitMargin = actualNetPrice - unitCostPriceUAH;
                 const variantIncome = sells * actualNetPrice;
                 const shippingLabel =

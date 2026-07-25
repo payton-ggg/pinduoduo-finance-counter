@@ -38,6 +38,7 @@ model Variant {
   rateUSD            Float?
   shippingType       String?
   customShippingRate Float?
+  commissionFlat     Float?
   createdAt          DateTime @default(now())
   isIncluded         Boolean  @default(true)
   product            Product  @relation(fields: [productId], references: [id], onDelete: Cascade)

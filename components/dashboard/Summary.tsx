@@ -166,7 +166,7 @@ export function Summary({
     const available = products
       .filter((p) => {
         const rawPrice = p.priceInUA || 0;
-        const netPrice = p.netPrice || (rawPrice > 0 ? rawPrice * 0.98 - 20 : 0);
+        const netPrice = p.netPrice || (rawPrice > 0 ? rawPrice * 0.97 - 30 : 0);
         if (netPrice <= 0) return false;
         const sold = p.sellsCount || 0;
         const stock = p.totalPurchased || 0;
@@ -174,7 +174,7 @@ export function Summary({
       })
       .map((p) => {
         const rawPrice = p.priceInUA || 0;
-        const netPrice = p.netPrice || (rawPrice > 0 ? rawPrice * 0.98 - 20 : 0);
+        const netPrice = p.netPrice || (rawPrice > 0 ? rawPrice * 0.97 - 30 : 0);
         const sold = p.sellsCount || 0;
         const stock = p.totalPurchased || 0;
         return {
@@ -219,7 +219,7 @@ export function Summary({
     const available = products
       .filter((p) => {
         const rawPrice = p.priceInUA || 0;
-        const netPrice = p.netPrice || (rawPrice > 0 ? rawPrice * 0.98 - 20 : 0);
+        const netPrice = p.netPrice || (rawPrice > 0 ? rawPrice * 0.97 - 30 : 0);
         if (netPrice <= 0) return false;
         const sold = p.sellsCount || 0;
         const stock = p.totalPurchased || 0;
@@ -227,7 +227,7 @@ export function Summary({
       })
       .map((p) => {
         const rawPrice = p.priceInUA || 0;
-        const netPrice = p.netPrice || (rawPrice > 0 ? rawPrice * 0.98 - 20 : 0);
+        const netPrice = p.netPrice || (rawPrice > 0 ? rawPrice * 0.97 - 30 : 0);
         const sold = p.sellsCount || 0;
         const stock = p.totalPurchased || 0;
         return {

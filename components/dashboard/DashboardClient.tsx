@@ -610,7 +610,7 @@ export function DashboardClient({
   const totalProjectedRevenue = summaryProducts.reduce((sum, p) => {
     const actualNetPrice =
       p.netPrice ||
-      ((p.priceInUA || 0) > 0 ? (p.priceInUA || 0) * 0.98 - 20 : 0);
+      ((p.priceInUA || 0) > 0 ? (p.priceInUA || 0) * 0.97 - 30 : 0);
     return sum + (p.totalPurchased || 0) * actualNetPrice;
   }, 0);
 
