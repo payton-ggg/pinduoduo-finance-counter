@@ -16,6 +16,11 @@ import {
   Trash2,
   ChevronDown,
   ChevronUp,
+  Upload,
+  Image as ImageIcon,
+  Sparkles,
+  CheckCircle2,
+  Clipboard,
 } from "lucide-react";
 
 type VariantValues = {
@@ -77,6 +82,9 @@ export default function ProductForm({
   const [folders, setFolders] = useState<{ id: string; name: string }[]>([]);
   const [aiText, setAiText] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [aiMode, setAiMode] = useState<"screenshot" | "text">("screenshot");
+  const [isAiImageLoading, setIsAiImageLoading] = useState(false);
+  const [aiSuccessMessage, setAiSuccessMessage] = useState<string | null>(null);
   const [collapsedVariants, setCollapsedVariants] = useState<Set<number>>(
     new Set(),
   );
@@ -315,6 +323,96 @@ export default function ProductForm({
     }
   };
 
+  const processScreenshotFile = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      alert("Пожалуйста, выберите файл изображения (скриншот)");
+      return;
+    }
+    setIsAiImageLoading(true);
+    setAiSuccessMessage(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const uploadRes = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!uploadRes.ok) {
+        throw new Error("Не удалось загрузить изображение на сервер");
+      }
+
+      const uploadData = await uploadRes.json();
+      const imageUrl = uploadData.secure_url || uploadData.url;
+
+      if (imageUrl) {
+        const currentImages = watch("images");
+        if (currentImages.length === 1 && !currentImages[0].url) {
+          setValue("images.0.url", imageUrl, { shouldDirty: true });
+        } else {
+          appendImage({ url: imageUrl });
+        }
+      }
+
+      const parseRes = await fetch("/api/ai/parse-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageUrl }),
+      });
+
+      const parseData = await parseRes.json();
+      if (parseData.data) {
+        const p = parseData.data;
+        if (p.name) setValue("name", p.name, { shouldDirty: true });
+        if (p.priceCNY)
+          setValue("variants.0.priceCNY", Number(p.priceCNY), {
+            shouldDirty: true,
+          });
+        if (p.pddSearchQuery)
+          setValue("variants.0.pddSearchQuery", p.pddSearchQuery, {
+            shouldDirty: true,
+          });
+        if (p.sellsCount)
+          setValue("variants.0.sellsCount", Number(p.sellsCount), {
+            shouldDirty: true,
+          });
+
+        if (p.warning) {
+          setAiSuccessMessage(p.warning);
+        } else {
+          setAiSuccessMessage(
+            "Скриншот успешно распознан! Фото добавлено в галерею, параметры занесены.",
+          );
+        }
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert("Ошибка при обработке скриншота: " + (err.message || err));
+    } finally {
+      setIsAiImageLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (const item of Array.from(items)) {
+        if (item.type.startsWith("image/")) {
+          const file = item.getAsFile();
+          if (file) {
+            processScreenshotFile(file);
+            break;
+          }
+        }
+      }
+    };
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, []);
+
   const onSubmit = async (values: FormValues) => {
     const payload = {
       name: values.name,
@@ -449,45 +547,125 @@ export default function ProductForm({
       </h1>
 
       <div className="mb-6 p-5 border border-primary/15 bg-primary/5 rounded-2xl relative overflow-hidden backdrop-blur-xs shadow-xs transition-all duration-300 hover:border-primary/25">
-        {/* Subtle decorative background glow for AI theme */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
 
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
           <label className="flex items-center gap-2 text-sm font-bold text-foreground">
             <Bot className="w-5 h-5 text-primary animate-pulse" />
             Автозаполнение через ИИ
           </label>
-          <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-primary/10 text-primary border border-primary/15">
-            AI Assistant
-          </span>
+          <div className="flex items-center gap-1 bg-background/60 p-1 rounded-xl border border-foreground/10 self-start sm:self-auto">
+            <button
+              type="button"
+              onClick={() => setAiMode("screenshot")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                aiMode === "screenshot"
+                  ? "bg-primary text-primary-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <ImageIcon className="w-3.5 h-3.5" />
+              По скриншоту Pinduoduo
+            </button>
+            <button
+              type="button"
+              onClick={() => setAiMode("text")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                aiMode === "text"
+                  ? "bg-primary text-primary-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              По тексту
+            </button>
+          </div>
         </div>
 
-        <p className="text-xs text-muted-foreground mb-4">
-          Опишите товар текстом, и ИИ автоматически заполнит поля первой версии.
-          Фотографии затронуты не будут.
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-3 relative z-10">
-          <textarea
-            placeholder="Например: Товар за 150 юаней, вес 250г, продаём за 2000 грн..."
-            value={aiText}
-            onChange={(e) => setAiText(e.target.value)}
-            className="flex-1 w-full bg-background/50 border border-foreground/10 rounded-xl px-4 py-3 text-sm text-foreground transition-all duration-300 hover:border-primary/30 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 resize-none placeholder:text-muted-foreground/60 min-h-[80px]"
-            rows={3}
-          />
-          <Button
-            type="button"
-            onClick={handleAiFill}
-            disabled={isAiLoading || !aiText.trim()}
-            className="sm:w-32 h-auto py-3 sm:py-0 font-semibold"
-          >
-            {isAiLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              "Заполнить"
+        {aiMode === "screenshot" ? (
+          <div className="relative z-10">
+            <p className="text-xs text-muted-foreground mb-3">
+              Загрузите скриншот карточки товара из приложения Pinduoduo или вставьте его напрямую из буфера обмена (<strong>Ctrl+V</strong> / <strong>Cmd+V</strong>).
+            </p>
+            <div
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                const file = e.dataTransfer.files?.[0];
+                if (file) processScreenshotFile(file);
+              }}
+              className="border-2 border-dashed border-primary/30 hover:border-primary/60 bg-background/40 hover:bg-background/70 rounded-xl p-4 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-2 group"
+            >
+              <input
+                type="file"
+                accept="image/*"
+                id="pdd-screenshot-upload"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) processScreenshotFile(file);
+                }}
+              />
+              <label
+                htmlFor="pdd-screenshot-upload"
+                className="cursor-pointer flex flex-col items-center gap-2 w-full"
+              >
+                {isAiImageLoading ? (
+                  <div className="flex items-center gap-2 text-primary font-medium text-sm py-2">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Распознаём скриншот Pinduoduo (Vision AI)...</span>
+                  </div>
+                ) : (
+                  <>
+                    <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Upload className="w-5 h-5" />
+                    </div>
+                    <div className="text-xs font-medium text-foreground">
+                      Нажмите для выбора скриншота или перетащите файл сюда
+                    </div>
+                    <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                      <Clipboard className="w-3 h-3" />
+                      Или просто нажмите <kbd className="px-1.5 py-0.5 bg-muted border rounded text-[10px] font-mono">Ctrl+V</kbd> на этой странице
+                    </div>
+                  </>
+                )}
+              </label>
+            </div>
+            {aiSuccessMessage && (
+              <div className="mt-3 p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs flex items-start gap-2 animate-in fade-in">
+                <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>{aiSuccessMessage}</span>
+              </div>
             )}
-          </Button>
-        </div>
+          </div>
+        ) : (
+          <div className="relative z-10">
+            <p className="text-xs text-muted-foreground mb-3">
+              Опишите товар текстом, и ИИ автоматически заполнит поля первой версии.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <textarea
+                placeholder="Например: Товар за 150 юаней, вес 250г, продаём за 2000 грн..."
+                value={aiText}
+                onChange={(e) => setAiText(e.target.value)}
+                className="flex-1 w-full bg-background/50 border border-foreground/10 rounded-xl px-4 py-3 text-sm text-foreground transition-all duration-300 hover:border-primary/30 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 resize-none placeholder:text-muted-foreground/60 min-h-[80px]"
+                rows={3}
+              />
+              <Button
+                type="button"
+                onClick={handleAiFill}
+                disabled={isAiLoading || !aiText.trim()}
+                className="sm:w-32 h-auto py-3 sm:py-0 font-semibold"
+              >
+                {isAiLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  "Заполнить"
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       <form id="product-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
