@@ -323,8 +323,78 @@ export default function ProductForm({
     }
   };
 
-  const processScreenshotFile = async (file: File) => {
-    if (!file.type.startsWith("image/")) {
+  const cropImageFile = (
+    file: File,
+    cropTop: number = 170,
+    cropBottom: number = 1239,
+  ): Promise<File> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(file);
+          return;
+        }
+
+        const baseHeight = 2556;
+        const scale = img.height > 1000 ? img.height / baseHeight : 1;
+
+        const actualCropTop = Math.round(cropTop * scale);
+        const actualCropBottom = Math.round(cropBottom * scale);
+        const croppedHeight = img.height - actualCropTop - actualCropBottom;
+
+        if (croppedHeight <= 100) {
+          resolve(file);
+          return;
+        }
+
+        canvas.width = img.width;
+        canvas.height = croppedHeight;
+
+        ctx.drawImage(
+          img,
+          0,
+          actualCropTop,
+          img.width,
+          croppedHeight,
+          0,
+          0,
+          img.width,
+          croppedHeight,
+        );
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              resolve(file);
+              return;
+            }
+            const croppedFile = new File([blob], file.name, {
+              type: file.type || "image/jpeg",
+            });
+            resolve(croppedFile);
+          },
+          file.type || "image/jpeg",
+          0.92,
+        );
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve(file);
+      };
+
+      img.src = url;
+    });
+  };
+
+  const processScreenshotFile = async (rawFile: File) => {
+    if (!rawFile.type.startsWith("image/")) {
       alert("Пожалуйста, выберите файл изображения (скриншот)");
       return;
     }
@@ -332,6 +402,9 @@ export default function ProductForm({
     setAiSuccessMessage(null);
 
     try {
+      // Обрезка скриншота: 170px сверху и 1239px снизу
+      const file = await cropImageFile(rawFile, 170, 1239);
+
       const formData = new FormData();
       formData.append("file", file);
 
