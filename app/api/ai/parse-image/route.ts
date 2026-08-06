@@ -55,20 +55,21 @@ No markdown formatting, no code blocks, only raw JSON.`;
           }
         }
 
-        const geminiModels = [
-          "gemini-2.0-flash-exp",
-          "gemini-2.0-flash",
-          "gemini-1.5-flash-8b",
-          "gemini-2.0-flash-lite-preview-02-05",
-          "gemini-1.5-pro",
+        const geminiTargets = [
+          { ver: "v1beta", model: "gemini-2.0-flash-lite" },
+          { ver: "v1beta", model: "gemini-2.0-flash-lite-preview-02-05" },
+          { ver: "v1beta", model: "gemini-1.5-flash-8b" },
+          { ver: "v1beta", model: "gemini-2.0-flash-exp" },
+          { ver: "v1beta", model: "gemini-2.0-flash" },
+          { ver: "v1", model: "gemini-2.0-flash" },
         ];
 
         let quotaErrorOccurred = false;
 
-        for (const model of geminiModels) {
+        for (const target of geminiTargets) {
           if (parsedData) break;
           const geminiRes = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+            `https://generativelanguage.googleapis.com/${target.ver}/models/${target.model}:generateContent?key=${GEMINI_API_KEY}`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -104,7 +105,11 @@ No markdown formatting, no code blocks, only raw JSON.`;
             }
           } else {
             const errText = await geminiRes.text();
-            console.warn(`Gemini API (${model}) error:`, geminiRes.status, errText);
+            console.warn(
+              `Gemini API (${target.ver}/${target.model}) error:`,
+              geminiRes.status,
+              errText,
+            );
             if (geminiRes.status === 429) {
               quotaErrorOccurred = true;
             }
