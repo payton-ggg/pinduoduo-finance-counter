@@ -15,6 +15,24 @@ import {
   Copy,
 } from "lucide-react";
 
+export type ProductVariantUI = {
+  id?: string;
+  priceCNY: number;
+  priceInUA?: number | null;
+  netPrice?: number | null;
+  rateCNY?: number | null;
+  rateUSD?: number | null;
+  purchasedCount?: number | null;
+  sellsCount?: number | null;
+  shippingUA?: number | null;
+  managementUAH?: number | null;
+  weight?: number | null;
+  shippingType?: string | null;
+  customShippingRate?: number | null;
+  pddSearchQuery?: string | null;
+  isIncluded?: boolean;
+};
+
 export type ProductUI = {
   id: string | number;
   name: string;
@@ -35,11 +53,7 @@ export type ProductUI = {
   folderName?: string | null;
   weight?: number | null;
   variantCount: number;
-  variantsList?: {
-    priceCNY: number;
-    priceInUA?: number;
-    rateCNY?: number;
-  }[];
+  variantsList?: ProductVariantUI[];
 };
 
 type ProductCardProps = {

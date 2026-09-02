@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { Header } from "./Header";
 import { Summary } from "./Summary";
 import { ProductGrid } from "./ProductGrid";
-import type { ProductUI } from "./ProductCard";
+import type { ProductUI, ProductVariantUI } from "./ProductCard";
+import { PriceManagementModal } from "./PriceManagementModal";
 import { Button } from "@/components/ui/button";
 import {
   Archive,
@@ -233,6 +234,7 @@ export function DashboardClient({
 
   // Copy product states
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
+  const [isPriceModalOpen, setIsPriceModalOpen] = useState(false);
   const [productToCopy, setProductToCopy] = useState<ProductUI | null>(null);
   const [copyName, setCopyName] = useState("");
   const [selectedFolderIdForCopy, setSelectedFolderIdForCopy] = useState("");
@@ -566,6 +568,87 @@ export function DashboardClient({
     }
   };
 
+  const handleBatchPricingUpdate = useCallback(
+    (
+      optimisticUpdates: Array<{
+        productId: string | number;
+        variant: ProductVariantUI;
+      }>
+    ) => {
+      setProducts((prevProducts) => {
+        const updateMap = new Map<string | number, ProductVariantUI[]>();
+        for (const item of optimisticUpdates) {
+          const existing = updateMap.get(item.productId) || [];
+          existing.push(item.variant);
+          updateMap.set(item.productId, existing);
+        }
+
+        return prevProducts.map((p) => {
+          const productUpdates = updateMap.get(p.id);
+          if (!productUpdates || productUpdates.length === 0) return p;
+
+          // Merge updated variants into product's variantsList
+          const updatedVariantsList = (p.variantsList || []).map((v) => {
+            const match = productUpdates.find((u) => u.id === v.id);
+            return match ? { ...v, ...match } : v;
+          });
+
+          // Recalculate product financial aggregates
+          let totalSpent = 0;
+          let totalPurchased = 0;
+          let totalSells = 0;
+          let totalShipping = 0;
+          let totalManagement = 0;
+          let totalWeight = 0;
+          let firstPriceCNY = p.priceCNY;
+          let firstPriceInUA = p.priceInUA || 0;
+          let firstNetPrice = p.netPrice;
+          let hasSetFirst = false;
+
+          updatedVariantsList.forEach((v) => {
+            if (v.isIncluded === false) return;
+
+            const actualRateCNY = v.rateCNY || globalRate || 1;
+            const unitCost = (v.priceCNY || 0) * (actualRateCNY > 0 ? actualRateCNY : 1);
+            const purchased = Number(v.purchasedCount) || 0;
+            const goodsCost = unitCost * purchased;
+            const shipping = Number(v.shippingUA) || 0;
+            const management = Number(v.managementUAH) || 0;
+
+            totalSpent += goodsCost + shipping + management;
+            totalPurchased += purchased;
+            totalSells += Number(v.sellsCount) || 0;
+            totalShipping += shipping;
+            totalManagement += management;
+            totalWeight += (Number(v.weight) || 0) * purchased;
+
+            if (!hasSetFirst) {
+              firstPriceCNY = v.priceCNY || 0;
+              firstPriceInUA = Number(v.priceInUA) || 0;
+              firstNetPrice = v.netPrice ?? undefined;
+              hasSetFirst = true;
+            }
+          });
+
+          return {
+            ...p,
+            spent: totalSpent,
+            priceCNY: firstPriceCNY,
+            priceInUA: firstPriceInUA,
+            netPrice: firstNetPrice,
+            totalPurchased,
+            sellsCount: totalSells,
+            shippingUA: totalShipping || undefined,
+            managementUAH: totalManagement || undefined,
+            weight: totalWeight || null,
+            variantsList: updatedVariantsList,
+          };
+        });
+      });
+    },
+    [globalRate]
+  );
+
   const fuse = useMemo(() => {
     return new Fuse(products, {
       keys: ["name", "folderName"],
@@ -656,6 +739,7 @@ export function DashboardClient({
         }}
         onClearSelection={clearSelection}
         onSelectAll={selectAll}
+        onOpenPriceModal={() => setIsPriceModalOpen(true)}
         hasSelection={selectedIds.size > 0}
         searchQuery={searchQuery}
         onSearchQueryChange={setSearchQuery}
@@ -749,6 +833,7 @@ export function DashboardClient({
         folderName={currentFolderName}
         onSwipe={swipeFolder}
         products={summaryProducts}
+        onOpenPriceModal={() => setIsPriceModalOpen(true)}
       />
 
       {/* Bulk Actions */}
@@ -914,6 +999,17 @@ export function DashboardClient({
           </div>
         </div>
       )}
+
+      {/* Price Management Modal (iOS Bottom Sheet) */}
+      <PriceManagementModal
+        isOpen={isPriceModalOpen}
+        onClose={() => setIsPriceModalOpen(false)}
+        products={products}
+        globalRate={globalRate}
+        folders={folders}
+        currentFolderId={selectedFolderId}
+        onSaveSuccess={handleBatchPricingUpdate}
+      />
     </div>
   );
 }

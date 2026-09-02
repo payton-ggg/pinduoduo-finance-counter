@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Plus, RefreshCw, Calculator, Search, X } from "lucide-react";
+import { Plus, RefreshCw, Calculator, Search, X, Coins } from "lucide-react";
 import { ModeToggle } from "@/components/ui/mode-toggle";
 import { useRouter } from "next/navigation";
 
@@ -9,6 +9,7 @@ type HeaderProps = {
   onAdd?: () => void;
   onClearSelection?: () => void;
   onSelectAll?: () => void;
+  onOpenPriceModal?: () => void;
   hasSelection?: boolean;
   searchQuery?: string;
   onSearchQueryChange?: (query: string) => void;
@@ -18,6 +19,7 @@ export function Header({
   onAdd,
   onClearSelection,
   onSelectAll,
+  onOpenPriceModal,
   hasSelection,
   searchQuery = "",
   onSearchQueryChange,
@@ -82,6 +84,18 @@ export function Header({
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
+          {onOpenPriceModal && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={onOpenPriceModal}
+              className="glass rounded-xl border-none hover:bg-primary/20 transition-all h-10 sm:h-11 w-10 sm:w-11 shrink-0 flex items-center justify-center group"
+              title="Управление ценами товаров (Закупка / Продажа)"
+            >
+              <Coins className="w-4 h-4 sm:w-5 group-hover:scale-110 text-primary transition-transform duration-300" />
+            </Button>
+          )}
+
           <Button
             variant="outline"
             size="icon"

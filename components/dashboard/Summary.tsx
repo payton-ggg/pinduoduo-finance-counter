@@ -23,6 +23,7 @@ type SummaryProps = {
   folderName?: string;
   onSwipe?: (direction: "left" | "right") => void;
   products?: ProductUI[];
+  onOpenPriceModal?: () => void;
 };
 
 export function Summary({
@@ -34,6 +35,7 @@ export function Summary({
   folderName,
   onSwipe,
   products,
+  onOpenPriceModal,
 }: SummaryProps) {
   const [showGross, setShowGross] = useState(false);
   const [showBreakEven, setShowBreakEven] = useState(false);
@@ -462,12 +464,18 @@ export function Summary({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        <Card className="p-5 glass-card flex flex-col justify-between space-y-3">
+        <Card
+          onClick={onOpenPriceModal}
+          className={`p-5 glass-card flex flex-col justify-between space-y-3 ${
+            onOpenPriceModal ? "cursor-pointer hover:border-red-500/40 group transition-all" : ""
+          }`}
+          title={onOpenPriceModal ? "Нажмите для управления ценами закупки" : undefined}
+        >
           <div className="flex items-center justify-between text-muted-foreground/80">
             <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
               Расходы
             </span>
-            <div className="p-2 bg-red-500/10 rounded-xl">
+            <div className="p-2 bg-red-500/10 rounded-xl group-hover:scale-110 transition-transform">
               <TrendingDown className="h-5 w-5 text-red-500" />
             </div>
           </div>
