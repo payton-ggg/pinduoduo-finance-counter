@@ -1,411 +1,441 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import {
-  Wallet,
-  TrendingDown,
-  TrendingUp,
-  Package,
-  Sparkles,
-  ChevronLeft,
-  ChevronRight,
-  FolderOpen,
-  X,
-  Weight,
+	Wallet,
+	TrendingDown,
+	TrendingUp,
+	Package,
+	Sparkles,
+	ChevronLeft,
+	ChevronRight,
+	FolderOpen,
+	X,
+	Weight,
 } from "lucide-react";
 import type { ProductUI } from "./ProductCard";
 
 type SummaryProps = {
-  totalSpent: number;
-  totalIncome: number;
-  totalProjectedRevenue: number;
-  totalProjectedProfit: number;
-  variationsCount: number;
-  folderName?: string;
-  onSwipe?: (direction: "left" | "right") => void;
-  products?: ProductUI[];
-  onOpenPriceModal?: () => void;
+	totalSpent: number;
+	totalIncome: number;
+	totalProjectedRevenue: number;
+	totalProjectedProfit: number;
+	variationsCount: number;
+	folderName?: string;
+	onSwipe?: (direction: "left" | "right") => void;
+	products?: ProductUI[];
+	onOpenPriceModal?: () => void;
 };
 
 export function Summary({
-  totalSpent,
-  totalIncome,
-  totalProjectedRevenue,
-  totalProjectedProfit,
-  variationsCount,
-  folderName,
-  onSwipe,
-  products,
-  onOpenPriceModal,
+	totalSpent,
+	totalIncome,
+	totalProjectedRevenue,
+	totalProjectedProfit,
+	variationsCount,
+	folderName,
+	onSwipe,
+	products,
+	onOpenPriceModal,
 }: SummaryProps) {
-  const [showGross, setShowGross] = useState(false);
-  const [showBreakEven, setShowBreakEven] = useState(false);
-  const [showOptionsModal, setShowOptionsModal] = useState(false);
-  const [showWeight, setShowWeight] = useState(false);
-  const profit = totalIncome - totalSpent;
+	const [showGross, setShowGross] = useState(false);
+	const [showBreakEven, setShowBreakEven] = useState(false);
+	const [showOptionsModal, setShowOptionsModal] = useState(false);
+	const [showWeight, setShowWeight] = useState(false);
+	const profit = totalIncome - totalSpent;
 
-  const totalWeightGrams =
-    products?.reduce(
-      (sum, p) => sum + (p.weight || 0) * (p.totalPurchased || 0),
-      0,
-    ) || 0;
+	const totalWeightGrams =
+		products?.reduce(
+			(sum, p) => sum + (p.weight || 0) * (p.totalPurchased || 0),
+			0,
+		) || 0;
 
-  const formattedTotalWeight =
-    totalWeightGrams > 1000
-      ? `${(totalWeightGrams / 1000).toFixed(3)} кг`
-      : `${totalWeightGrams} г`;
+	const formattedTotalWeight =
+		totalWeightGrams > 1000
+			? `${(totalWeightGrams / 1000).toFixed(3)} кг`
+			: `${totalWeightGrams} г`;
 
-  const touchStartX = useRef<number | null>(null);
-  const touchStartY = useRef<number | null>(null);
-  const touchDeltaX = useRef(0);
-  const gridRef = useRef<HTMLDivElement>(null);
-  const [slideClass, setSlideClass] = useState("");
-  const [dragOffset, setDragOffset] = useState(0);
-  const isDragging = useRef(false);
-  const prevFolderName = useRef(folderName);
+	const touchStartX = useRef<number | null>(null);
+	const touchStartY = useRef<number | null>(null);
+	const touchDeltaX = useRef(0);
+	const gridRef = useRef<HTMLDivElement>(null);
+	const [slideClass, setSlideClass] = useState("");
+	const [dragOffset, setDragOffset] = useState(0);
+	const isDragging = useRef(false);
+	const prevFolderName = useRef(folderName);
 
-  useEffect(() => {
-    if (prevFolderName.current !== folderName && !isDragging.current) {
-      prevFolderName.current = folderName;
-    }
-  }, [folderName]);
+	useEffect(() => {
+		if (prevFolderName.current !== folderName && !isDragging.current) {
+			prevFolderName.current = folderName;
+		}
+	}, [folderName]);
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
-    touchDeltaX.current = 0;
-    isDragging.current = false;
-    setSlideClass("");
-  }, []);
+	const handleTouchStart = useCallback((e: React.TouchEvent) => {
+		touchStartX.current = e.touches[0].clientX;
+		touchStartY.current = e.touches[0].clientY;
+		touchDeltaX.current = 0;
+		isDragging.current = false;
+		setSlideClass("");
+	}, []);
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (touchStartX.current === null || touchStartY.current === null) return;
-    const dx = e.touches[0].clientX - touchStartX.current;
-    const dy = e.touches[0].clientY - touchStartY.current;
-    if (
-      !isDragging.current &&
-      Math.abs(dx) > 10 &&
-      Math.abs(dx) > Math.abs(dy)
-    ) {
-      isDragging.current = true;
-    }
-    if (isDragging.current) {
-      touchDeltaX.current = dx;
-      setDragOffset(dx * 0.4);
-    }
-  }, []);
+	const handleTouchMove = useCallback((e: React.TouchEvent) => {
+		if (touchStartX.current === null || touchStartY.current === null) return;
+		const dx = e.touches[0].clientX - touchStartX.current;
+		const dy = e.touches[0].clientY - touchStartY.current;
+		if (
+			!isDragging.current &&
+			Math.abs(dx) > 10 &&
+			Math.abs(dx) > Math.abs(dy)
+		) {
+			isDragging.current = true;
+		}
+		if (isDragging.current) {
+			touchDeltaX.current = dx;
+			setDragOffset(dx * 0.4);
+		}
+	}, []);
 
-  const handleTouchEnd = useCallback(
-    (e: React.TouchEvent) => {
-      const wasDragging = isDragging.current;
-      isDragging.current = false;
+	const handleTouchEnd = useCallback(
+		(e: React.TouchEvent) => {
+			isDragging.current = false;
 
-      if (
-        touchStartX.current === null ||
-        touchStartY.current === null ||
-        !onSwipe
-      ) {
-        setDragOffset(0);
-        return;
-      }
-      const deltaX = e.changedTouches[0].clientX - touchStartX.current;
-      const deltaY = e.changedTouches[0].clientY - touchStartY.current;
-      touchStartX.current = null;
-      touchStartY.current = null;
+			if (
+				touchStartX.current === null ||
+				touchStartY.current === null ||
+				!onSwipe
+			) {
+				setDragOffset(0);
+				return;
+			}
+			const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+			const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+			touchStartX.current = null;
+			touchStartY.current = null;
 
-      if (Math.abs(deltaX) < 50 || Math.abs(deltaY) > Math.abs(deltaX)) {
-        setDragOffset(0);
-        return;
-      }
+			if (Math.abs(deltaX) < 50 || Math.abs(deltaY) > Math.abs(deltaX)) {
+				setDragOffset(0);
+				return;
+			}
 
-      const direction = deltaX < 0 ? "left" : "right";
-      setSlideClass(
-        direction === "left"
-          ? "animate-slide-out-left"
-          : "animate-slide-out-right",
-      );
+			const direction = deltaX < 0 ? "left" : "right";
+			setSlideClass(
+				direction === "left"
+					? "animate-slide-out-left"
+					: "animate-slide-out-right",
+			);
 
-      setTimeout(() => {
-        onSwipe(direction);
-        setDragOffset(0);
-        setSlideClass(
-          direction === "left"
-            ? "animate-slide-in-right"
-            : "animate-slide-in-left",
-        );
-        setTimeout(() => setSlideClass(""), 250);
-      }, 150);
-    },
-    [onSwipe],
-  );
+			setTimeout(() => {
+				onSwipe(direction);
+				setDragOffset(0);
+				setSlideClass(
+					direction === "left"
+						? "animate-slide-in-right"
+						: "animate-slide-in-left",
+				);
+				setTimeout(() => setSlideClass(""), 250);
+			}, 150);
+		},
+		[onSwipe],
+	);
 
-  const handleChevron = useCallback(
-    (direction: "left" | "right") => {
-      if (!onSwipe) return;
-      setSlideClass(
-        direction === "left"
-          ? "animate-slide-out-left"
-          : "animate-slide-out-right",
-      );
-      setTimeout(() => {
-        onSwipe(direction);
-        setSlideClass(
-          direction === "left"
-            ? "animate-slide-in-right"
-            : "animate-slide-in-left",
-        );
-        setTimeout(() => setSlideClass(""), 250);
-      }, 150);
-    },
-    [onSwipe],
-  );
+	const handleChevron = useCallback(
+		(direction: "left" | "right") => {
+			if (!onSwipe) return;
+			setSlideClass(
+				direction === "left"
+					? "animate-slide-out-left"
+					: "animate-slide-out-right",
+			);
+			setTimeout(() => {
+				onSwipe(direction);
+				setSlideClass(
+					direction === "left"
+						? "animate-slide-in-right"
+						: "animate-slide-in-left",
+				);
+				setTimeout(() => setSlideClass(""), 250);
+			}, 150);
+		},
+		[onSwipe],
+	);
 
-  const getBreakEvenPlan = () => {
-    if (profit >= 0 || !products || products.length === 0) return null;
+	const getBreakEvenPlan = () => {
+		if (profit >= 0 || !products || products.length === 0) return null;
 
-    let deficit = Math.abs(profit);
-    const plan: { name: string; count: number; total: number }[] = [];
+		let deficit = Math.abs(profit);
+		const plan: { name: string; count: number; total: number }[] = [];
 
-    const available = products
-      .filter((p) => {
-        const rawPrice = p.priceInUA || 0;
-        const netPrice = p.netPrice || (rawPrice > 0 ? rawPrice * 0.97 - 30 : 0);
-        if (netPrice <= 0) return false;
-        const sold = p.sellsCount || 0;
-        const stock = p.totalPurchased || 0;
-        return stock > sold;
-      })
-      .map((p) => {
-        const rawPrice = p.priceInUA || 0;
-        const netPrice = p.netPrice || (rawPrice > 0 ? rawPrice * 0.97 - 30 : 0);
-        const sold = p.sellsCount || 0;
-        const stock = p.totalPurchased || 0;
-        return {
-          id: p.id,
-          name: p.name,
-          price: netPrice,
-          remaining: stock - sold,
-        };
-      })
-      .sort((a, b) => b.price - a.price);
+		const available = products
+			.filter((p) => {
+				const rawPrice = p.priceInUA || 0;
+				const netPrice =
+					p.netPrice || (rawPrice > 0 ? rawPrice * 0.97 - 30 : 0);
+				if (netPrice <= 0) return false;
+				const sold = p.sellsCount || 0;
+				const stock = p.totalPurchased || 0;
+				return stock > sold;
+			})
+			.map((p) => {
+				const rawPrice = p.priceInUA || 0;
+				const netPrice =
+					p.netPrice || (rawPrice > 0 ? rawPrice * 0.97 - 30 : 0);
+				const sold = p.sellsCount || 0;
+				const stock = p.totalPurchased || 0;
+				return {
+					id: p.id,
+					name: p.name,
+					price: netPrice,
+					remaining: stock - sold,
+				};
+			})
+			.sort((a, b) => b.price - a.price);
 
-    for (const item of available) {
-      if (deficit <= 0) break;
-      const needToSell = Math.min(
-        item.remaining,
-        Math.ceil(deficit / item.price),
-      );
-      if (needToSell > 0) {
-        plan.push({
-          name: item.name,
-          count: needToSell,
-          total: needToSell * item.price,
-        });
-        deficit -= needToSell * item.price;
-      }
-    }
+		for (const item of available) {
+			if (deficit <= 0) break;
+			const needToSell = Math.min(
+				item.remaining,
+				Math.ceil(deficit / item.price),
+			);
+			if (needToSell > 0) {
+				plan.push({
+					name: item.name,
+					count: needToSell,
+					total: needToSell * item.price,
+				});
+				deficit -= needToSell * item.price;
+			}
+		}
 
-    return {
-      plan,
-      remainingDeficit: deficit > 0 ? deficit : 0,
-      finalProfit: deficit <= 0 ? Math.abs(deficit) : 0,
-    };
-  };
+		return {
+			plan,
+			remainingDeficit: deficit > 0 ? deficit : 0,
+			finalProfit: deficit <= 0 ? Math.abs(deficit) : 0,
+		};
+	};
 
-  const breakEvenPlan = getBreakEvenPlan();
+	const breakEvenPlan = getBreakEvenPlan();
 
-  const getAlternativePlans = () => {
-    if (profit >= 0 || !products || products.length === 0) return [];
+	const getAlternativePlans = () => {
+		if (profit >= 0 || !products || products.length === 0) return [];
 
-    const deficit = Math.abs(profit);
+		const deficit = Math.abs(profit);
 
-    const available = products
-      .filter((p) => {
-        const rawPrice = p.priceInUA || 0;
-        const netPrice = p.netPrice || (rawPrice > 0 ? rawPrice * 0.97 - 30 : 0);
-        if (netPrice <= 0) return false;
-        const sold = p.sellsCount || 0;
-        const stock = p.totalPurchased || 0;
-        return stock > sold;
-      })
-      .map((p) => {
-        const rawPrice = p.priceInUA || 0;
-        const netPrice = p.netPrice || (rawPrice > 0 ? rawPrice * 0.97 - 30 : 0);
-        const sold = p.sellsCount || 0;
-        const stock = p.totalPurchased || 0;
-        return {
-          id: p.id,
-          name: p.name,
-          price: netPrice,
-          remaining: stock - sold,
-        };
-      });
+		const available = products
+			.filter((p) => {
+				const rawPrice = p.priceInUA || 0;
+				const netPrice =
+					p.netPrice || (rawPrice > 0 ? rawPrice * 0.97 - 30 : 0);
+				if (netPrice <= 0) return false;
+				const sold = p.sellsCount || 0;
+				const stock = p.totalPurchased || 0;
+				return stock > sold;
+			})
+			.map((p) => {
+				const rawPrice = p.priceInUA || 0;
+				const netPrice =
+					p.netPrice || (rawPrice > 0 ? rawPrice * 0.97 - 30 : 0);
+				const sold = p.sellsCount || 0;
+				const stock = p.totalPurchased || 0;
+				return {
+					id: p.id,
+					name: p.name,
+					price: netPrice,
+					remaining: stock - sold,
+				};
+			});
 
-    if (available.length === 0) return [];
+		if (available.length === 0) return [];
 
-    const options: {
-      type: string;
-      title: string;
-      items: { name: string; count: number }[];
-      profit: number;
-      remainingDeficit: number;
-    }[] = [];
+		const options: {
+			type: string;
+			title: string;
+			items: { name: string; count: number }[];
+			profit: number;
+			remainingDeficit: number;
+		}[] = [];
 
-    const solveGreedy = (sortedItems: typeof available, title: string, type: string) => {
-      let currentDeficit = deficit;
-      const items: { name: string; count: number }[] = [];
-      let totalEarned = 0;
+		const solveGreedy = (
+			sortedItems: typeof available,
+			title: string,
+			type: string,
+		) => {
+			let currentDeficit = deficit;
+			const items: { name: string; count: number }[] = [];
+			let totalEarned = 0;
 
-      for (const item of sortedItems) {
-        if (currentDeficit <= 0) break;
-        const countToSell = Math.min(
-          item.remaining,
-          Math.ceil(currentDeficit / item.price)
-        );
-        if (countToSell > 0) {
-          items.push({ name: item.name, count: countToSell });
-          currentDeficit -= countToSell * item.price;
-          totalEarned += countToSell * item.price;
-        }
-      }
+			for (const item of sortedItems) {
+				if (currentDeficit <= 0) break;
+				const countToSell = Math.min(
+					item.remaining,
+					Math.ceil(currentDeficit / item.price),
+				);
+				if (countToSell > 0) {
+					items.push({ name: item.name, count: countToSell });
+					currentDeficit -= countToSell * item.price;
+					totalEarned += countToSell * item.price;
+				}
+			}
 
-      return {
-        type,
-        title,
-        items,
-        profit: currentDeficit <= 0 ? totalEarned - deficit : totalEarned - deficit,
-        remainingDeficit: currentDeficit > 0 ? currentDeficit : 0,
-      };
-    };
+			return {
+				type,
+				title,
+				items,
+				profit:
+					currentDeficit <= 0 ? totalEarned - deficit : totalEarned - deficit,
+				remainingDeficit: currentDeficit > 0 ? currentDeficit : 0,
+			};
+		};
 
-    // Strategy 1: Greedy sorting by Price Descending (Minimize number of units sold)
-    const mixPriceDesc = [...available].sort((a, b) => b.price - a.price);
-    options.push(solveGreedy(mixPriceDesc, "Оптимальный микс (Минимум штук)", "mix_optimal"));
+		// Strategy 1: Greedy sorting by Price Descending (Minimize number of units sold)
+		const mixPriceDesc = [...available].sort((a, b) => b.price - a.price);
+		options.push(
+			solveGreedy(
+				mixPriceDesc,
+				"Оптимальный микс (Минимум штук)",
+				"mix_optimal",
+			),
+		);
 
-    // Strategy 2: Greedy sorting by Remaining Stock Descending (Clear out largest stocks first)
-    const mixStockDesc = [...available].sort((a, b) => b.remaining - a.remaining);
-    options.push(solveGreedy(mixStockDesc, "Разгрузка склада (По остаткам)", "mix_clear_large"));
+		// Strategy 2: Greedy sorting by Remaining Stock Descending (Clear out largest stocks first)
+		const mixStockDesc = [...available].sort(
+			(a, b) => b.remaining - a.remaining,
+		);
+		options.push(
+			solveGreedy(
+				mixStockDesc,
+				"Разгрузка склада (По остаткам)",
+				"mix_clear_large",
+			),
+		);
 
-    // Strategy 3: Greedy sorting by Remaining Stock Ascending (Clear out almost-finished batches)
-    const mixStockAsc = [...available].sort((a, b) => a.remaining - b.remaining);
-    options.push(solveGreedy(mixStockAsc, "Закрытие мелких партий", "mix_clear_small"));
+		// Strategy 3: Greedy sorting by Remaining Stock Ascending (Clear out almost-finished batches)
+		const mixStockAsc = [...available].sort(
+			(a, b) => a.remaining - b.remaining,
+		);
+		options.push(
+			solveGreedy(mixStockAsc, "Закрытие мелких партий", "mix_clear_small"),
+		);
 
-    // Strategy 4: Single product focus (for any product that can cover the deficit alone)
-    for (const p of available) {
-      const need = Math.ceil(deficit / p.price);
-      if (need <= p.remaining) {
-        options.push({
-          type: "single",
-          title: `Только "${p.name}"`,
-          items: [{ name: p.name, count: need }],
-          profit: need * p.price - deficit,
-          remainingDeficit: 0,
-        });
-      }
-    }
+		// Strategy 4: Single product focus (for any product that can cover the deficit alone)
+		for (const p of available) {
+			const need = Math.ceil(deficit / p.price);
+			if (need <= p.remaining) {
+				options.push({
+					type: "single",
+					title: `Только "${p.name}"`,
+					items: [{ name: p.name, count: need }],
+					profit: need * p.price - deficit,
+					remainingDeficit: 0,
+				});
+			}
+		}
 
-    // Strategy 5: Partial single product focus
-    if (options.filter(o => o.type === "single").length === 0) {
-      const sortedByCoverage = [...available]
-        .map(p => ({ p, coverage: p.remaining * p.price }))
-        .sort((a, b) => b.coverage - a.coverage);
+		// Strategy 5: Partial single product focus
+		if (options.filter((o) => o.type === "single").length === 0) {
+			const sortedByCoverage = [...available]
+				.map((p) => ({ p, coverage: p.remaining * p.price }))
+				.sort((a, b) => b.coverage - a.coverage);
 
-      for (const entry of sortedByCoverage.slice(0, 3)) {
-        options.push({
-          type: "single_partial",
-          title: `Максимум из "${entry.p.name}" (Частично)`,
-          items: [{ name: entry.p.name, count: entry.p.remaining }],
-          profit: entry.coverage - deficit,
-          remainingDeficit: Math.max(0, deficit - entry.coverage),
-        });
-      }
-    }
+			for (const entry of sortedByCoverage.slice(0, 3)) {
+				options.push({
+					type: "single_partial",
+					title: `Максимум из "${entry.p.name}" (Частично)`,
+					items: [{ name: entry.p.name, count: entry.p.remaining }],
+					profit: entry.coverage - deficit,
+					remainingDeficit: Math.max(0, deficit - entry.coverage),
+				});
+			}
+		}
 
-    // Strategy 6: Balanced Mix
-    let low = 0;
-    let high = 1.0;
-    let bestP = 1.0;
-    for (let step = 0; step < 20; step++) {
-      const mid = (low + high) / 2;
-      let sum = 0;
-      for (const item of available) {
-        sum += Math.ceil(mid * item.remaining) * item.price;
-      }
-      if (sum >= deficit) {
-        bestP = mid;
-        high = mid;
-      } else {
-        low = mid;
-      }
-    }
-    const balancedItems: { name: string; count: number }[] = [];
-    let balancedSum = 0;
-    for (const item of available) {
-      const count = Math.ceil(bestP * item.remaining);
-      if (count > 0) {
-        balancedItems.push({ name: item.name, count });
-        balancedSum += count * item.price;
-      }
-    }
-    if (balancedItems.length > 0) {
-      options.push({
-        type: "balanced",
-        title: `Равномерный микс (~${Math.round(bestP * 100)}% от остатка)`,
-        items: balancedItems,
-        profit: balancedSum - deficit,
-        remainingDeficit: balancedSum >= deficit ? 0 : Math.max(0, deficit - balancedSum),
-      });
-    }
+		// Strategy 6: Balanced Mix
+		let low = 0;
+		let high = 1.0;
+		let bestP = 1.0;
+		for (let step = 0; step < 20; step++) {
+			const mid = (low + high) / 2;
+			let sum = 0;
+			for (const item of available) {
+				sum += Math.ceil(mid * item.remaining) * item.price;
+			}
+			if (sum >= deficit) {
+				bestP = mid;
+				high = mid;
+			} else {
+				low = mid;
+			}
+		}
+		const balancedItems: { name: string; count: number }[] = [];
+		let balancedSum = 0;
+		for (const item of available) {
+			const count = Math.ceil(bestP * item.remaining);
+			if (count > 0) {
+				balancedItems.push({ name: item.name, count });
+				balancedSum += count * item.price;
+			}
+		}
+		if (balancedItems.length > 0) {
+			options.push({
+				type: "balanced",
+				title: `Равномерный микс (~${Math.round(bestP * 100)}% от остатка)`,
+				items: balancedItems,
+				profit: balancedSum - deficit,
+				remainingDeficit:
+					balancedSum >= deficit ? 0 : Math.max(0, deficit - balancedSum),
+			});
+		}
 
-    // Strategy 7: Sell Everything (if total stock is not enough to cover deficit)
-    const totalPotential = available.reduce((sum, p) => sum + p.remaining * p.price, 0);
-    if (totalPotential < deficit) {
-      options.push({
-        type: "sell_all",
-        title: "Продать все доступные остатки",
-        items: available.map(p => ({ name: p.name, count: p.remaining })),
-        profit: totalPotential - deficit,
-        remainingDeficit: deficit - totalPotential,
-      });
-    }
+		// Strategy 7: Sell Everything (if total stock is not enough to cover deficit)
+		const totalPotential = available.reduce(
+			(sum, p) => sum + p.remaining * p.price,
+			0,
+		);
+		if (totalPotential < deficit) {
+			options.push({
+				type: "sell_all",
+				title: "Продать все доступные остатки",
+				items: available.map((p) => ({ name: p.name, count: p.remaining })),
+				profit: totalPotential - deficit,
+				remainingDeficit: deficit - totalPotential,
+			});
+		}
 
-    // Filter duplicates and empty item arrays
-    const uniqueOptions: typeof options = [];
-    const seenSignatures = new Set<string>();
+		// Filter duplicates and empty item arrays
+		const uniqueOptions: typeof options = [];
+		const seenSignatures = new Set<string>();
 
-    for (const opt of options) {
-      if (opt.items.length === 0) continue;
-      const signature = opt.items
-        .map(i => `${i.name}:${i.count}`)
-        .sort()
-        .join("|");
-      if (!seenSignatures.has(signature)) {
-        seenSignatures.add(signature);
-        uniqueOptions.push(opt);
-      }
-    }
+		for (const opt of options) {
+			if (opt.items.length === 0) continue;
+			const signature = opt.items
+				.map((i) => `${i.name}:${i.count}`)
+				.sort()
+				.join("|");
+			if (!seenSignatures.has(signature)) {
+				seenSignatures.add(signature);
+				uniqueOptions.push(opt);
+			}
+		}
 
-    uniqueOptions.sort((a, b) => {
-      if (a.remainingDeficit === 0 && b.remainingDeficit > 0) return -1;
-      if (a.remainingDeficit > 0 && b.remainingDeficit === 0) return 1;
+		uniqueOptions.sort((a, b) => {
+			if (a.remainingDeficit === 0 && b.remainingDeficit > 0) return -1;
+			if (a.remainingDeficit > 0 && b.remainingDeficit === 0) return 1;
 
-      if (a.remainingDeficit === 0 && b.remainingDeficit === 0) {
-        const aCount = a.items.reduce((sum, i) => sum + i.count, 0);
-        const bCount = b.items.reduce((sum, i) => sum + i.count, 0);
-        if (aCount !== bCount) return aCount - bCount;
-        return b.profit - a.profit;
-      } else {
-        return a.remainingDeficit - b.remainingDeficit;
-      }
-    });
+			if (a.remainingDeficit === 0 && b.remainingDeficit === 0) {
+				const aCount = a.items.reduce((sum, i) => sum + i.count, 0);
+				const bCount = b.items.reduce((sum, i) => sum + i.count, 0);
+				if (aCount !== bCount) return aCount - bCount;
+				return b.profit - a.profit;
+			} else {
+				return a.remainingDeficit - b.remainingDeficit;
+			}
+		});
 
-    return uniqueOptions.slice(0, 10);
-  };
+		return uniqueOptions.slice(0, 10);
+	};
 
-  const alternativePlans = getAlternativePlans();
+	const alternativePlans = getAlternativePlans();
 
-  return (
-    <div className="mb-6 overflow-hidden py-5 rounded-xl">
-      <style>{`
+	return (
+		<div className="mb-6 overflow-hidden py-5 rounded-xl">
+			<style>{`
         @keyframes slideOutLeft {
           from { transform: translateX(0); opacity: 1; }
           to { transform: translateX(-60px); opacity: 0; }
@@ -427,291 +457,297 @@ export function Summary({
         .animate-slide-in-left { animation: slideInLeft 250ms ease-out forwards; }
         .animate-slide-in-right { animation: slideInRight 250ms ease-out forwards; }
       `}</style>
-      {folderName && (
-        <div className="flex items-center justify-center gap-2 mb-3 sm:hidden">
-          <button
-            onClick={() => handleChevron("right")}
-            className="p-1.5 rounded-lg text-muted-foreground hover:bg-foreground/5 active:bg-foreground/10 transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          <div
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-xl bg-primary/10 text-primary text-xs font-bold transition-transform ${slideClass}`}
-          >
-            <FolderOpen className="w-3.5 h-3.5" />
-            {folderName}
-          </div>
-          <button
-            onClick={() => handleChevron("left")}
-            className="p-1.5 rounded-lg text-muted-foreground hover:bg-foreground/5 active:bg-foreground/10 transition-colors"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-      )}
-      <div
-        ref={gridRef}
-        className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 ${slideClass}`}
-        style={
-          dragOffset
-            ? {
-                transform: `translateX(${dragOffset}px)`,
-                opacity: Math.max(0.3, 1 - Math.abs(dragOffset) / 200),
-              }
-            : undefined
-        }
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
-        <Card
-          onClick={onOpenPriceModal}
-          className={`p-5 glass-card flex flex-col justify-between space-y-3 ${
-            onOpenPriceModal ? "cursor-pointer hover:border-red-500/40 group transition-all" : ""
-          }`}
-          title={onOpenPriceModal ? "Нажмите для управления ценами закупки" : undefined}
-        >
-          <div className="flex items-center justify-between text-muted-foreground/80">
-            <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
-              Расходы
-            </span>
-            <div className="p-2 bg-red-500/10 rounded-xl group-hover:scale-110 transition-transform">
-              <TrendingDown className="h-5 w-5 text-red-500" />
-            </div>
-          </div>
-          <div className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
-            {totalSpent.toLocaleString()}{" "}
-            <span className="text-sm font-medium text-muted-foreground">₴</span>
-          </div>
-        </Card>
+			{folderName && (
+				<div className="flex items-center justify-center gap-2 mb-3 sm:hidden">
+					<button
+						onClick={() => handleChevron("right")}
+						className="p-1.5 rounded-lg text-muted-foreground hover:bg-foreground/5 active:bg-foreground/10 transition-colors"
+					>
+						<ChevronLeft className="w-4 h-4" />
+					</button>
+					<div
+						className={`flex items-center gap-1.5 px-3 py-1 rounded-xl bg-primary/10 text-primary text-xs font-bold transition-transform ${slideClass}`}
+					>
+						<FolderOpen className="w-3.5 h-3.5" />
+						{folderName}
+					</div>
+					<button
+						onClick={() => handleChevron("left")}
+						className="p-1.5 rounded-lg text-muted-foreground hover:bg-foreground/5 active:bg-foreground/10 transition-colors"
+					>
+						<ChevronRight className="w-4 h-4" />
+					</button>
+				</div>
+			)}
+			<div
+				ref={gridRef}
+				className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 ${slideClass}`}
+				style={
+					dragOffset
+						? {
+								transform: `translateX(${dragOffset}px)`,
+								opacity: Math.max(0.3, 1 - Math.abs(dragOffset) / 200),
+							}
+						: undefined
+				}
+				onTouchStart={handleTouchStart}
+				onTouchMove={handleTouchMove}
+				onTouchEnd={handleTouchEnd}
+			>
+				<Card
+					onClick={onOpenPriceModal}
+					className={`p-5 glass-card flex flex-col justify-between space-y-3 ${
+						onOpenPriceModal
+							? "cursor-pointer hover:border-red-500/40 group transition-all"
+							: ""
+					}`}
+					title={
+						onOpenPriceModal
+							? "Нажмите для управления ценами закупки"
+							: undefined
+					}
+				>
+					<div className="flex items-center justify-between text-muted-foreground/80">
+						<span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
+							Расходы
+						</span>
+						<div className="p-2 bg-red-500/10 rounded-xl group-hover:scale-110 transition-transform">
+							<TrendingDown className="h-5 w-5 text-red-500" />
+						</div>
+					</div>
+					<div className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
+						{totalSpent.toLocaleString()}{" "}
+						<span className="text-sm font-medium text-muted-foreground">₴</span>
+					</div>
+				</Card>
 
-        <Card className="p-5 glass-card flex flex-col justify-between space-y-3">
-          <div className="flex items-center justify-between text-muted-foreground/80">
-            <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
-              Доходы
-            </span>
-            <div className="p-2 bg-green-500/10 rounded-xl">
-              <TrendingUp className="h-5 w-5 text-green-500" />
-            </div>
-          </div>
-          <div className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
-            {totalIncome.toLocaleString()}{" "}
-            <span className="text-sm font-medium text-muted-foreground">₴</span>
-          </div>
-        </Card>
+				<Card className="p-5 glass-card flex flex-col justify-between space-y-3">
+					<div className="flex items-center justify-between text-muted-foreground/80">
+						<span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
+							Доходы
+						</span>
+						<div className="p-2 bg-green-500/10 rounded-xl">
+							<TrendingUp className="h-5 w-5 text-green-500" />
+						</div>
+					</div>
+					<div className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
+						{totalIncome.toLocaleString()}{" "}
+						<span className="text-sm font-medium text-muted-foreground">₴</span>
+					</div>
+				</Card>
 
-        <Card
-          onClick={() => {
-            if (profit < 0) setShowBreakEven(!showBreakEven);
-          }}
-          className={`p-5 glass-card flex flex-col justify-between relative overflow-hidden group ${profit < 0 ? "cursor-pointer hover:border-primary/40" : ""}`}
-        >
-          <div className="absolute -top-3 -left-4 w-120 h-120 bg-primary/5 group-hover:bg-primary/10 transition-colors" />
-          <div className="flex items-center justify-between text-primary relative z-10">
-            <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
-              {showBreakEven && profit < 0 ? "Выход в ноль" : "Прибыль"}
-            </span>
-            <div className="p-2 bg-primary/10 rounded-xl">
-              <Wallet className="h-5 w-5" />
-            </div>
-          </div>
-          <div className="relative z-10">
-            {!showBreakEven || profit >= 0 ? (
-              <div
-                className={`text-xl sm:text-2xl font-black tracking-tight ${
-                  profit >= 0 ? "text-primary" : "text-destructive"
-                }`}
-              >
-                {profit.toLocaleString()}{" "}
-                <span className="text-sm font-medium opacity-70">₴</span>
-              </div>
-            ) : (
-              <div className="text-sm text-foreground/90 font-medium flex flex-col w-full">
-                {breakEvenPlan?.plan.length ? (
-                  <div className="space-y-1 pr-1 flex-1">
-                    {breakEvenPlan.plan.slice(0, 3).map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="flex justify-between items-center text-sm sm:text-base"
-                      >
-                        <span
-                          className="truncate max-w-[140px] sm:max-w-[160px] mr-2 text-muted-foreground"
-                          title={item.name}
-                        >
-                          {item.name}:
-                        </span>
-                        <span className="whitespace-nowrap font-black text-primary">
-                          {item.count} шт
-                        </span>
-                      </div>
-                    ))}
-                    {breakEvenPlan.plan.length > 3 && (
-                      <div className="text-xs text-muted-foreground italic">
-                        + еще {breakEvenPlan.plan.length - 3} тов.
-                      </div>
-                    )}
-                    {breakEvenPlan.remainingDeficit > 0 ? (
-                      <div className="text-destructive text-xs font-bold mt-1 border-t border-destructive/20 pt-1 leading-tight">
-                        Не хватит, останется{" "}
-                        {breakEvenPlan.remainingDeficit.toLocaleString()} ₴
-                      </div>
-                    ) : (
-                      <div className="text-green-500 text-xs font-bold mt-1 border-t border-green-500/20 pt-1 flex justify-between">
-                        <span>Остаток после:</span>
-                        <span>
-                          +{breakEvenPlan.finalProfit.toLocaleString()} ₴
-                        </span>
-                      </div>
-                    )}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowOptionsModal(true);
-                      }}
-                      className="w-full mt-2 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold rounded-lg transition-colors border border-primary/20"
-                    >
-                      Показать 10 лучших вариантов
-                    </button>
-                  </div>
-                ) : (
-                  <div className="text-destructive text-sm font-bold">
-                    Нет товаров
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </Card>
+				<Card
+					onClick={() => {
+						if (profit < 0) setShowBreakEven(!showBreakEven);
+					}}
+					className={`p-5 glass-card flex flex-col justify-between relative overflow-hidden group ${profit < 0 ? "cursor-pointer hover:border-primary/40" : ""}`}
+				>
+					<div className="absolute -top-3 -left-4 w-120 h-120 bg-primary/5 group-hover:bg-primary/10 transition-colors" />
+					<div className="flex items-center justify-between text-primary relative z-10">
+						<span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
+							{showBreakEven && profit < 0 ? "Выход в ноль" : "Прибыль"}
+						</span>
+						<div className="p-2 bg-primary/10 rounded-xl">
+							<Wallet className="h-5 w-5" />
+						</div>
+					</div>
+					<div className="relative z-10">
+						{!showBreakEven || profit >= 0 ? (
+							<div
+								className={`text-xl sm:text-2xl font-black tracking-tight ${
+									profit >= 0 ? "text-primary" : "text-destructive"
+								}`}
+							>
+								{profit.toLocaleString()}{" "}
+								<span className="text-sm font-medium opacity-70">₴</span>
+							</div>
+						) : (
+							<div className="text-sm text-foreground/90 font-medium flex flex-col w-full">
+								{breakEvenPlan?.plan.length ? (
+									<div className="space-y-1 pr-1 flex-1">
+										{breakEvenPlan.plan.slice(0, 3).map((item, idx) => (
+											<div
+												key={idx}
+												className="flex justify-between items-center text-sm sm:text-base"
+											>
+												<span
+													className="truncate max-w-35 sm:max-w-40 mr-2 text-muted-foreground"
+													title={item.name}
+												>
+													{item.name}:
+												</span>
+												<span className="whitespace-nowrap font-black text-primary">
+													{item.count} шт
+												</span>
+											</div>
+										))}
+										{breakEvenPlan.plan.length > 3 && (
+											<div className="text-xs text-muted-foreground italic">
+												+ еще {breakEvenPlan.plan.length - 3} тов.
+											</div>
+										)}
+										{breakEvenPlan.remainingDeficit > 0 ? (
+											<div className="text-destructive text-xs font-bold mt-1 border-t border-destructive/20 pt-1 leading-tight">
+												Не хватит, останется{" "}
+												{breakEvenPlan.remainingDeficit.toLocaleString()} ₴
+											</div>
+										) : (
+											<div className="text-green-500 text-xs font-bold mt-1 border-t border-green-500/20 pt-1 flex justify-between">
+												<span>Остаток после:</span>
+												<span>
+													+{breakEvenPlan.finalProfit.toLocaleString()} ₴
+												</span>
+											</div>
+										)}
+										<button
+											onClick={(e) => {
+												e.stopPropagation();
+												setShowOptionsModal(true);
+											}}
+											className="w-full mt-2 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold rounded-lg transition-colors border border-primary/20"
+										>
+											Показать 10 лучших вариантов
+										</button>
+									</div>
+								) : (
+									<div className="text-destructive text-sm font-bold">
+										Нет товаров
+									</div>
+								)}
+							</div>
+						)}
+					</div>
+				</Card>
 
-        <Card
-          onClick={() => setShowGross(!showGross)}
-          className="p-5 glass-card flex flex-col justify-between space-y-3 cursor-pointer group hover:border-primary/40 relative overflow-hidden"
-        >
-          <div className="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Sparkles className="w-3 h-3 text-primary animate-pulse" />
-          </div>
-          <div className="flex items-center justify-between text-primary">
-            <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
-              Прогноз {showGross ? "(Грязными)" : "(Чистыми)"}
-            </span>
-            <div className="p-2 bg-primary/10 rounded-xl transition-transform group-hover:rotate-12">
-              <TrendingUp className="h-5 w-5" />
-            </div>
-          </div>
-          <div className="text-xl sm:text-2xl font-black tracking-tight text-primary">
-            {showGross
-              ? totalProjectedRevenue.toLocaleString()
-              : totalProjectedProfit.toLocaleString()}{" "}
-            <span className="text-sm font-medium opacity-70">₴</span>
-          </div>
-        </Card>
+				<Card
+					onClick={() => setShowGross(!showGross)}
+					className="p-5 glass-card flex flex-col justify-between space-y-3 cursor-pointer group hover:border-primary/40 relative overflow-hidden"
+				>
+					<div className="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+						<Sparkles className="w-3 h-3 text-primary animate-pulse" />
+					</div>
+					<div className="flex items-center justify-between text-primary">
+						<span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
+							Прогноз {showGross ? "(Грязными)" : "(Чистыми)"}
+						</span>
+						<div className="p-2 bg-primary/10 rounded-xl transition-transform group-hover:rotate-12">
+							<TrendingUp className="h-5 w-5" />
+						</div>
+					</div>
+					<div className="text-xl sm:text-2xl font-black tracking-tight text-primary">
+						{showGross
+							? totalProjectedRevenue.toLocaleString()
+							: totalProjectedProfit.toLocaleString()}{" "}
+						<span className="text-sm font-medium opacity-70">₴</span>
+					</div>
+				</Card>
 
-        <Card
-          onClick={() => setShowWeight(!showWeight)}
-          className="p-5 glass-card flex flex-col justify-between space-y-3 cursor-pointer group hover:border-primary/40 relative overflow-hidden transition-all duration-300"
-        >
-          <div className="flex items-center justify-between text-muted-foreground/80 relative z-10">
-            <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
-              {showWeight ? "Общий вес" : "Товары"}
-            </span>
-            <div className="p-2 bg-blue-500/10 rounded-xl transition-transform group-hover:scale-110">
-              {showWeight ? (
-                <Weight className="h-5 w-5 text-blue-500" />
-              ) : (
-                <Package className="h-5 w-5 text-blue-500" />
-              )}
-            </div>
-          </div>
-          <div className="text-xl sm:text-2xl font-black tracking-tight text-foreground relative z-10">
-            {showWeight ? formattedTotalWeight : variationsCount}
-          </div>
-        </Card>
-      </div>
+				<Card
+					onClick={() => setShowWeight(!showWeight)}
+					className="p-5 glass-card flex flex-col justify-between space-y-3 cursor-pointer group hover:border-primary/40 relative overflow-hidden transition-all duration-300"
+				>
+					<div className="flex items-center justify-between text-muted-foreground/80 relative z-10">
+						<span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
+							{showWeight ? "Общий вес" : "Товары"}
+						</span>
+						<div className="p-2 bg-blue-500/10 rounded-xl transition-transform group-hover:scale-110">
+							{showWeight ? (
+								<Weight className="h-5 w-5 text-blue-500" />
+							) : (
+								<Package className="h-5 w-5 text-blue-500" />
+							)}
+						</div>
+					</div>
+					<div className="text-xl sm:text-2xl font-black tracking-tight text-foreground relative z-10">
+						{showWeight ? formattedTotalWeight : variationsCount}
+					</div>
+				</Card>
+			</div>
 
-      {showOptionsModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-          onClick={() => setShowOptionsModal(false)}
-        >
-          <div
-            className="bg-background border border-border shadow-2xl rounded-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[85vh]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between p-4 border-b">
-              <h2 className="text-lg font-black flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-primary" />
-                Топ 10 вариантов выхода в ноль
-              </h2>
-              <button
-                onClick={() => setShowOptionsModal(false)}
-                className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-4 overflow-y-auto space-y-3 custom-scrollbar">
-              {alternativePlans.length > 0 ? (
-                alternativePlans.map((opt, i) => (
-                  <div
-                    key={i}
-                    className="p-3 rounded-xl border bg-card hover:bg-muted/30 transition-colors"
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-bold text-sm text-foreground flex items-center gap-2">
-                        <div className="bg-primary text-primary-foreground text-xs w-5 h-5 rounded-full flex items-center justify-center shadow-md">
-                          {i + 1}
-                        </div>
-                        {opt.title}
-                      </h3>
-                      <div className="text-right pl-2">
-                        {opt.remainingDeficit > 0 ? (
-                          <>
-                            <p className="text-[10px] font-medium text-destructive uppercase tracking-widest mb-0.5">
-                              Останется дефицит:
-                            </p>
-                            <p className="text-sm font-black text-destructive">
-                              -{opt.remainingDeficit.toLocaleString()} ₴
-                            </p>
-                          </>
-                        ) : (
-                          <>
-                            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest mb-0.5">
-                              Чистыми после:
-                            </p>
-                            <p className="text-sm font-black text-green-500">
-                              +{opt.profit.toLocaleString()} ₴
-                            </p>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                    <div className="space-y-1.5 bg-foreground/5 p-2.5 rounded-lg">
-                      {opt.items.map((item, j) => (
-                        <div
-                          key={j}
-                          className="flex justify-between text-xs sm:text-sm items-center"
-                        >
-                          <span className="truncate mr-2 text-muted-foreground">
-                            {item.name}
-                          </span>
-                          <span className="font-bold whitespace-nowrap bg-background px-2 py-0.5 rounded-md border border-border/50">
-                            {item.count} шт
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center p-6 text-muted-foreground">
-                  Нет доступных вариантов для выхода в ноль (не хватает
-                  остатков).
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+			{showOptionsModal && (
+				<div
+					className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+					onClick={() => setShowOptionsModal(false)}
+				>
+					<div
+						className="bg-background border border-border shadow-2xl rounded-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[85vh]"
+						onClick={(e) => e.stopPropagation()}
+					>
+						<div className="flex items-center justify-between p-4 border-b">
+							<h2 className="text-lg font-black flex items-center gap-2">
+								<Sparkles className="w-5 h-5 text-primary" />
+								Топ 10 вариантов выхода в ноль
+							</h2>
+							<button
+								onClick={() => setShowOptionsModal(false)}
+								className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground"
+							>
+								<X className="w-5 h-5" />
+							</button>
+						</div>
+						<div className="p-4 overflow-y-auto space-y-3 custom-scrollbar">
+							{alternativePlans.length > 0 ? (
+								alternativePlans.map((opt, i) => (
+									<div
+										key={i}
+										className="p-3 rounded-xl border bg-card hover:bg-muted/30 transition-colors"
+									>
+										<div className="flex justify-between items-start mb-2">
+											<h3 className="font-bold text-sm text-foreground flex items-center gap-2">
+												<div className="bg-primary text-primary-foreground text-xs w-5 h-5 rounded-full flex items-center justify-center shadow-md">
+													{i + 1}
+												</div>
+												{opt.title}
+											</h3>
+											<div className="text-right pl-2">
+												{opt.remainingDeficit > 0 ? (
+													<>
+														<p className="text-[10px] font-medium text-destructive uppercase tracking-widest mb-0.5">
+															Останется дефицит:
+														</p>
+														<p className="text-sm font-black text-destructive">
+															-{opt.remainingDeficit.toLocaleString()} ₴
+														</p>
+													</>
+												) : (
+													<>
+														<p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest mb-0.5">
+															Чистыми после:
+														</p>
+														<p className="text-sm font-black text-green-500">
+															+{opt.profit.toLocaleString()} ₴
+														</p>
+													</>
+												)}
+											</div>
+										</div>
+										<div className="space-y-1.5 bg-foreground/5 p-2.5 rounded-lg">
+											{opt.items.map((item, j) => (
+												<div
+													key={j}
+													className="flex justify-between text-xs sm:text-sm items-center"
+												>
+													<span className="truncate mr-2 text-muted-foreground">
+														{item.name}
+													</span>
+													<span className="font-bold whitespace-nowrap bg-background px-2 py-0.5 rounded-md border border-border/50">
+														{item.count} шт
+													</span>
+												</div>
+											))}
+										</div>
+									</div>
+								))
+							) : (
+								<div className="text-center p-6 text-muted-foreground">
+									Нет доступных вариантов для выхода в ноль (не хватает
+									остатков).
+								</div>
+							)}
+						</div>
+					</div>
+				</div>
+			)}
+		</div>
+	);
 }
