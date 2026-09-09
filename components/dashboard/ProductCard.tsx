@@ -93,10 +93,33 @@ export const ProductCard = memo(function ProductCard({
   const variants = product.variantsList && product.variantsList.length > 0 ? product.variantsList : [product];
   const activeVariant = variants[priceIndex] || variants[0];
 
-  const actualRateCNY = activeVariant.rateCNY || globalRate || 0;
-
-  const purchaseCostUAH =
+  const actualRateCNY = activeVariant.rateCNY || product.rateCNY || globalRate || 0;
+  const basePurchaseUAH =
     actualRateCNY > 0 ? activeVariant.priceCNY * actualRateCNY : activeVariant.priceCNY * 1;
+
+  const purchased = Number(activeVariant.purchasedCount) || 0;
+  let unitShippingUAH = 0;
+  if (purchased > 0 && Number(activeVariant.shippingUA) > 0) {
+    unitShippingUAH = Number(activeVariant.shippingUA) / purchased;
+  } else if (
+    Number(activeVariant.weight) > 0 &&
+    (activeVariant.rateUSD || product.rateUSD || 0) > 0
+  ) {
+    const ratePerKgUSD =
+      activeVariant.shippingType === "sea"
+        ? 7.1
+        : activeVariant.shippingType === "custom"
+          ? activeVariant.customShippingRate || 0
+          : 18.3;
+    unitShippingUAH =
+      (Number(activeVariant.weight) / 1000) *
+      ratePerKgUSD *
+      (activeVariant.rateUSD || product.rateUSD || 0);
+  } else if ((product.totalPurchased || 0) > 0 && (product.shippingUA || 0) > 0) {
+    unitShippingUAH = (product.shippingUA || 0) / (product.totalPurchased || 1);
+  }
+
+  const purchaseCostUAH = basePurchaseUAH + unitShippingUAH;
 
   const handleSelection = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -195,7 +218,14 @@ export const ProductCard = memo(function ProductCard({
               </button>
             )}
 
-            <span className="inline-flex items-center gap-1 bg-secondary/50 backdrop-blur-md px-2 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-[11px] font-bold text-secondary-foreground border border-secondary">
+            <span
+              className="inline-flex items-center gap-1 bg-secondary/50 backdrop-blur-md px-2 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-[11px] font-bold text-secondary-foreground border border-secondary"
+              title={
+                unitShippingUAH > 0
+                  ? `Товар: ${basePurchaseUAH.toFixed(0)}₴ + Доставка: ${unitShippingUAH.toFixed(0)}₴ = ${purchaseCostUAH.toFixed(0)}₴`
+                  : undefined
+              }
+            >
               <Coins className="w-3 h-3" />
               {actualRateCNY > 0
                 ? `${activeVariant.priceCNY}¥ ≈ ${purchaseCostUAH.toFixed(0)}₴`
@@ -242,7 +272,7 @@ export const ProductCard = memo(function ProductCard({
             return (
               <div className="flex items-center justify-between px-2.5 py-1 rounded-xl text-[10px] font-black bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                 <span className="flex items-center gap-1">
-                  <Coins className="w-3 h-3" /> Закупка + Продажа
+                  <Coins className="w-3 h-3" /> Закупка (с дост.) + Продажа
                 </span>
                 <span>{metrics.purchasePlusSale.toFixed(0)} ₴</span>
               </div>

@@ -43,7 +43,7 @@ export const SORT_ITEMS: SortOptionItem[] = [
 		label: "Закупка + Продажа",
 		shortLabel: "Закупка + Продажа",
 		icon: Coins,
-		description: "Сортировка по сумме цены закупки и цены продажи",
+		description: "Сортировка по сумме цены закупки (с учётом доставки) и цены продажи",
 	},
 	{
 		key: "best_sales",
