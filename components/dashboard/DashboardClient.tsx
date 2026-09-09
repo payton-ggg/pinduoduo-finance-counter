@@ -8,6 +8,8 @@ import { Summary } from "./Summary";
 import { ProductGrid } from "./ProductGrid";
 import type { ProductUI, ProductVariantUI } from "./ProductCard";
 import { PriceManagementModal } from "./PriceManagementModal";
+import { SortToolbar } from "./SortToolbar";
+import { sortProducts, type SortKey, type SortDirection } from "@/lib/sorting";
 import { Button } from "@/components/ui/button";
 import {
 	Archive,
@@ -231,6 +233,26 @@ export function DashboardClient({
 	const [editingFolderName, setEditingFolderName] = useState("");
 	const [searchQuery, setSearchQuery] = useState("");
 	const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+
+	// Product sorting state
+	const [sortBy, setSortBy] = useState<SortKey>("default");
+	const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+
+	const handleSortChange = useCallback((key: SortKey) => {
+		setSortBy((prevKey) => {
+			if (prevKey === key) {
+				setSortDirection((prevDir) => (prevDir === "desc" ? "asc" : "desc"));
+				return key;
+			}
+			setSortDirection("desc");
+			return key;
+		});
+	}, []);
+
+	const handleResetSort = useCallback(() => {
+		setSortBy("default");
+		setSortDirection("desc");
+	}, []);
 
 	// Copy product states
 	const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
@@ -685,6 +707,10 @@ export function DashboardClient({
 		fuse,
 	]);
 
+	const sortedProducts = useMemo(() => {
+		return sortProducts(filteredProducts, sortBy, sortDirection, globalRate);
+	}, [filteredProducts, sortBy, sortDirection, globalRate]);
+
 	const selectedProducts = filteredProducts.filter((p) =>
 		selectedIds.has(p.id),
 	);
@@ -900,12 +926,21 @@ export function DashboardClient({
 				</div>
 			)}
 
+			<SortToolbar
+				sortBy={sortBy}
+				sortDirection={sortDirection}
+				onSortChange={handleSortChange}
+				onReset={handleResetSort}
+				totalCount={sortedProducts.length}
+			/>
+
 			<ProductGrid
-				products={filteredProducts}
+				products={sortedProducts}
 				selectedIds={selectedIds}
 				onToggle={toggleSelection}
 				onCopy={handleOpenCopyModal}
 				globalRate={globalRate}
+				activeSortKey={sortBy}
 			/>
 
 			{/* Copy Product Modal */}

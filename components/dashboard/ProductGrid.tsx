@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ProductCard, ProductUI } from "./ProductCard";
+import type { SortKey } from "@/lib/sorting";
 
 type ProductGridProps = {
   products: ProductUI[];
@@ -9,6 +10,7 @@ type ProductGridProps = {
   onToggle?: (id: string | number) => void;
   onCopy?: (product: ProductUI) => void;
   globalRate?: number;
+  activeSortKey?: SortKey;
 };
 
 export function ProductGrid({
@@ -17,6 +19,7 @@ export function ProductGrid({
   onToggle,
   onCopy,
   globalRate,
+  activeSortKey,
 }: ProductGridProps) {
   return (
     <div className="grid grid-cols-1 min-[450px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
@@ -33,6 +36,7 @@ export function ProductGrid({
             onToggle={onToggle ? () => onToggle(p.id) : undefined}
             onCopy={onCopy}
             globalRate={globalRate}
+            activeSortKey={activeSortKey}
           />
         </Link>
       ))}

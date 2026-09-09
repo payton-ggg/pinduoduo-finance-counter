@@ -13,7 +13,13 @@ import {
   ChevronLeft,
   ChevronRight,
   Copy,
+  Sparkles,
+  Flame,
+  Package,
+  Percent,
+  Tag,
 } from "lucide-react";
+import { getProductMetrics, type SortKey } from "@/lib/sorting";
 
 export type ProductVariantUI = {
   id?: string;
@@ -62,6 +68,7 @@ type ProductCardProps = {
   onToggle?: () => void;
   onCopy?: (product: ProductUI) => void;
   globalRate?: number;
+  activeSortKey?: SortKey;
 };
 
 export const ProductCard = memo(function ProductCard({
@@ -70,6 +77,7 @@ export const ProductCard = memo(function ProductCard({
   onToggle,
   onCopy,
   globalRate,
+  activeSortKey,
 }: ProductCardProps) {
   const [imgSrc, setImgSrc] = useState(product.img || "/placeholder.png");
   const [priceIndex, setPriceIndex] = useState(0);
@@ -215,6 +223,73 @@ export const ProductCard = memo(function ProductCard({
             )}
           </div>
         </div>
+
+        {/* Active sort metric badge */}
+        {activeSortKey && activeSortKey !== "default" && (() => {
+          const metrics = getProductMetrics(product, globalRate);
+          if (activeSortKey === "roi") {
+            const isPos = metrics.roi >= 0;
+            return (
+              <div className={`flex items-center justify-between px-2.5 py-1 rounded-xl text-[10px] font-black border ${isPos ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-destructive/10 text-destructive border-destructive/20"}`}>
+                <span className="flex items-center gap-1">
+                  <Sparkles className="w-3 h-3" /> Окупаемость (ROI)
+                </span>
+                <span>{isPos ? "+" : ""}{metrics.roi > 9999 ? "∞" : metrics.roi.toFixed(1)}%</span>
+              </div>
+            );
+          }
+          if (activeSortKey === "purchase_sale_sum") {
+            return (
+              <div className="flex items-center justify-between px-2.5 py-1 rounded-xl text-[10px] font-black bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                <span className="flex items-center gap-1">
+                  <Coins className="w-3 h-3" /> Закупка + Продажа
+                </span>
+                <span>{metrics.purchasePlusSale.toFixed(0)} ₴</span>
+              </div>
+            );
+          }
+          if (activeSortKey === "best_sales") {
+            return (
+              <div className="flex items-center justify-between px-2.5 py-1 rounded-xl text-[10px] font-black bg-orange-500/10 text-orange-500 border border-orange-500/20">
+                <span className="flex items-center gap-1">
+                  <Flame className="w-3 h-3" /> Продано шт.
+                </span>
+                <span>{metrics.sales} шт.</span>
+              </div>
+            );
+          }
+          if (activeSortKey === "large_purchases") {
+            return (
+              <div className="flex items-center justify-between px-2.5 py-1 rounded-xl text-[10px] font-black bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
+                <span className="flex items-center gap-1">
+                  <Package className="w-3 h-3" /> Закуплено шт.
+                </span>
+                <span>{metrics.purchases} шт.</span>
+              </div>
+            );
+          }
+          if (activeSortKey === "sales_purchases_ratio") {
+            return (
+              <div className="flex items-center justify-between px-2.5 py-1 rounded-xl text-[10px] font-black bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
+                <span className="flex items-center gap-1">
+                  <Percent className="w-3 h-3" /> Продано / Закуплено
+                </span>
+                <span>{metrics.salesPurchasesRatio.toFixed(0)}% ({metrics.sales}/{metrics.purchases})</span>
+              </div>
+            );
+          }
+          if (activeSortKey === "price_sale") {
+            return (
+              <div className="flex items-center justify-between px-2.5 py-1 rounded-xl text-[10px] font-black bg-primary/10 text-primary border border-primary/20">
+                <span className="flex items-center gap-1">
+                  <Tag className="w-3 h-3" /> Цена продажи
+                </span>
+                <span>{metrics.salePrice} ₴</span>
+              </div>
+            );
+          }
+          return null;
+        })()}
 
         <div className="mt-auto space-y-2.5 sm:space-y-3">
           <div className="grid grid-cols-2 gap-2 p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-foreground/3 border border-foreground/5">
