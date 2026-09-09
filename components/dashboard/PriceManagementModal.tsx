@@ -139,12 +139,33 @@ export function PriceManagementModal({
 			const shippingUA = Number(variant.shippingUA) || 0;
 			const managementUAH = Number(variant.managementUAH) || 0;
 
+			const unitShippingUAH =
+				purchasedCount > 0
+					? shippingUA / purchasedCount
+					: Number(variant.weight || 0) > 0 &&
+						  Number(variant.rateUSD || fallbackProduct.rateUSD || 0) > 0
+						? (Number(variant.weight) / 1000) *
+						  (variant.shippingType === "sea"
+								? 7.1
+								: variant.shippingType === "custom"
+									? variant.customShippingRate || 0
+									: 18.3) *
+						  Number(variant.rateUSD || fallbackProduct.rateUSD || 0)
+						: 0;
+			const unitManagementUAH =
+				purchasedCount > 0 ? managementUAH / purchasedCount : 0;
+
 			const unitCostUAH =
-				priceCNY * (rateCNY > 0 ? rateCNY : 1) + shippingUA + managementUAH;
+				priceCNY * (rateCNY > 0 ? rateCNY : 1) +
+				unitShippingUAH +
+				unitManagementUAH;
 			const actualNetPrice = netPrice ?? calcNetPrice(priceInUA) ?? 0;
 			const unitMarginUAH =
 				actualNetPrice > 0 ? actualNetPrice - unitCostUAH : 0;
-			const totalSpent = unitCostUAH * purchasedCount;
+			const totalSpent =
+				priceCNY * (rateCNY > 0 ? rateCNY : 1) * purchasedCount +
+				shippingUA +
+				managementUAH;
 			const totalProjectedRevenue = actualNetPrice * purchasedCount;
 			const totalProjectedProfit = totalProjectedRevenue - totalSpent;
 

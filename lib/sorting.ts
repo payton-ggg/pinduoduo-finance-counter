@@ -19,6 +19,7 @@ export interface ProductMetrics {
   purchases: number;
   salesPurchasesRatio: number;
   firstPurchaseCostUAH: number;
+  firstUnitShippingUAH: number;
   projectedProfit: number;
 }
 
@@ -28,6 +29,7 @@ export function getProductMetrics(p: ProductUI, globalRate?: number): ProductMet
   const totalSells = p.sellsCount || 0;
 
   let firstPurchaseCostUAH = 0;
+  let firstUnitShippingUAH = 0;
   let firstSalePrice = p.priceInUA || 0;
   let projectedRevenue = 0;
 
@@ -36,7 +38,28 @@ export function getProductMetrics(p: ProductUI, globalRate?: number): ProductMet
     if (included.length > 0) {
       const first = included[0];
       const rate = first.rateCNY || p.rateCNY || globalRate || 1;
-      firstPurchaseCostUAH = (first.priceCNY || 0) * (rate > 0 ? rate : 1);
+      const baseCost = (first.priceCNY || 0) * (rate > 0 ? rate : 1);
+
+      const firstPurchased = Number(first.purchasedCount) || 0;
+      if (firstPurchased > 0 && Number(first.shippingUA) > 0) {
+        firstUnitShippingUAH = Number(first.shippingUA) / firstPurchased;
+      } else if (Number(first.weight) > 0 && (first.rateUSD || p.rateUSD || 0) > 0) {
+        const ratePerKgUSD =
+          first.shippingType === "sea"
+            ? 7.1
+            : first.shippingType === "custom"
+              ? first.customShippingRate || 0
+              : 18.3;
+        firstUnitShippingUAH =
+          (Number(first.weight) / 1000) *
+          ratePerKgUSD *
+          (first.rateUSD || p.rateUSD || 0);
+      } else if ((p.totalPurchased || 0) > 0 && (p.shippingUA || 0) > 0) {
+        firstUnitShippingUAH = (p.shippingUA || 0) / (p.totalPurchased || 1);
+      }
+
+      // Purchase price including unit shipping
+      firstPurchaseCostUAH = baseCost + firstUnitShippingUAH;
       firstSalePrice = first.priceInUA ?? p.priceInUA ?? 0;
 
       let calcRev = 0;
@@ -50,7 +73,11 @@ export function getProductMetrics(p: ProductUI, globalRate?: number): ProductMet
     }
   } else {
     const rate = p.rateCNY || globalRate || 1;
-    firstPurchaseCostUAH = (p.priceCNY || 0) * (rate > 0 ? rate : 1);
+    const baseCost = (p.priceCNY || 0) * (rate > 0 ? rate : 1);
+    if ((p.totalPurchased || 0) > 0 && (p.shippingUA || 0) > 0) {
+      firstUnitShippingUAH = (p.shippingUA || 0) / (p.totalPurchased || 1);
+    }
+    firstPurchaseCostUAH = baseCost + firstUnitShippingUAH;
     const actualNetPrice =
       p.netPrice ||
       ((p.priceInUA || 0) > 0 ? (p.priceInUA || 0) * 0.97 - 30 : 0);
@@ -70,7 +97,7 @@ export function getProductMetrics(p: ProductUI, globalRate?: number): ProductMet
   // Sale price
   const salePrice = firstSalePrice;
 
-  // Purchase price + Sale price sum
+  // Purchase price (with shipping) + Sale price sum
   const purchasePlusSale = firstPurchaseCostUAH + salePrice;
 
   // Best sales count
@@ -91,6 +118,7 @@ export function getProductMetrics(p: ProductUI, globalRate?: number): ProductMet
     purchases,
     salesPurchasesRatio,
     firstPurchaseCostUAH,
+    firstUnitShippingUAH,
     projectedProfit,
   };
 }
