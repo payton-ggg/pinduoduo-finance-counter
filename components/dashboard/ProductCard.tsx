@@ -90,33 +90,50 @@ export const ProductCard = memo(function ProductCard({
 
   const margin = product.income - product.spent;
 
-  const variants = product.variantsList && product.variantsList.length > 0 ? product.variantsList : [product];
+  const variants =
+    product.variantsList && product.variantsList.length > 0
+      ? product.variantsList
+      : [
+          {
+            priceCNY: product.priceCNY,
+            priceInUA: product.priceInUA,
+            netPrice: product.netPrice,
+            rateCNY: product.rateCNY,
+            rateUSD: product.rateUSD,
+            purchasedCount: product.totalPurchased,
+            sellsCount: product.sellsCount,
+            shippingUA: product.shippingUA,
+            managementUAH: product.managementUAH,
+            weight: product.weight,
+          } as ProductVariantUI,
+        ];
   const activeVariant = variants[priceIndex] || variants[0];
 
-  const actualRateCNY = activeVariant.rateCNY || product.rateCNY || globalRate || 0;
+  const actualRateCNY =
+    activeVariant.rateCNY || product.rateCNY || globalRate || 0;
   const basePurchaseUAH =
-    actualRateCNY > 0 ? activeVariant.priceCNY * actualRateCNY : activeVariant.priceCNY * 1;
+    actualRateCNY > 0
+      ? activeVariant.priceCNY * actualRateCNY
+      : activeVariant.priceCNY * 1;
 
-  const purchased = Number(activeVariant.purchasedCount) || 0;
+  const purchased =
+    Number(activeVariant.purchasedCount ?? product.totalPurchased) || 0;
+  const shippingUA =
+    Number(activeVariant.shippingUA ?? product.shippingUA) || 0;
+  const weight = Number(activeVariant.weight ?? product.weight) || 0;
+  const rateUSD = activeVariant.rateUSD || product.rateUSD || 0;
+
   let unitShippingUAH = 0;
-  if (purchased > 0 && Number(activeVariant.shippingUA) > 0) {
-    unitShippingUAH = Number(activeVariant.shippingUA) / purchased;
-  } else if (
-    Number(activeVariant.weight) > 0 &&
-    (activeVariant.rateUSD || product.rateUSD || 0) > 0
-  ) {
+  if (purchased > 0 && shippingUA > 0) {
+    unitShippingUAH = shippingUA / purchased;
+  } else if (weight > 0 && rateUSD > 0) {
     const ratePerKgUSD =
       activeVariant.shippingType === "sea"
         ? 7.1
         : activeVariant.shippingType === "custom"
           ? activeVariant.customShippingRate || 0
           : 18.3;
-    unitShippingUAH =
-      (Number(activeVariant.weight) / 1000) *
-      ratePerKgUSD *
-      (activeVariant.rateUSD || product.rateUSD || 0);
-  } else if ((product.totalPurchased || 0) > 0 && (product.shippingUA || 0) > 0) {
-    unitShippingUAH = (product.shippingUA || 0) / (product.totalPurchased || 1);
+    unitShippingUAH = (weight / 1000) * ratePerKgUSD * rateUSD;
   }
 
   const purchaseCostUAH = basePurchaseUAH + unitShippingUAH;
