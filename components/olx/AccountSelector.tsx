@@ -43,13 +43,14 @@ export function AccountSelector({
   const totalUnreadAll = accounts.reduce((acc, a) => acc + (a.unreadCount || 0), 0);
 
   return (
-    <div className="flex items-center justify-between gap-3 p-3 glass-card rounded-2xl mb-4 border border-border/40 overflow-x-auto">
-      <div className="flex items-center gap-2 overflow-x-auto py-0.5 no-scrollbar">
+    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 glass-card rounded-2xl mb-4 border border-border/40">
+      {/* Список аккаунтов без внутреннего скролла — аккуратный flex-wrap */}
+      <div className="flex flex-wrap items-center gap-2 py-0.5 flex-1 min-w-0">
         {/* Кнопка: Все аккаунты */}
         <button
           type="button"
           onClick={() => onSelectAccount("all")}
-          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
             selectedAccountId === "all"
               ? "bg-primary text-primary-foreground shadow-md shadow-primary/20 scale-[1.02]"
               : "bg-foreground/5 hover:bg-foreground/10 text-muted-foreground hover:text-foreground"
@@ -78,7 +79,7 @@ export function AccountSelector({
               key={account.id}
               type="button"
               onClick={() => onSelectAccount(account.id)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap border ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
                 isSelected
                   ? "bg-primary text-primary-foreground border-primary shadow-md scale-[1.02]"
                   : "bg-foreground/5 hover:bg-foreground/10 text-muted-foreground hover:text-foreground border-border/20"
@@ -112,13 +113,14 @@ export function AccountSelector({
         })}
       </div>
 
-      <div className="flex items-center gap-2 shrink-0">
+      {/* Кнопки действий */}
+      <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
         <Button
           variant="outline"
           size="sm"
           onClick={onSyncAll}
           disabled={isSyncing}
-          className="h-9 px-3 rounded-xl border-border/40 hover:bg-primary/20 hover:text-primary gap-1.5 text-xs font-bold"
+          className="h-9 px-3 rounded-xl border-border/40 hover:bg-primary/20 hover:text-primary gap-1.5 text-xs font-bold cursor-pointer"
           title="Синхронизировать все аккаунты с OLX"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? "animate-spin text-primary" : ""}`} />
@@ -129,7 +131,7 @@ export function AccountSelector({
           variant="outline"
           size="icon"
           onClick={onOpenAccountsModal}
-          className="h-9 w-9 rounded-xl border-border/40 hover:bg-foreground/10"
+          className="h-9 w-9 rounded-xl border-border/40 hover:bg-foreground/10 cursor-pointer"
           title="Настройки аккаунтов"
         >
           <Settings className="w-4 h-4 text-muted-foreground" />
@@ -138,7 +140,7 @@ export function AccountSelector({
         <Button
           size="sm"
           onClick={onOpenConnectModal}
-          className="h-9 px-3 rounded-xl font-bold gap-1.5 shadow-md shadow-primary/20 text-xs"
+          className="h-9 px-3 rounded-xl font-bold gap-1.5 shadow-md shadow-primary/20 text-xs cursor-pointer"
         >
           <Plus className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Подключить</span>

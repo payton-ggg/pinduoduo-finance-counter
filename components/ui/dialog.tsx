@@ -43,17 +43,17 @@ export function DialogContent({
   const { onOpenChange } = React.useContext(DialogContext);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Затемнение фона */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+      {/* Затемнение фона — плотный и четкий бэкдроп */}
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity animate-in fade-in-0 duration-200"
         onClick={() => onOpenChange?.(false)}
       />
 
-      {/* Контент модального окна */}
+      {/* Контент модального окна — 100% непрозрачный, четкий контраст */}
       <div
         className={cn(
-          "relative z-50 w-full max-h-[90vh] overflow-y-auto rounded-3xl bg-background p-6 shadow-2xl border border-border/50 transition-all animate-in fade-in-0 zoom-in-95",
+          "relative z-50 w-full max-h-[90vh] overflow-y-auto rounded-3xl bg-card dark:bg-[#141417] text-card-foreground p-6 shadow-2xl border border-border/80 transition-all animate-in fade-in-0 zoom-in-95 duration-200",
           className
         )}
         onClick={(e) => e.stopPropagation()}
@@ -61,7 +61,7 @@ export function DialogContent({
       >
         <button
           onClick={() => onOpenChange?.(false)}
-          className="absolute right-4 top-4 rounded-xl p-1.5 text-muted-foreground hover:bg-foreground/5 hover:text-foreground transition-colors"
+          className="absolute right-4 top-4 rounded-xl p-2 text-muted-foreground hover:bg-foreground/10 hover:text-foreground transition-colors cursor-pointer"
           title="Закрыть"
         >
           <X className="w-5 h-5" />
@@ -91,7 +91,7 @@ export function DialogTitle({
 }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
     <h2
-      className={cn("text-lg font-bold text-foreground tracking-tight", className)}
+      className={cn("text-lg sm:text-xl font-black text-foreground tracking-tight", className)}
       {...props}
     />
   );

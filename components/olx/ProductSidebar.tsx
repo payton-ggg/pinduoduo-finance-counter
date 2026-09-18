@@ -379,7 +379,7 @@ export function ProductSidebar({
 
       {/* Модалка выбора товара из каталога */}
       <Dialog open={isLinkModalOpen} onOpenChange={setIsLinkModalOpen}>
-        <DialogContent className="max-w-md glass-card border border-border/40 shadow-2xl p-6">
+        <DialogContent className="max-w-md bg-card dark:bg-[#18181b] border border-border/80 shadow-2xl p-6 sm:p-7">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold">Привязать товар из каталога</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
@@ -393,7 +393,7 @@ export function ProductSidebar({
               placeholder="Поиск по названию товара..."
               value={productSearch}
               onChange={(e) => setProductSearch(e.target.value)}
-              className="pl-9 text-xs bg-foreground/5"
+              className="pl-9 text-xs bg-muted/50 dark:bg-[#27272a]"
             />
           </div>
 
@@ -404,7 +404,7 @@ export function ProductSidebar({
                 <div
                   key={prod.id}
                   onClick={() => handleLinkProduct(prod.id, prod.variants[0]?.id)}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-foreground/5 hover:bg-primary/15 border border-border/30 hover:border-primary/40 transition-all cursor-pointer group"
+                  className="flex items-center justify-between p-2.5 rounded-xl bg-muted/40 dark:bg-[#27272a]/60 hover:bg-primary/15 border border-border/60 hover:border-primary/40 transition-all cursor-pointer group"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <img
@@ -433,7 +433,7 @@ export function ProductSidebar({
 
       {/* Модалка фиксации продажи */}
       <Dialog open={isSaleModalOpen} onOpenChange={setIsSaleModalOpen}>
-        <DialogContent className="max-w-md glass-card border border-border/40 shadow-2xl p-6">
+        <DialogContent className="max-w-md bg-card dark:bg-[#18181b] border border-border/80 shadow-2xl p-6 sm:p-7">
           <DialogHeader>
             <div className="flex items-center gap-3 mb-1">
               <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500">

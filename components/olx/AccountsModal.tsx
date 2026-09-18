@@ -80,16 +80,16 @@ export function AccountsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl glass-card border border-border/40 shadow-2xl p-6">
+      <DialogContent className="max-w-2xl bg-card dark:bg-[#18181b] border border-border/80 shadow-2xl p-6 sm:p-7">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+              <div className="p-3 rounded-2xl bg-primary/15 text-primary border border-primary/20">
                 <Store className="w-6 h-6" />
               </div>
               <div>
-                <DialogTitle className="text-xl font-bold">Подключенные аккаунты OLX</DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground">
+                <DialogTitle className="text-xl font-black text-foreground">Подключенные аккаунты OLX</DialogTitle>
+                <DialogDescription className="text-xs text-muted-foreground mt-0.5">
                   Управление магазинами, токенами и принудительная синхронизация
                 </DialogDescription>
               </div>
@@ -98,7 +98,7 @@ export function AccountsModal({
             <Button
               onClick={() => { onClose(); onOpenConnectModal(); }}
               size="sm"
-              className="font-bold rounded-xl gap-1.5 shadow-md shadow-primary/20"
+              className="font-bold rounded-xl gap-1.5 shadow-md shadow-primary/20 cursor-pointer"
             >
               <Plus className="w-4 h-4" /> Добавить
             </Button>
@@ -107,9 +107,9 @@ export function AccountsModal({
 
         <div className="space-y-3 my-4 max-h-[60vh] overflow-y-auto pr-1">
           {accounts.length === 0 ? (
-            <div className="text-center py-10 border border-dashed rounded-2xl border-border/50 text-muted-foreground">
+            <div className="text-center py-10 border border-dashed rounded-2xl border-border/60 text-muted-foreground bg-muted/20">
               <Store className="w-10 h-10 mx-auto opacity-30 mb-2" />
-              <p className="font-semibold text-sm">Нет подключенных аккаунтов</p>
+              <p className="font-bold text-sm text-foreground">Нет подключенных аккаунтов</p>
               <p className="text-xs text-muted-foreground mt-1">
                 Подключите ваш первый магазин OLX для работы с переписками
               </p>
@@ -125,10 +125,10 @@ export function AccountsModal({
             accounts.map((acc) => (
               <div
                 key={acc.id}
-                className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-foreground/5 border border-border/30 hover:border-primary/30 transition-all"
+                className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-muted/40 dark:bg-[#27272a]/60 border border-border/60 hover:border-primary/40 transition-all"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center font-bold text-lg text-primary shrink-0 overflow-hidden">
+                  <div className="w-12 h-12 rounded-xl bg-primary/15 border border-primary/25 flex items-center justify-center font-bold text-lg text-primary shrink-0 overflow-hidden">
                     {acc.avatarUrl ? (
                       <img src={acc.avatarUrl} alt={acc.accountName} className="w-full h-full object-cover" />
                     ) : (
@@ -139,16 +139,16 @@ export function AccountsModal({
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-sm text-foreground truncate">{acc.accountName}</h4>
                       {acc.isActive ? (
-                        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[10px] px-1.5 py-0">
+                        <Badge variant="outline" className="bg-emerald-500/15 text-emerald-500 border-emerald-500/30 text-[10px] px-1.5 py-0 font-bold">
                           Активен
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20 text-[10px] px-1.5 py-0">
+                        <Badge variant="outline" className="bg-destructive/15 text-destructive border-destructive/30 text-[10px] px-1.5 py-0 font-bold">
                           Отключен
                         </Badge>
                       )}
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1 flex-wrap">
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1 flex-wrap font-medium">
                       <span>Диалогов: <b className="text-foreground">{acc.threadCount}</b></span>
                       {acc.unreadCount > 0 && (
                         <span className="text-primary font-bold">
@@ -156,7 +156,7 @@ export function AccountsModal({
                         </span>
                       )}
                       {acc.lastSyncAt && (
-                        <span className="flex items-center gap-1 text-[11px]">
+                        <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
                           <Clock className="w-3 h-3" />
                           Синхр.: {new Date(acc.lastSyncAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
@@ -172,7 +172,7 @@ export function AccountsModal({
                     onClick={() => handleSyncAccount(acc.id)}
                     disabled={syncingId === acc.id}
                     title="Синхронизировать сейчас"
-                    className="h-9 w-9 rounded-xl border-border/40 hover:bg-primary/20 hover:text-primary"
+                    className="h-9 w-9 rounded-xl border-border/60 hover:bg-primary/20 hover:text-primary cursor-pointer"
                   >
                     <RefreshCw className={`w-4 h-4 ${syncingId === acc.id ? "animate-spin text-primary" : ""}`} />
                   </Button>
@@ -182,7 +182,7 @@ export function AccountsModal({
                     onClick={() => handleDeleteAccount(acc.id)}
                     disabled={deletingId === acc.id}
                     title="Отключить аккаунт"
-                    className="h-9 w-9 rounded-xl border-border/40 hover:bg-destructive/20 hover:text-destructive"
+                    className="h-9 w-9 rounded-xl border-border/60 hover:bg-destructive/20 hover:text-destructive cursor-pointer"
                   >
                     {deletingId === acc.id ? (
                       <Loader2 className="w-4 h-4 animate-spin text-destructive" />

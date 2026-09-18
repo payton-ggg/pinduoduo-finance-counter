@@ -147,7 +147,7 @@ export function QuickTemplatesModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl glass-card border border-border/40 shadow-2xl p-6">
+      <DialogContent className="max-w-2xl bg-card dark:bg-[#18181b] border border-border/80 shadow-2xl p-6 sm:p-7">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">

@@ -51,7 +51,6 @@ export function ConnectAccountModal({
       const data = await res.json();
 
       if (data.authUrl) {
-        // Переходим на авторизацию в OLX
         window.location.href = data.authUrl;
       } else {
         throw new Error(data.error || "Не удалось сгенерировать ссылку авторизации");
@@ -128,15 +127,15 @@ export function ConnectAccountModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-xl glass-card border border-border/40 shadow-2xl p-6">
+      <DialogContent className="max-w-xl bg-card dark:bg-[#18181b] border border-border/80 shadow-2xl p-6 sm:p-7">
         <DialogHeader>
           <div className="flex items-center gap-3 mb-1">
-            <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+            <div className="p-3 rounded-2xl bg-primary/15 text-primary border border-primary/20">
               <Store className="w-6 h-6" />
             </div>
             <div>
-              <DialogTitle className="text-xl font-bold">Подключить аккаунт OLX</DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground">
+              <DialogTitle className="text-xl font-black text-foreground">Подключить аккаунт OLX</DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
                 Интегрируйте ваш магазин OLX.ua для общения с клиентами и учета продаж
               </DialogDescription>
             </div>
@@ -144,14 +143,14 @@ export function ConnectAccountModal({
         </DialogHeader>
 
         {/* Табы выбора метода подключения */}
-        <div className="flex items-center gap-2 p-1 bg-foreground/5 rounded-xl my-4">
+        <div className="flex items-center gap-2 p-1.5 bg-muted/60 dark:bg-[#27272a] rounded-2xl my-4 border border-border/40">
           <button
             type="button"
             onClick={() => { setTab("oauth"); setError(null); }}
-            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+            className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${
               tab === "oauth"
                 ? "bg-primary text-primary-foreground shadow-md"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground hover:text-foreground hover:bg-foreground/5"
             }`}
           >
             ⚡ Официальный OAuth
@@ -159,10 +158,10 @@ export function ConnectAccountModal({
           <button
             type="button"
             onClick={() => { setTab("manual"); setError(null); }}
-            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+            className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${
               tab === "manual"
                 ? "bg-primary text-primary-foreground shadow-md"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground hover:text-foreground hover:bg-foreground/5"
             }`}
           >
             🔑 Ввод токена
@@ -170,10 +169,10 @@ export function ConnectAccountModal({
           <button
             type="button"
             onClick={() => { setTab("demo"); setError(null); }}
-            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+            className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${
               tab === "demo"
                 ? "bg-emerald-600 text-white shadow-md"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground hover:text-foreground hover:bg-foreground/5"
             }`}
           >
             ✨ Демо режим
@@ -181,7 +180,7 @@ export function ConnectAccountModal({
         </div>
 
         {error && (
-          <div className="p-3 mb-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs font-medium">
+          <div className="p-3.5 mb-4 rounded-xl bg-destructive/15 border border-destructive/30 text-destructive text-xs font-bold">
             {error}
           </div>
         )}
@@ -189,42 +188,42 @@ export function ConnectAccountModal({
         {/* Вкладка 1: OAuth */}
         {tab === "oauth" && (
           <div className="space-y-4">
-            <div className="p-3 rounded-xl bg-primary/5 border border-primary/10 space-y-2 text-xs text-muted-foreground">
-              <div className="flex items-center gap-2 text-foreground font-semibold">
-                <Info className="w-4 h-4 text-primary" />
+            <div className="p-4 rounded-2xl bg-muted/40 dark:bg-[#27272a]/70 border border-border/60 space-y-2.5 text-xs text-muted-foreground">
+              <div className="flex items-center gap-2 text-foreground font-bold text-sm">
+                <Info className="w-4 h-4 text-primary shrink-0" />
                 Как получить доступ в OLX Developers:
               </div>
-              <ol className="list-decimal list-inside space-y-1 pl-1">
+              <ol className="list-decimal list-inside space-y-1.5 pl-1 leading-relaxed text-foreground/90">
                 <li>
                   Перейдите в кабинет разработчика{" "}
                   <a
                     href="https://developer.olx.ua/"
                     target="_blank"
                     rel="noreferrer"
-                    className="text-primary underline inline-flex items-center gap-0.5 font-bold"
+                    className="text-primary hover:underline inline-flex items-center gap-0.5 font-bold"
                   >
                     developer.olx.ua <ExternalLink className="w-3 h-3" />
                   </a>
                 </li>
                 <li>Создайте приложение (Partner App) с типом доступа Web</li>
-                <li>Скопируйте полученный <b>Client ID</b> и вставьте ниже</li>
+                <li>Скопируйте полученный <b>Client ID</b> и вставьте в поле ниже</li>
               </ol>
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-xs font-bold">Client ID приложения OLX</Label>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-foreground">Client ID приложения OLX</Label>
               <Input
                 placeholder="например: 200543"
                 value={clientId}
                 onChange={(e) => setClientId(e.target.value)}
-                className="bg-foreground/5"
+                className="bg-muted/50 dark:bg-[#27272a] border-border/80 h-11 text-sm font-medium"
               />
             </div>
 
             <Button
               onClick={handleOAuthConnect}
               disabled={loading || !clientId.trim()}
-              className="w-full font-bold h-11 rounded-xl shadow-lg shadow-primary/20 gap-2"
+              className="w-full font-bold h-11 rounded-xl shadow-lg shadow-primary/20 gap-2 mt-2"
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -240,35 +239,35 @@ export function ConnectAccountModal({
         {tab === "manual" && (
           <form onSubmit={handleManualConnect} className="space-y-3.5">
             <div className="space-y-1.5">
-              <Label className="text-xs font-bold">Название аккаунта</Label>
+              <Label className="text-xs font-bold text-foreground">Название аккаунта</Label>
               <Input
                 placeholder="например: OLX Магазин Наушников"
                 value={accountName}
                 onChange={(e) => setAccountName(e.target.value)}
-                className="bg-foreground/5"
+                className="bg-muted/50 dark:bg-[#27272a] border-border/80 h-10 text-sm"
                 required
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-bold">Access Token</Label>
+              <Label className="text-xs font-bold text-foreground">Access Token</Label>
               <Input
                 placeholder="Bearer токен из OLX API..."
                 value={accessToken}
                 onChange={(e) => setAccessToken(e.target.value)}
-                className="bg-foreground/5 font-mono text-xs"
+                className="bg-muted/50 dark:bg-[#27272a] border-border/80 h-10 font-mono text-xs"
                 required
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold text-muted-foreground">Refresh Token (опционально)</Label>
                 <Input
                   placeholder="refresh_token..."
                   value={refreshToken}
                   onChange={(e) => setRefreshToken(e.target.value)}
-                  className="bg-foreground/5 font-mono text-xs"
+                  className="bg-muted/50 dark:bg-[#27272a] border-border/80 h-10 font-mono text-xs"
                 />
               </div>
               <div className="space-y-1.5">
@@ -278,7 +277,7 @@ export function ConnectAccountModal({
                   placeholder="client_secret..."
                   value={clientSecret}
                   onChange={(e) => setClientSecret(e.target.value)}
-                  className="bg-foreground/5 font-mono text-xs"
+                  className="bg-muted/50 dark:bg-[#27272a] border-border/80 h-10 font-mono text-xs"
                 />
               </div>
             </div>
@@ -296,21 +295,21 @@ export function ConnectAccountModal({
 
         {/* Вкладка 3: Demo Mode */}
         {tab === "demo" && (
-          <div className="space-y-4 text-center py-2">
-            <div className="w-14 h-14 mx-auto rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+          <div className="space-y-4 text-center py-3">
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center border border-emerald-500/20">
               <Sparkles className="w-7 h-7" />
             </div>
             <div>
-              <h4 className="font-bold text-base text-foreground">Мгновенный тестовый аккаунт</h4>
-              <p className="text-xs text-muted-foreground max-w-sm mx-auto mt-1">
-                Создает готовый демонстрационный магазин с реальными диалогами покупателей, привязкой к товарам и симуляцией переписки. Идеально для проверки без ожидания подтверждения от OLX!
+              <h4 className="font-black text-base text-foreground">Мгновенный тестовый аккаунт</h4>
+              <p className="text-xs text-muted-foreground max-w-md mx-auto mt-1.5 leading-relaxed">
+                Создает готовый демонстрационный магазин с реальными диалогами покупателей, привязкой к товарам и симуляцией переписки. Идеально для проверки интерфейса без ожидания ключей от OLX!
               </p>
             </div>
 
             <Button
               onClick={handleCreateDemoAccount}
               disabled={loading}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-11 rounded-xl shadow-lg shadow-emerald-600/20 gap-2"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-11 rounded-xl shadow-lg shadow-emerald-600/20 gap-2 mt-2 cursor-pointer"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
               Сгенерировать демо-аккаунт и диалоги
