@@ -1,7 +1,8 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, RefreshCw, Calculator, Search, X, Coins } from "lucide-react";
+import { Plus, RefreshCw, Calculator, Search, X, Coins, MessageSquareText } from "lucide-react";
 import { ModeToggle } from "@/components/ui/mode-toggle";
 import { useRouter } from "next/navigation";
 
@@ -25,6 +26,26 @@ export function Header({
   onSearchQueryChange,
 }: HeaderProps) {
   const router = useRouter();
+  const [unreadOlxCount, setUnreadOlxCount] = useState<number>(0);
+
+  useEffect(() => {
+    const checkOlxUnread = async () => {
+      try {
+        const res = await fetch("/api/olx/accounts");
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          const total = data.reduce((acc, a) => acc + (a.unreadCount || 0), 0);
+          setUnreadOlxCount(total);
+        }
+      } catch (e) {
+        // silent
+      }
+    };
+    checkOlxUnread();
+    const interval = setInterval(checkOlxUnread, 15000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 p-4 sm:p-6 glass-card mb-8">
       <div className="space-y-0.5 sm:space-y-1 text-center sm:text-left">
@@ -84,6 +105,22 @@ export function Header({
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
+          {/* Кнопка перехода в OLX Сообщения */}
+          <Button
+            variant="outline"
+            onClick={() => router.push("/olx")}
+            className="glass rounded-xl border-none hover:bg-primary/20 transition-all h-10 sm:h-11 px-3 sm:px-4 shrink-0 flex items-center gap-2 group relative font-bold text-xs"
+            title="OLX Мульти-аккаунт чат и заказы"
+          >
+            <MessageSquareText className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
+            <span className="hidden sm:inline">OLX Чат</span>
+            {unreadOlxCount > 0 && (
+              <span className="bg-primary text-primary-foreground text-[10px] font-black px-1.5 py-0.2 rounded-full shadow-md animate-pulse">
+                {unreadOlxCount}
+              </span>
+            )}
+          </Button>
+
           {onOpenPriceModal && (
             <Button
               variant="outline"
