@@ -9,21 +9,22 @@ datasource db {
 }
 
 model Product {
-  id           String    @id @default(uuid())
+  id           String      @id @default(uuid())
   name         String
-  createdAt    DateTime  @default(now())
+  createdAt    DateTime    @default(now())
   images       String[]
   pinduoduoUrl String?
   archive      Int?
   folderId     String
   expenses     Expense[]
   incomes      Income[]
-  folder       Folder    @relation(fields: [folderId], references: [id])
+  folder       Folder      @relation(fields: [folderId], references: [id])
   variants     Variant[]
+  olxThreads   OlxThread[]
 }
 
 model Variant {
-  id                 String   @id @default(uuid())
+  id                 String      @id @default(uuid())
   productId          String
   priceCNY           Float
   priceInUA          Float?
@@ -31,7 +32,7 @@ model Variant {
   weight             Float?
   pddSearchQuery     String?
   sellsCount         Int?
-  purchasedCount     Int?     @default(0)
+  purchasedCount     Int?        @default(0)
   shippingUA         Float?
   managementUAH      Float?
   rateCNY            Float?
@@ -39,9 +40,10 @@ model Variant {
   shippingType       String?
   customShippingRate Float?
   commissionFlat     Float?
-  createdAt          DateTime @default(now())
-  isIncluded         Boolean  @default(true)
-  product            Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt          DateTime    @default(now())
+  isIncluded         Boolean     @default(true)
+  product            Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  olxThreads         OlxThread[]
 }
 
 model Folder {
@@ -68,4 +70,79 @@ model Income {
   amount    Float
   createdAt DateTime @default(now())
   product   Product  @relation(fields: [productId], references: [id])
+}
+
+model OlxAccount {
+  id             String      @id @default(uuid())
+  olxUserId      String?
+  accountName    String
+  email          String?
+  phone          String?
+  avatarUrl      String?
+  clientId       String?
+  clientSecret   String?
+  accessToken    String
+  refreshToken   String?
+  tokenExpiresAt DateTime?
+  isActive       Boolean     @default(true)
+  lastSyncAt     DateTime?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  threads        OlxThread[]
+}
+
+model OlxThread {
+  id               String       @id @default(uuid())
+  olxThreadId      String
+  accountId        String
+  account          OlxAccount   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  advertId         String?
+  advertTitle      String?
+  advertUrl        String?
+  advertPrice      Float?
+  advertImage      String?
+  interlocutorId   String?
+  interlocutorName String?
+  unreadCount      Int          @default(0)
+  lastMessageText  String?
+  lastMessageAt    DateTime?
+  isArchived       Boolean      @default(false)
+  isFavorite       Boolean      @default(false)
+  buyerNotes       String?
+  linkedProductId  String?
+  linkedProduct    Product?     @relation(fields: [linkedProductId], references: [id], onDelete: SetNull)
+  linkedVariantId  String?
+  linkedVariant    Variant?     @relation(fields: [linkedVariantId], references: [id], onDelete: SetNull)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  messages         OlxMessage[]
+
+  @@unique([accountId, olxThreadId])
+}
+
+model OlxMessage {
+  id           String    @id @default(uuid())
+  olxMessageId String?
+  threadId     String
+  thread       OlxThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  senderId     String?
+  senderName   String?
+  isFromMe     Boolean   @default(false)
+  text         String
+  attachments  String[]  @default([])
+  isRead       Boolean   @default(false)
+  sentAt       DateTime  @default(now())
+  createdAt    DateTime  @default(now())
+
+  @@index([threadId, sentAt])
+}
+
+model CannedResponse {
+  id        String   @id @default(uuid())
+  title     String
+  category  String?  @default("Общие")
+  text      String
+  shortcut  String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
 }
