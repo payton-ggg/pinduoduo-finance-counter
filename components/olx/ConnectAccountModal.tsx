@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Dialog,
   DialogContent,
@@ -23,8 +24,10 @@ import {
   Zap,
   Globe,
   Lock,
-  ArrowRight,
-  HelpCircle,
+  Copy,
+  Check,
+  AlertTriangle,
+  Server,
 } from "lucide-react";
 
 type ConnectAccountModalProps = {
@@ -38,6 +41,7 @@ export function ConnectAccountModal({
   onClose,
   onAccountConnected,
 }: ConnectAccountModalProps) {
+  const searchParams = useSearchParams();
   const [tab, setTab] = useState<"oauth" | "manual" | "demo">("oauth");
   const [accountName, setAccountName] = useState("");
   const [clientId, setClientId] = useState("");
@@ -46,18 +50,119 @@ export function ConnectAccountModal({
   const [refreshToken, setRefreshToken] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [copiedUri, setCopiedUri] = useState(false);
 
+  // Вычисляем Redirect URI для кабинета OLX
+  const redirectUri =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/api/olx/oauth?action=callback`
+      : "";
+
+  // Загрузка сохраненных ключей из sessionStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedClientId = sessionStorage.getItem("olx_client_id");
+      const savedClientSecret = sessionStorage.getItem("olx_client_secret");
+      const savedAccountName = sessionStorage.getItem("olx_account_name");
+
+      if (savedClientId) setClientId(savedClientId);
+      if (savedClientSecret) setClientSecret(savedClientSecret);
+      if (savedAccountName) setAccountName(savedAccountName);
+    }
+  }, []);
+
+  // Автоматическая обработка OAuth callback (?oauth_code=...)
+  useEffect(() => {
+    const oauthCode = searchParams.get("oauth_code");
+    const oauthError = searchParams.get("oauth_error");
+
+    if (oauthError) {
+      setError(`Ошибка авторизации от OLX: ${oauthError}`);
+    } else if (oauthCode && isOpen) {
+      const savedClientId = sessionStorage.getItem("olx_client_id") || clientId;
+      const savedClientSecret = sessionStorage.getItem("olx_client_secret") || clientSecret;
+      const savedAccountName = sessionStorage.getItem("olx_account_name") || accountName;
+
+      if (savedClientId && savedClientSecret) {
+        handleExchangeOAuthCode(oauthCode, savedClientId, savedClientSecret, savedAccountName);
+      } else {
+        setError("Код авторизации получен, но отсутствуют Client ID и Client Secret. Введите их ниже.");
+      }
+    }
+  }, [searchParams, isOpen]);
+
+  const handleExchangeOAuthCode = async (
+    code: string,
+    cId: string,
+    cSecret: string,
+    accName: string
+  ) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/olx/oauth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "exchange",
+          code,
+          clientId: cId.trim(),
+          clientSecret: cSecret.trim(),
+          accountName: accName.trim() || undefined,
+          redirectUri,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Не удалось обменять код авторизации на токен");
+      }
+
+      // Очищаем временные данные
+      sessionStorage.removeItem("olx_client_id");
+      sessionStorage.removeItem("olx_client_secret");
+      sessionStorage.removeItem("olx_account_name");
+
+      onAccountConnected();
+      onClose();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCopyRedirectUri = () => {
+    if (!redirectUri) return;
+    navigator.clipboard.writeText(redirectUri);
+    setCopiedUri(true);
+    setTimeout(() => setCopiedUri(false), 2000);
+  };
+
+  // 1. Старт OAuth через браузер
   const handleOAuthConnect = async () => {
     if (!clientId.trim()) {
-      setError("Пожалуйста, укажите Client ID вашего приложения OLX");
+      setError("Пожалуйста, укажите Client ID");
       return;
     }
+    if (!clientSecret.trim()) {
+      setError("Пожалуйста, укажите Client Secret от вашего приложения OLX");
+      return;
+    }
+
+    // Сохраняем в sessionStorage перед переходом
+    sessionStorage.setItem("olx_client_id", clientId.trim());
+    sessionStorage.setItem("olx_client_secret", clientSecret.trim());
+    sessionStorage.setItem("olx_account_name", accountName.trim());
+
     setError(null);
     setLoading(true);
 
     try {
       const res = await fetch(
-        `/api/olx/oauth?action=authorize&clientId=${encodeURIComponent(clientId.trim())}`
+        `/api/olx/oauth?action=authorize&clientId=${encodeURIComponent(
+          clientId.trim()
+        )}&redirectUri=${encodeURIComponent(redirectUri)}`
       );
       const data = await res.json();
 
@@ -72,6 +177,46 @@ export function ConnectAccountModal({
     }
   };
 
+  // 2. Прямой вход через Client Credentials (без браузерного редиректа на OLX, обходит CloudFront WAF)
+  const handleDirectCredentialsConnect = async () => {
+    if (!clientId.trim() || !clientSecret.trim()) {
+      setError("Заполните Client ID и Client Secret");
+      return;
+    }
+
+    setError(null);
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/olx/oauth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "credentials",
+          clientId: clientId.trim(),
+          clientSecret: clientSecret.trim(),
+          accountName: accountName.trim() || undefined,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(
+          data.error ||
+            "Не удалось подключиться через Client Credentials. Проверьте правильность Client ID и Secret."
+        );
+      }
+
+      onAccountConnected();
+      onClose();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 3. Ручной ввод токена
   const handleManualConnect = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!accountName.trim() || !accessToken.trim()) {
@@ -108,6 +253,7 @@ export function ConnectAccountModal({
     }
   };
 
+  // 4. Демо аккаунт
   const handleCreateDemoAccount = async () => {
     setError(null);
     setLoading(true);
@@ -156,13 +302,13 @@ export function ConnectAccountModal({
                 </span>
               </div>
               <DialogDescription className="text-xs text-muted-foreground mt-0.5 font-medium">
-                Синхронизация диалогов, быстрые ответы и автоматический учет заказов
+                Синхронизация диалогов, быстрые ответы и учет продаж
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        {/* Переключатель вкладок (Сегментированный контрол) */}
+        {/* Переключатель вкладок */}
         <div className="grid grid-cols-3 gap-1.5 p-1.5 bg-muted/50 rounded-2xl my-3.5 border border-border/50">
           <button
             type="button"
@@ -177,7 +323,7 @@ export function ConnectAccountModal({
             }`}
           >
             <Zap className={`w-3.5 h-3.5 ${tab === "oauth" ? "text-primary" : ""}`} />
-            <span>OAuth 2.0</span>
+            <span>OAuth & Ключи</span>
           </button>
           <button
             type="button"
@@ -192,7 +338,7 @@ export function ConnectAccountModal({
             }`}
           >
             <KeyRound className={`w-3.5 h-3.5 ${tab === "manual" ? "text-primary" : ""}`} />
-            <span>Токен API</span>
+            <span>Ввод Токена</span>
           </button>
           <button
             type="button"
@@ -213,83 +359,148 @@ export function ConnectAccountModal({
 
         {/* Сообщение об ошибке */}
         {error && (
-          <div className="p-3.5 mb-3 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive text-xs font-semibold flex items-center gap-2 animate-in fade-in duration-200">
-            <Info className="w-4 h-4 shrink-0" />
-            <span>{error}</span>
+          <div className="p-3.5 mb-3 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive text-xs font-semibold flex items-start gap-2 animate-in fade-in duration-200">
+            <Info className="w-4 h-4 shrink-0 mt-0.5" />
+            <span className="leading-relaxed">{error}</span>
           </div>
         )}
 
-        {/* Вкладка 1: Официальный OAuth 2.0 */}
+        {/* Вкладка 1: OAuth & Ключи */}
         {tab === "oauth" && (
-          <div className="space-y-4">
-            <div className="p-4 rounded-2xl bg-muted/30 border border-border/50 space-y-3">
-              <div className="flex items-center gap-2 text-foreground font-bold text-xs">
-                <Globe className="w-4 h-4 text-primary shrink-0" />
-                Инструкция по подключению через OLX Developers:
+          <div className="space-y-3.5">
+            {/* Инструкция и Redirect URI */}
+            <div className="p-3.5 rounded-2xl bg-muted/30 border border-border/50 space-y-2.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="flex items-center gap-1.5 text-foreground font-bold">
+                  <Globe className="w-3.5 h-3.5 text-primary shrink-0" />
+                  Портал OLX Developers:
+                </span>
+                <a
+                  href="https://developer.olx.ua/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary hover:underline inline-flex items-center gap-0.5 font-bold text-[11px]"
+                >
+                  developer.olx.ua <ExternalLink className="w-3 h-3" />
+                </a>
               </div>
-              <div className="space-y-2 text-xs text-muted-foreground">
-                <div className="flex items-start gap-2.5">
-                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-black shrink-0 mt-0.5">
-                    1
-                  </span>
-                  <span>
-                    Откройте портал разработчиков{" "}
-                    <a
-                      href="https://developer.olx.ua/"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-primary hover:underline inline-flex items-center gap-0.5 font-bold"
-                    >
-                      developer.olx.ua <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </span>
+
+              {/* Redirect URI поле */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                  <span>Redirect URI (укажите в настройках Partner App):</span>
                 </div>
-                <div className="flex items-start gap-2.5">
-                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-black shrink-0 mt-0.5">
-                    2
-                  </span>
-                  <span>Создайте приложение (Partner App) и укажите тип Web</span>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-black shrink-0 mt-0.5">
-                    3
-                  </span>
-                  <span>Скопируйте полученный <b>Client ID</b> и вставьте в поле ниже</span>
+                <div className="flex items-center gap-1.5">
+                  <Input
+                    readOnly
+                    value={redirectUri}
+                    className="bg-background/80 border-border/60 h-8 font-mono text-[11px] text-muted-foreground select-all"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCopyRedirectUri}
+                    className="h-8 px-2.5 rounded-xl text-xs gap-1 shrink-0 font-bold"
+                  >
+                    {copiedUri ? (
+                      <>
+                        <Check className="w-3 h-3 text-emerald-500" />
+                        <span className="text-emerald-500">Скопировано</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3 h-3" />
+                        <span>Копия</span>
+                      </>
+                    )}
+                  </Button>
                 </div>
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
+            {/* Поля Client ID & Client Secret */}
+            <div className="space-y-3">
+              <div className="space-y-1">
                 <Label className="text-xs font-bold text-foreground">
-                  Client ID приложения OLX
+                  Client ID <span className="text-destructive">*</span>
                 </Label>
-                <span className="text-[10px] text-muted-foreground">Обязательное поле</span>
+                <Input
+                  placeholder="например: 200543"
+                  value={clientId}
+                  onChange={(e) => setClientId(e.target.value)}
+                  className="bg-muted/40 border-border/60 h-10 text-sm font-medium rounded-xl focus:bg-background transition-colors"
+                />
               </div>
-              <Input
-                placeholder="например: 200543"
-                value={clientId}
-                onChange={(e) => setClientId(e.target.value)}
-                className="bg-muted/40 border-border/60 h-11 text-sm font-medium rounded-xl focus:bg-background transition-colors"
-              />
+
+              <div className="space-y-1">
+                <Label className="text-xs font-bold text-foreground">
+                  Client Secret <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  type="password"
+                  placeholder="секретный ключ приложения из OLX..."
+                  value={clientSecret}
+                  onChange={(e) => setClientSecret(e.target.value)}
+                  className="bg-muted/40 border-border/60 h-10 font-mono text-xs rounded-xl focus:bg-background transition-colors"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-xs font-bold text-muted-foreground">
+                  Название магазина (опционально)
+                </Label>
+                <Input
+                  placeholder="например: Главный магазин OLX"
+                  value={accountName}
+                  onChange={(e) => setAccountName(e.target.value)}
+                  className="bg-muted/40 border-border/60 h-9 text-xs rounded-xl focus:bg-background transition-colors"
+                />
+              </div>
             </div>
 
-            <Button
-              onClick={handleOAuthConnect}
-              disabled={loading || !clientId.trim()}
-              className="w-full font-bold h-11 rounded-xl shadow-lg shadow-primary/20 gap-2 mt-2 cursor-pointer"
-            >
-              {loading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <ShieldCheck className="w-4 h-4" />
-              )}
-              Войти через OLX и авторизовать магазин
-            </Button>
+            {/* Блок с двумя вариантами подключения */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+              <Button
+                onClick={handleOAuthConnect}
+                disabled={loading || !clientId.trim() || !clientSecret.trim()}
+                className="w-full font-bold h-11 rounded-xl shadow-lg shadow-primary/20 gap-2 cursor-pointer text-xs"
+              >
+                {loading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <ShieldCheck className="w-4 h-4" />
+                )}
+                Войти через браузер (OAuth)
+              </Button>
 
-            <div className="flex items-center justify-center gap-2 text-[11px] text-muted-foreground/80 font-medium">
-              <Lock className="w-3 h-3" />
-              <span>Безопасная авторизация через официальный OAuth 2.0 протокол OLX</span>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleDirectCredentialsConnect}
+                disabled={loading || !clientId.trim() || !clientSecret.trim()}
+                className="w-full font-bold h-11 rounded-xl border-border/60 hover:bg-primary/10 hover:text-primary gap-2 cursor-pointer text-xs"
+                title="Подключение напрямую с сервера без редиректа в браузере (обходит CloudFront WAF)"
+              >
+                <Server className="w-4 h-4" />
+                Прямой вход (Server API)
+              </Button>
+            </div>
+
+            {/* Подсказка про ошибку 403 CloudFront */}
+            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-muted-foreground space-y-1">
+              <div className="flex items-center gap-1.5 text-amber-500 font-bold">
+                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                <span>Если OLX выдает ошибку «403 ERROR / CloudFront»:</span>
+              </div>
+              <ul className="list-disc list-inside space-y-0.5 pl-0.5 text-foreground/80 leading-relaxed">
+                <li>
+                  Убедитесь, что скопировали <b>Redirect URI</b> в настройки приложения на <b>developer.olx.ua</b>.
+                </li>
+                <li>
+                  Если браузер блокируется по IP/VPN, нажмите кнопку <b>«Прямой вход (Server API)»</b> или вставьте токен во вкладке <b>«Ввод Токена»</b>.
+                </li>
+              </ul>
             </div>
           </div>
         )}
@@ -299,7 +510,7 @@ export function ConnectAccountModal({
           <form onSubmit={handleManualConnect} className="space-y-3.5">
             <div className="space-y-1.5">
               <Label className="text-xs font-bold text-foreground">
-                Название магазина / профиля
+                Название магазина / профиля <span className="text-destructive">*</span>
               </Label>
               <Input
                 placeholder="например: OLX Магазин Наушников"
@@ -311,9 +522,12 @@ export function ConnectAccountModal({
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-bold text-foreground">
-                Access Token (Bearer)
-              </Label>
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-bold text-foreground">
+                  Access Token (Bearer) <span className="text-destructive">*</span>
+                </Label>
+                <span className="text-[10px] text-muted-foreground">Сгенерированный в OLX</span>
+              </div>
               <Input
                 placeholder="Bearer токен из OLX API..."
                 value={accessToken}
@@ -396,7 +610,7 @@ export function ConnectAccountModal({
                 </div>
                 <div className="flex items-center gap-2 text-[11px] font-semibold text-foreground/80">
                   <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
-                  <span>Без ключей и API токенов</span>
+                  <span>Без ожидания ключей от OLX</span>
                 </div>
               </div>
             </div>
@@ -419,4 +633,5 @@ export function ConnectAccountModal({
     </Dialog>
   );
 }
+
 
