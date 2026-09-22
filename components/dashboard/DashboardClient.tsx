@@ -63,6 +63,7 @@ type SortableFolderProps = {
 	deleteFolder: (id: string) => void;
 	isAdmin: boolean;
 	toggleFolderAccess: (id: string, allowed: boolean) => void;
+	hideLockedFolders?: boolean;
 };
 
 function SortableFolderItem({
@@ -78,6 +79,7 @@ function SortableFolderItem({
 	deleteFolder,
 	isAdmin,
 	toggleFolderAccess,
+	hideLockedFolders = false,
 }: SortableFolderProps) {
 	const {
 		attributes,
@@ -154,7 +156,7 @@ function SortableFolderItem({
 						{folder.name} ({count})
 						{isActive && <Pencil className="w-3 h-3 opacity-60" />}
 					</button>
-					{isAdmin && (
+					{isAdmin && !hideLockedFolders && (
 						<button
 							onClick={() =>
 								toggleFolderAccess(folder.id, !folder.allowedForSecondPassword)
@@ -209,6 +211,7 @@ export function DashboardClient({
 	const router = useRouter();
 	const [products, setProducts] = useState<ProductUI[]>(initialProducts);
 	const [role, setRole] = useState<string>("admin");
+	const [hideLockedFolders, setHideLockedFolders] = useState<boolean>(false);
 
 	useEffect(() => {
 		if (typeof window !== "undefined") {
@@ -216,8 +219,21 @@ export function DashboardClient({
 			if (savedRole) {
 				setRole(savedRole);
 			}
+			const savedHide = localStorage.getItem("hide_locked_folders") === "true";
+			setHideLockedFolders(savedHide);
 		}
 	}, []);
+
+	const toggleHideLockedFolders = useCallback(() => {
+		setHideLockedFolders((prev) => {
+			const next = !prev;
+			if (typeof window !== "undefined") {
+				localStorage.setItem("hide_locked_folders", String(next));
+			}
+			return next;
+		});
+	}, []);
+
 	const [selectedIds, setSelectedIds] = useState<Set<string | number>>(
 		() => new Set(initialProducts.map((p) => p.id)),
 	);
@@ -228,6 +244,22 @@ export function DashboardClient({
 	const [selectedFolderId, setSelectedFolderId] = useState<string | null>(
 		initialFolderId,
 	);
+
+	// Если скрытие включено, а выбрана закрытая папка — переключаем на «Все»
+	useEffect(() => {
+		if (hideLockedFolders && selectedFolderId) {
+			const selectedFolder = folders.find((f) => f.id === selectedFolderId);
+			if (selectedFolder && !selectedFolder.allowedForSecondPassword) {
+				setSelectedFolderId(null);
+				if (typeof window !== "undefined") {
+					const url = new URL(window.location.href);
+					url.searchParams.delete("folderId");
+					window.history.replaceState(null, "", url.pathname + url.search);
+					sessionStorage.setItem("selectedFolderId", "null");
+				}
+			}
+		}
+	}, [hideLockedFolders, selectedFolderId, folders]);
 	const [showFolderDropdown, setShowFolderDropdown] = useState(false);
 	const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
 	const [editingFolderName, setEditingFolderName] = useState("");
@@ -682,16 +714,38 @@ export function DashboardClient({
 		});
 	}, [products]);
 
-	const filteredProducts = useMemo(() => {
-		if (debouncedSearchQuery.trim()) {
-			return fuse.search(debouncedSearchQuery).map((result) => result.item);
+	const visibleFolders = useMemo(() => {
+		if (hideLockedFolders) {
+			return folders.filter((f) => f.allowedForSecondPassword);
 		}
-		return products.filter((p) => {
+		return folders;
+	}, [folders, hideLockedFolders]);
+
+	const filteredProducts = useMemo(() => {
+		let list = products;
+		if (hideLockedFolders) {
+			const lockedFolderIds = new Set(
+				folders
+					.filter((f) => !f.allowedForSecondPassword)
+					.map((f) => f.id),
+			);
+			list = list.filter((p) => !p.folderId || !lockedFolderIds.has(p.folderId));
+		}
+
+		if (debouncedSearchQuery.trim()) {
+			return new Fuse(list, {
+				keys: ["name", "folderName"],
+				threshold: 0.3,
+			})
+				.search(debouncedSearchQuery)
+				.map((result) => result.item);
+		}
+		return list.filter((p) => {
 			const matchesTab = activeTab === "active" ? !p.archive : p.archive;
 			if (!matchesTab) return false;
 			if (selectedFolderId === null) {
 				if (role === "restricted") {
-					return folders.some((f) => f.id === p.folderId);
+					return visibleFolders.some((f) => f.id === p.folderId);
 				}
 				return true;
 			}
@@ -702,9 +756,10 @@ export function DashboardClient({
 		debouncedSearchQuery,
 		activeTab,
 		selectedFolderId,
+		visibleFolders,
 		folders,
 		role,
-		fuse,
+		hideLockedFolders,
 	]);
 
 	const sortedProducts = useMemo(() => {
@@ -729,7 +784,7 @@ export function DashboardClient({
 
 	const totalProjectedProfit = totalProjectedRevenue - totalSpent;
 
-	const folderOrder: (string | null)[] = [null, ...folders.map((f) => f.id)];
+	const folderOrder: (string | null)[] = [null, ...visibleFolders.map((f) => f.id)];
 
 	const swipeFolder = useCallback(
 		(direction: "left" | "right") => {
@@ -748,15 +803,26 @@ export function DashboardClient({
 	const currentFolderName =
 		selectedFolderId === null
 			? "Все"
-			: (folders.find((f) => f.id === selectedFolderId)?.name ?? "");
+			: (visibleFolders.find((f) => f.id === selectedFolderId)?.name ?? "");
 
 	useEffect(() => {
 		setProducts(initialProducts);
 	}, [initialProducts]);
 
-	const tabProducts = products.filter((p) =>
-		activeTab === "active" ? !p.archive : p.archive,
-	);
+	const tabProducts = useMemo(() => {
+		let list = products.filter((p) =>
+			activeTab === "active" ? !p.archive : p.archive,
+		);
+		if (hideLockedFolders) {
+			const lockedFolderIds = new Set(
+				folders
+					.filter((f) => !f.allowedForSecondPassword)
+					.map((f) => f.id),
+			);
+			list = list.filter((p) => !p.folderId || !lockedFolderIds.has(p.folderId));
+		}
+		return list;
+	}, [products, activeTab, hideLockedFolders, folders]);
 
 	return (
 		<div className="py-4 space-y-4">
@@ -773,6 +839,9 @@ export function DashboardClient({
 				hasSelection={selectedIds.size > 0}
 				searchQuery={searchQuery}
 				onSearchQueryChange={setSearchQuery}
+				hideLockedFolders={hideLockedFolders}
+				onToggleHideLockedFolders={toggleHideLockedFolders}
+				isAdmin={role === "admin"}
 			/>
 
 			<div className="glass max-lg:hidden p-1.5 rounded-2xl flex gap-1 w-fit mb-6">
@@ -785,7 +854,7 @@ export function DashboardClient({
 					}`}
 				>
 					<Package className="w-4 h-4" />
-					Активные ({products.filter((p) => !p.archive).length})
+					Активные ({tabProducts.length})
 				</button>
 				<button
 					onClick={() => updateActiveTab("archive")}
@@ -819,10 +888,10 @@ export function DashboardClient({
 					onDragEnd={handleDragEnd}
 				>
 					<SortableContext
-						items={folders.map((f) => f.id)}
+						items={visibleFolders.map((f) => f.id)}
 						strategy={horizontalListSortingStrategy}
 					>
-						{folders.map((folder) => {
+						{visibleFolders.map((folder) => {
 							const count = tabProducts.filter(
 								(p) => p.folderId === folder.id,
 							).length;
@@ -841,6 +910,7 @@ export function DashboardClient({
 									deleteFolder={deleteFolder}
 									isAdmin={role === "admin"}
 									toggleFolderAccess={toggleFolderAccess}
+									hideLockedFolders={hideLockedFolders}
 								/>
 							);
 						})}
@@ -902,7 +972,7 @@ export function DashboardClient({
 						</Button>
 						{showFolderDropdown && (
 							<div className="absolute top-full left-0 mt-1 z-50 min-w-45 bg-background border rounded-xl shadow-xl p-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
-								{folders.map((folder) => (
+								{visibleFolders.map((folder) => (
 									<button
 										key={folder.id}
 										onClick={() => {
@@ -915,7 +985,7 @@ export function DashboardClient({
 										{folder.name}
 									</button>
 								))}
-								{folders.length === 0 && (
+								{visibleFolders.length === 0 && (
 									<p className="px-3 py-2 text-sm text-muted-foreground italic">
 										Нет папок
 									</p>
@@ -998,7 +1068,7 @@ export function DashboardClient({
 									onChange={(e) => setSelectedFolderIdForCopy(e.target.value)}
 								>
 									<option value="">Выберите папку назначения...</option>
-									{folders.map((f) => (
+									{visibleFolders.map((f) => (
 										<option key={f.id} value={f.id}>
 											{f.name}
 										</option>
@@ -1043,9 +1113,20 @@ export function DashboardClient({
 			<PriceManagementModal
 				isOpen={isPriceModalOpen}
 				onClose={() => setIsPriceModalOpen(false)}
-				products={products}
+				products={
+					hideLockedFolders
+						? products.filter((p) => {
+								const lockedFolderIds = new Set(
+									folders
+										.filter((f) => !f.allowedForSecondPassword)
+										.map((f) => f.id),
+								);
+								return !p.folderId || !lockedFolderIds.has(p.folderId);
+						  })
+						: products
+				}
 				globalRate={globalRate}
-				folders={folders}
+				folders={visibleFolders}
 				currentFolderId={selectedFolderId}
 				onSaveSuccess={handleBatchPricingUpdate}
 			/>

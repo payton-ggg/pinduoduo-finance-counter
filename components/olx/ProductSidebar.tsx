@@ -5,7 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import {
   Package,
   Coins,
@@ -132,7 +138,9 @@ export function ProductSidebar({
       0;
     setSaleAmount(Number(defaultPrice) || 0);
     setSaleQty(1);
-    setSaleNote(thread.interlocutorName ? `Покупатель: ${thread.interlocutorName}` : "");
+    setSaleNote(
+      thread.interlocutorName ? `Покупатель: ${thread.interlocutorName}` : "",
+    );
     setSaleSuccess(false);
     setIsSaleModalOpen(true);
   };
@@ -149,7 +157,9 @@ export function ProductSidebar({
         body: JSON.stringify({
           threadId: thread.id,
           productId: thread.linkedProduct.id,
-          variantId: thread.linkedVariant?.id || (thread.linkedProduct as any)?.variants?.[0]?.id,
+          variantId:
+            thread.linkedVariant?.id ||
+            (thread.linkedProduct as any)?.variants?.[0]?.id,
           amount: Number(saleAmount),
           quantity: Number(saleQty),
           note: saleNote,
@@ -189,11 +199,16 @@ export function ProductSidebar({
   const costCNY = variant?.priceCNY || 0;
   const shippingUA = variant?.shippingUA || 0;
   const managementUA = variant?.managementUAH || 0;
-  const totalCostUAH = Math.round(costCNY * rateCNY + shippingUA + managementUA);
+  const totalCostUAH = Math.round(
+    costCNY * rateCNY + shippingUA + managementUA,
+  );
 
   const sellingPriceUAH = thread.advertPrice || variant?.priceInUA || 0;
   const netProfitUAH = Math.round(sellingPriceUAH - totalCostUAH);
-  const profitMargin = sellingPriceUAH > 0 ? Math.round((netProfitUAH / sellingPriceUAH) * 100) : 0;
+  const profitMargin =
+    sellingPriceUAH > 0
+      ? Math.round((netProfitUAH / sellingPriceUAH) * 100)
+      : 0;
 
   const purchasedCount = variant?.purchasedCount || 0;
   const sellsCount = variant?.sellsCount || 0;
@@ -206,7 +221,10 @@ export function ProductSidebar({
           <Tag className="w-3.5 h-3.5 text-primary" /> Сделка и Склад
         </h3>
         {linkedProduct && (
-          <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20 py-0 px-1.5">
+          <Badge
+            variant="outline"
+            className="text-[10px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20 py-0 px-1.5"
+          >
             Товар привязан
           </Badge>
         )}
@@ -236,7 +254,9 @@ export function ProductSidebar({
               </h4>
               <div className="flex items-center justify-between mt-1">
                 <span className="text-sm font-black text-foreground">
-                  {thread.advertPrice ? `${thread.advertPrice} ₴` : "Цена не указана"}
+                  {thread.advertPrice
+                    ? `${thread.advertPrice} ₴`
+                    : "Цена не указана"}
                 </span>
                 {thread.advertUrl && (
                   <a
@@ -273,14 +293,21 @@ export function ProductSidebar({
             <div className="flex items-center gap-2.5">
               <div className="w-10 h-10 rounded-xl overflow-hidden bg-foreground/10 shrink-0">
                 <img
-                  src={linkedProduct.images?.[0] || "https://placehold.co/100x100?text=No+Img"}
+                  src={
+                    linkedProduct.images?.[0] ||
+                    "https://placehold.co/100x100?text=No+Img"
+                  }
                   alt=""
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="min-w-0">
-                <h5 className="font-bold text-xs text-foreground truncate">{linkedProduct.name}</h5>
-                <span className="text-[10px] text-muted-foreground">ID: {linkedProduct.id.slice(0, 8)}</span>
+                <h5 className="font-bold text-xs text-foreground truncate">
+                  {linkedProduct.name}
+                </h5>
+                <span className="text-[10px] text-muted-foreground">
+                  ID: {linkedProduct.id.slice(0, 8)}
+                </span>
               </div>
             </div>
 
@@ -291,7 +318,15 @@ export function ProductSidebar({
                   <Boxes className="w-3 h-3 text-primary" /> Остаток
                 </div>
                 <div className="text-base font-black text-foreground mt-0.5">
-                  <span className={inStock > 3 ? "text-emerald-500" : inStock > 0 ? "text-amber-500" : "text-destructive"}>
+                  <span
+                    className={
+                      inStock > 3
+                        ? "text-emerald-500"
+                        : inStock > 0
+                          ? "text-amber-500"
+                          : "text-destructive"
+                    }
+                  >
                     {inStock} шт
                   </span>
                   <span className="text-[10px] text-muted-foreground font-normal ml-1">
@@ -302,7 +337,8 @@ export function ProductSidebar({
 
               <div className="p-2.5 rounded-xl bg-background/50 border border-border/20">
                 <div className="text-[10px] text-muted-foreground flex items-center gap-1 font-semibold">
-                  <TrendingUp className="w-3 h-3 text-emerald-500" /> Чистая прибыль
+                  <TrendingUp className="w-3 h-3 text-emerald-500" /> Чистая
+                  прибыль
                 </div>
                 <div className="text-base font-black text-emerald-500 mt-0.5">
                   +{netProfitUAH} ₴
@@ -316,18 +352,22 @@ export function ProductSidebar({
             <div className="text-[11px] space-y-1 text-muted-foreground pt-1 border-t border-border/20">
               <div className="flex justify-between">
                 <span>Себестоимость (закупка + дост.):</span>
-                <span className="font-bold text-foreground">{totalCostUAH} ₴</span>
+                <span className="font-bold text-foreground">
+                  {totalCostUAH} ₴
+                </span>
               </div>
               <div className="flex justify-between">
                 <span>Розничная цена:</span>
-                <span className="font-bold text-foreground">{sellingPriceUAH} ₴</span>
+                <span className="font-bold text-foreground">
+                  {sellingPriceUAH} ₴
+                </span>
               </div>
             </div>
 
             {/* Главная кнопка: Оформить продажу */}
             <Button
               onClick={openSaleModal}
-              className="w-full font-black rounded-xl h-10 shadow-lg shadow-primary/20 gap-2 bg-gradient-to-r from-primary to-primary/90 text-primary-foreground text-xs"
+              className="w-full font-black rounded-xl h-10 shadow-lg shadow-primary/20 gap-2 bg-linear-to-r from-primary to-primary/90 text-primary-foreground text-xs"
             >
               <ShoppingCart className="w-4 h-4" /> Оформить продажу (1 клик)
             </Button>
@@ -335,9 +375,12 @@ export function ProductSidebar({
         ) : (
           <div className="p-4 rounded-2xl border border-dashed border-border/60 text-center space-y-2">
             <Package className="w-8 h-8 mx-auto opacity-30 text-primary" />
-            <p className="text-xs font-bold text-foreground">Товар склада не привязан</p>
+            <p className="text-xs font-bold text-foreground">
+              Товар склада не привязан
+            </p>
             <p className="text-[10px] text-muted-foreground">
-              Привяжите товар из вашего каталога, чтобы видеть себестоимость, остатки и списывать продажи в 1 клик
+              Привяжите товар из вашего каталога, чтобы видеть себестоимость,
+              остатки и списывать продажи в 1 клик
             </p>
             <Button
               size="sm"
@@ -362,7 +405,11 @@ export function ProductSidebar({
               disabled={isSavingNotes}
               className="h-6 px-2 text-[10px] font-bold text-primary hover:bg-primary/10 gap-1"
             >
-              {isSavingNotes ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+              {isSavingNotes ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Save className="w-3 h-3" />
+              )}
               Сохранить
             </Button>
           </div>
@@ -381,7 +428,9 @@ export function ProductSidebar({
       <Dialog open={isLinkModalOpen} onOpenChange={setIsLinkModalOpen}>
         <DialogContent className="max-w-md bg-card text-card-foreground border border-border/60 shadow-2xl p-5 sm:p-7 rounded-3xl backdrop-blur-xl">
           <DialogHeader>
-            <DialogTitle className="text-lg font-black text-foreground tracking-tight">Привязать товар из каталога</DialogTitle>
+            <DialogTitle className="text-lg font-black text-foreground tracking-tight">
+              Привязать товар из каталога
+            </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground mt-0.5">
               Выберите товар для диалога &quot;{thread.advertTitle}&quot;
             </DialogDescription>
@@ -399,11 +448,17 @@ export function ProductSidebar({
 
           <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
             {catalog
-              .filter((p) => !productSearch || p.name.toLowerCase().includes(productSearch.toLowerCase()))
+              .filter(
+                (p) =>
+                  !productSearch ||
+                  p.name.toLowerCase().includes(productSearch.toLowerCase()),
+              )
               .map((prod) => (
                 <div
                   key={prod.id}
-                  onClick={() => handleLinkProduct(prod.id, prod.variants[0]?.id)}
+                  onClick={() =>
+                    handleLinkProduct(prod.id, prod.variants[0]?.id)
+                  }
                   className="flex items-center justify-between p-2.5 rounded-xl bg-muted/30 hover:bg-primary/10 border border-border/50 hover:border-primary/30 transition-all cursor-pointer group"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
@@ -417,12 +472,18 @@ export function ProductSidebar({
                         {prod.name}
                       </h5>
                       <span className="text-[10px] text-muted-foreground">
-                        {prod.variants[0]?.priceInUA ? `${prod.variants[0].priceInUA} ₴` : "Без цены"}
+                        {prod.variants[0]?.priceInUA
+                          ? `${prod.variants[0].priceInUA} ₴`
+                          : "Без цены"}
                       </span>
                     </div>
                   </div>
 
-                  <Button size="sm" variant="ghost" className="h-7 text-xs font-bold group-hover:text-primary">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 text-xs font-bold group-hover:text-primary"
+                  >
                     Выбрать
                   </Button>
                 </div>
@@ -440,7 +501,9 @@ export function ProductSidebar({
                 <ShoppingCart className="w-6 h-6" />
               </div>
               <div>
-                <DialogTitle className="text-lg sm:text-xl font-black text-foreground tracking-tight">Оформить продажу</DialogTitle>
+                <DialogTitle className="text-lg sm:text-xl font-black text-foreground tracking-tight">
+                  Оформить продажу
+                </DialogTitle>
                 <DialogDescription className="text-xs text-muted-foreground mt-0.5">
                   Создать запись дохода и списать единицу со склада
                 </DialogDescription>
@@ -451,7 +514,9 @@ export function ProductSidebar({
           {saleSuccess ? (
             <div className="py-8 text-center space-y-2 text-emerald-500">
               <CheckCircle2 className="w-12 h-12 mx-auto animate-bounce" />
-              <h4 className="font-black text-base">Продажа успешно зафиксирована!</h4>
+              <h4 className="font-black text-base">
+                Продажа успешно зафиксирована!
+              </h4>
               <p className="text-xs text-muted-foreground">
                 Доход добавлен в статистику, остаток на складе обновлен
               </p>
@@ -460,7 +525,9 @@ export function ProductSidebar({
             <form onSubmit={handleConfirmSale} className="space-y-4 my-2">
               <div className="p-3 rounded-xl bg-foreground/5 text-xs space-y-1">
                 <div className="text-muted-foreground">Товар:</div>
-                <div className="font-bold text-foreground truncate">{linkedProduct?.name}</div>
+                <div className="font-bold text-foreground truncate">
+                  {linkedProduct?.name}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -488,7 +555,9 @@ export function ProductSidebar({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold">Примечание к сделке (опционально)</label>
+                <label className="text-xs font-bold">
+                  Примечание к сделке (опционально)
+                </label>
                 <Input
                   placeholder="например: OLX Доставка Новая Почта"
                   value={saleNote}
