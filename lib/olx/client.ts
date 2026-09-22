@@ -124,6 +124,36 @@ export class OlxApiClient {
   }
 
   /**
+   * Получить токен напрямую через Client ID и Client Secret (Client Credentials)
+   */
+  static async getTokensWithCredentials(params: {
+    clientId: string;
+    clientSecret: string;
+  }): Promise<OlxTokens> {
+    const response = await fetch(OLX_TOKEN_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Version: "2.0",
+      },
+      body: JSON.stringify({
+        grant_type: "client_credentials",
+        client_id: params.clientId,
+        client_secret: params.clientSecret,
+        scope: "read write v2",
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`OLX Auth failed (${response.status}): ${errorText}`);
+    }
+
+    return response.json();
+  }
+
+  /**
    * Обновить access_token по refresh_token
    */
   static async refreshAccessToken(params: {

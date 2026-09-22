@@ -53,7 +53,7 @@ export function DialogContent({
       {/* Контент модального окна — 100% непрозрачный, четкий контраст */}
       <div
         className={cn(
-          "relative z-50 w-full max-h-[90vh] overflow-y-auto rounded-3xl bg-card dark:bg-[#141417] text-card-foreground p-6 shadow-2xl border border-border/80 transition-all animate-in fade-in-0 zoom-in-95 duration-200",
+          "relative z-50 w-full max-h-[90vh] overflow-y-auto rounded-3xl bg-card text-card-foreground p-6 shadow-2xl border border-border/80 transition-all animate-in fade-in-0 zoom-in-95 duration-200",
           className
         )}
         onClick={(e) => e.stopPropagation()}

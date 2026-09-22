@@ -147,16 +147,18 @@ export function QuickTemplatesModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-card dark:bg-[#18181b] border border-border/80 shadow-2xl p-6 sm:p-7">
+      <DialogContent className="max-w-2xl bg-card text-card-foreground border border-border/60 shadow-2xl p-5 sm:p-7 rounded-3xl backdrop-blur-xl">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500">
+              <div className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20 shadow-sm shrink-0">
                 <Zap className="w-6 h-6" />
               </div>
               <div>
-                <DialogTitle className="text-xl font-bold">Шаблоны быстрых ответов</DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground">
+                <DialogTitle className="text-lg sm:text-xl font-black text-foreground tracking-tight">
+                  Шаблоны быстрых ответов
+                </DialogTitle>
+                <DialogDescription className="text-xs text-muted-foreground mt-0.5 font-medium">
                   Заготовленные фразы для мгновенных ответов покупателям в 1 клик
                 </DialogDescription>
               </div>

@@ -379,10 +379,10 @@ export function ProductSidebar({
 
       {/* Модалка выбора товара из каталога */}
       <Dialog open={isLinkModalOpen} onOpenChange={setIsLinkModalOpen}>
-        <DialogContent className="max-w-md bg-card dark:bg-[#18181b] border border-border/80 shadow-2xl p-6 sm:p-7">
+        <DialogContent className="max-w-md bg-card text-card-foreground border border-border/60 shadow-2xl p-5 sm:p-7 rounded-3xl backdrop-blur-xl">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold">Привязать товар из каталога</DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground">
+            <DialogTitle className="text-lg font-black text-foreground tracking-tight">Привязать товар из каталога</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground mt-0.5">
               Выберите товар для диалога &quot;{thread.advertTitle}&quot;
             </DialogDescription>
           </DialogHeader>
@@ -393,7 +393,7 @@ export function ProductSidebar({
               placeholder="Поиск по названию товара..."
               value={productSearch}
               onChange={(e) => setProductSearch(e.target.value)}
-              className="pl-9 text-xs bg-muted/50 dark:bg-[#27272a]"
+              className="pl-9 text-xs bg-muted/40 border-border/60 rounded-xl"
             />
           </div>
 
@@ -404,7 +404,7 @@ export function ProductSidebar({
                 <div
                   key={prod.id}
                   onClick={() => handleLinkProduct(prod.id, prod.variants[0]?.id)}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-muted/40 dark:bg-[#27272a]/60 hover:bg-primary/15 border border-border/60 hover:border-primary/40 transition-all cursor-pointer group"
+                  className="flex items-center justify-between p-2.5 rounded-xl bg-muted/30 hover:bg-primary/10 border border-border/50 hover:border-primary/30 transition-all cursor-pointer group"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <img
@@ -433,15 +433,15 @@ export function ProductSidebar({
 
       {/* Модалка фиксации продажи */}
       <Dialog open={isSaleModalOpen} onOpenChange={setIsSaleModalOpen}>
-        <DialogContent className="max-w-md bg-card dark:bg-[#18181b] border border-border/80 shadow-2xl p-6 sm:p-7">
+        <DialogContent className="max-w-md bg-card text-card-foreground border border-border/60 shadow-2xl p-5 sm:p-7 rounded-3xl backdrop-blur-xl">
           <DialogHeader>
             <div className="flex items-center gap-3 mb-1">
-              <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500">
+              <div className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shadow-sm shrink-0">
                 <ShoppingCart className="w-6 h-6" />
               </div>
               <div>
-                <DialogTitle className="text-xl font-bold">Оформить продажу</DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground">
+                <DialogTitle className="text-lg sm:text-xl font-black text-foreground tracking-tight">Оформить продажу</DialogTitle>
+                <DialogDescription className="text-xs text-muted-foreground mt-0.5">
                   Создать запись дохода и списать единицу со склада
                 </DialogDescription>
               </div>

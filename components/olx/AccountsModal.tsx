@@ -80,17 +80,19 @@ export function AccountsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-card dark:bg-[#18181b] border border-border/80 shadow-2xl p-6 sm:p-7">
+      <DialogContent className="max-w-2xl bg-card text-card-foreground border border-border/60 shadow-2xl p-5 sm:p-7 rounded-3xl backdrop-blur-xl">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-2xl bg-primary/15 text-primary border border-primary/20">
+              <div className="p-3 rounded-2xl bg-primary/10 text-primary border border-primary/20 shadow-sm shrink-0">
                 <Store className="w-6 h-6" />
               </div>
               <div>
-                <DialogTitle className="text-xl font-black text-foreground">Подключенные аккаунты OLX</DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-                  Управление магазинами, токенами и принудительная синхронизация
+                <DialogTitle className="text-lg sm:text-xl font-black text-foreground tracking-tight">
+                  Подключенные аккаунты OLX
+                </DialogTitle>
+                <DialogDescription className="text-xs text-muted-foreground mt-0.5 font-medium">
+                  Управление магазинами, токенами и синхронизация
                 </DialogDescription>
               </div>
             </div>
@@ -125,10 +127,10 @@ export function AccountsModal({
             accounts.map((acc) => (
               <div
                 key={acc.id}
-                className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-muted/40 dark:bg-[#27272a]/60 border border-border/60 hover:border-primary/40 transition-all"
+                className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-muted/30 border border-border/50 hover:border-primary/40 transition-all"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-12 h-12 rounded-xl bg-primary/15 border border-primary/25 flex items-center justify-center font-bold text-lg text-primary shrink-0 overflow-hidden">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center font-bold text-lg text-primary shrink-0 overflow-hidden">
                     {acc.avatarUrl ? (
                       <img src={acc.avatarUrl} alt={acc.accountName} className="w-full h-full object-cover" />
                     ) : (
