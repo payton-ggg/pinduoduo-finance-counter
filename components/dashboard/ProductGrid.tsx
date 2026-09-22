@@ -26,6 +26,7 @@ export function ProductGrid({
       {products.map((p, index) => (
         <Link
           href={`/product/${p.id}`}
+          prefetch={false}
           key={p.id}
           className="animate-in fade-in zoom-in-95 duration-500 fill-mode-forwards block h-full group/link"
           style={{ animationDelay: `${index * 50}ms` }}

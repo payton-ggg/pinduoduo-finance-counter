@@ -29,11 +29,15 @@ export function Header({
   const [unreadOlxCount, setUnreadOlxCount] = useState<number>(0);
 
   useEffect(() => {
+    let isMounted = true;
+
     const checkOlxUnread = async () => {
+      if (document.hidden) return;
       try {
         const res = await fetch("/api/olx/accounts");
+        if (!res.ok) return;
         const data = await res.json();
-        if (Array.isArray(data)) {
+        if (isMounted && Array.isArray(data)) {
           const total = data.reduce((acc, a) => acc + (a.unreadCount || 0), 0);
           setUnreadOlxCount(total);
         }
@@ -41,9 +45,28 @@ export function Header({
         // silent
       }
     };
+
+    // 1. Проверяем сразу при монтировании
     checkOlxUnread();
-    const interval = setInterval(checkOlxUnread, 15000);
-    return () => clearInterval(interval);
+
+    // 2. Обновляем при возвращении на вкладку
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        checkOlxUnread();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", checkOlxUnread);
+
+    // 3. Ненавязчивый интервал раз в 60 секунд только для активной вкладки
+    const interval = setInterval(checkOlxUnread, 60000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", checkOlxUnread);
+    };
   }, []);
 
   return (
