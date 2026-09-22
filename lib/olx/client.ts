@@ -1,6 +1,9 @@
-export const OLX_BASE_URL = "https://api.olx.ua";
+export const OLX_BASE_URL = "https://www.olx.ua";
 export const OLX_AUTH_URL = "https://www.olx.ua/oauth/authorize/";
-export const OLX_TOKEN_URL = "https://api.olx.ua/open/oauth/token";
+export const OLX_TOKEN_URL = "https://www.olx.ua/api/open/oauth/token";
+
+const DEFAULT_USER_AGENT =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
 export interface OlxTokens {
   access_token: string;
@@ -104,7 +107,8 @@ export class OlxApiClient {
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        "Version": "2.0",
+        Version: "2.0",
+        "User-Agent": DEFAULT_USER_AGENT,
       },
       body: JSON.stringify({
         grant_type: "authorization_code",
@@ -166,7 +170,8 @@ export class OlxApiClient {
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        "Version": "2.0",
+        Version: "2.0",
+        "User-Agent": DEFAULT_USER_AGENT,
       },
       body: JSON.stringify({
         grant_type: "refresh_token",
@@ -193,7 +198,8 @@ export class OlxApiClient {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         Accept: "application/json",
-        "Version": "2.0",
+        Version: "2.0",
+        "User-Agent": DEFAULT_USER_AGENT,
       },
     });
 
