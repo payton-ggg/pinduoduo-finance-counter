@@ -15,9 +15,11 @@ import {
   Menu,
   CheckSquare,
   RotateCcw,
+  LogOut,
 } from "lucide-react";
 import { ModeToggle } from "@/components/ui/mode-toggle";
 import { useRouter } from "next/navigation";
+import { logout } from "@/lib/authClient";
 
 type HeaderProps = {
   onAdd?: () => void;
@@ -210,6 +212,17 @@ export function Header({
             title="Обновить данные"
           >
             <RefreshCw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />
+          </Button>
+
+          {/* Выйти из системы */}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={logout}
+            className="glass rounded-2xl border border-border/50 hover:bg-destructive/15 hover:text-destructive text-muted-foreground transition-all h-10 w-10 shrink-0 flex items-center justify-center group cursor-pointer"
+            title="Выйти из аккаунта"
+          >
+            <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
           </Button>
 
           {/* Добавить товар */}
@@ -430,14 +443,26 @@ export function Header({
                 </div>
               </div>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.location.reload()}
-                className="h-8 rounded-xl text-xs font-bold gap-1 border-border/50 cursor-pointer"
-              >
-                <RefreshCw className="w-3 h-3" /> Обновить
-              </Button>
+              <div className="flex items-center gap-1.5">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.location.reload()}
+                  className="h-8 rounded-xl text-xs font-bold gap-1 border-border/50 cursor-pointer"
+                >
+                  <RefreshCw className="w-3 h-3" /> Обновить
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={logout}
+                  className="h-8 rounded-xl text-xs font-bold gap-1 border-destructive/30 text-destructive hover:bg-destructive/10 cursor-pointer"
+                  title="Выйти из аккаунта"
+                >
+                  <LogOut className="w-3 h-3" /> Выйти
+                </Button>
+              </div>
             </div>
           </div>
         )}

@@ -3,8 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MessageSquare, RefreshCw, Plus, Store, Sparkles } from "lucide-react";
+import { ArrowLeft, MessageSquare, RefreshCw, Plus, Store, Sparkles, LogOut } from "lucide-react";
 import { ModeToggle } from "@/components/ui/mode-toggle";
+import { logout } from "@/lib/authClient";
 import { AccountSelector, type OlxAccountItem } from "./AccountSelector";
 import { ThreadList, type ThreadItem } from "./ThreadList";
 import { ChatWindow } from "./ChatWindow";
@@ -230,10 +231,20 @@ export function OlxHub({ globalRate = 5.8 }: OlxHubProps) {
             size="icon"
             onClick={handleSyncAll}
             disabled={isSyncing}
-            className="h-10 w-10 rounded-xl border-border/40 hover:bg-primary/20"
+            className="h-10 w-10 rounded-xl border-border/40 hover:bg-primary/20 cursor-pointer"
             title="Обновить диалоги"
           >
             <RefreshCw className={`w-4 h-4 ${isSyncing ? "animate-spin text-primary" : ""}`} />
+          </Button>
+
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={logout}
+            className="h-10 w-10 rounded-xl border-border/40 hover:bg-destructive/15 hover:text-destructive text-muted-foreground transition-all cursor-pointer"
+            title="Выйти из аккаунта"
+          >
+            <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
           </Button>
         </div>
       </div>

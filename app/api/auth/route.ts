@@ -30,3 +30,16 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ ok: false, error: "Неверный пароль" }, { status: 401 });
 }
+
+export async function DELETE() {
+  const response = NextResponse.json({ ok: true });
+  response.cookies.set("site_password", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: "/",
+    maxAge: 0,
+    expires: new Date(0),
+  });
+  return response;
+}

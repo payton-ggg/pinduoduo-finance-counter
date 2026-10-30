@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { ArrowLeft, RefreshCw, ArrowUpDown } from "lucide-react";
+import { ArrowLeft, RefreshCw, ArrowUpDown, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { logout } from "@/lib/authClient";
 import { Card } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import type { ExchangeRates } from "@/lib/rates";
@@ -193,15 +194,27 @@ export function CalculatorClient({ rates }: CalculatorClientProps) {
             </p>
           </div>
         </div>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => window.location.reload()}
-          className="glass rounded-xl border-none hover:bg-primary/20 transition-all h-10 w-10 sm:h-11 sm:w-11 shrink-0 group"
-          title="Обновить курсы"
-        >
-          <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 group-hover:rotate-180 transition-transform duration-500" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => window.location.reload()}
+            className="glass rounded-xl border-none hover:bg-primary/20 transition-all h-10 w-10 sm:h-11 sm:w-11 shrink-0 group cursor-pointer"
+            title="Обновить курсы"
+          >
+            <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 group-hover:rotate-180 transition-transform duration-500" />
+          </Button>
+
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={logout}
+            className="glass rounded-xl border-none hover:bg-destructive/15 hover:text-destructive text-muted-foreground transition-all h-10 w-10 sm:h-11 sm:w-11 shrink-0 group cursor-pointer"
+            title="Выйти из аккаунта"
+          >
+            <LogOut className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform duration-300" />
+          </Button>
+        </div>
       </div>
 
       {/* Rates cards */}
