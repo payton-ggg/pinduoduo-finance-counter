@@ -20,6 +20,7 @@ import {
   Tag,
 } from "lucide-react";
 import { getProductMetrics, type SortKey } from "@/lib/sorting";
+import { getShippingRatePerKg } from "@/lib/tariffs";
 
 export type ProductVariantUI = {
   id?: string;
@@ -127,12 +128,10 @@ export const ProductCard = memo(function ProductCard({
   if (purchased > 0 && shippingUA > 0) {
     unitShippingUAH = shippingUA / purchased;
   } else if (weight > 0 && rateUSD > 0) {
-    const ratePerKgUSD =
-      activeVariant.shippingType === "sea"
-        ? 7.1
-        : activeVariant.shippingType === "custom"
-          ? activeVariant.customShippingRate || 0
-          : 18.3;
+    const ratePerKgUSD = getShippingRatePerKg(
+      activeVariant.shippingType,
+      activeVariant.customShippingRate
+    );
     unitShippingUAH = (weight / 1000) * ratePerKgUSD * rateUSD;
   }
 

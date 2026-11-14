@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ProductUI, ProductVariantUI } from "./ProductCard";
+import { getShippingRatePerKg } from "@/lib/tariffs";
 
 type VariantDraft = {
 	priceCNY: number;
@@ -145,11 +146,7 @@ export function PriceManagementModal({
 					: Number(variant.weight || 0) > 0 &&
 						  Number(variant.rateUSD || fallbackProduct.rateUSD || 0) > 0
 						? (Number(variant.weight) / 1000) *
-						  (variant.shippingType === "sea"
-								? 7.1
-								: variant.shippingType === "custom"
-									? variant.customShippingRate || 0
-									: 18.3) *
+						  getShippingRatePerKg(variant.shippingType, variant.customShippingRate) *
 						  Number(variant.rateUSD || fallbackProduct.rateUSD || 0)
 						: 0;
 			const unitManagementUAH =

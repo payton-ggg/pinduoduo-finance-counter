@@ -7,6 +7,7 @@ import { logout } from "@/lib/authClient";
 import { Card } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import type { ExchangeRates } from "@/lib/rates";
+import { SHIPPING_RATES } from "@/lib/tariffs";
 
 type Currency = "UAH" | "USD" | "EUR" | "CNY";
 
@@ -248,14 +249,14 @@ export function CalculatorClient({ rates }: CalculatorClientProps) {
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-muted-foreground">✈️ Авиа</span>
               <span className="text-sm sm:text-base font-black text-foreground">
-                {(18.3 * rates.usd).toFixed(0)}{" "}
+                {(SHIPPING_RATES.air * rates.usd).toFixed(0)}{" "}
                 <span className="text-xs font-medium text-muted-foreground">₴</span>
               </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-muted-foreground">🚢 Море</span>
               <span className="text-sm sm:text-base font-black text-foreground">
-                {(7.1 * rates.usd).toFixed(0)}{" "}
+                {(SHIPPING_RATES.sea * rates.usd).toFixed(0)}{" "}
                 <span className="text-xs font-medium text-muted-foreground">₴</span>
               </span>
             </div>

@@ -30,6 +30,7 @@ import {
   ArrowDownRight,
   Banknote,
 } from "lucide-react";
+import { SHIPPING_RATES, getShippingRatePerKg } from "@/lib/tariffs";
 
 type ProductOverviewClientProps = {
   id: string;
@@ -142,11 +143,7 @@ export function ProductOverviewClient({
           ? shippingUA / purchased
           : unitWeight > 0 && (v.rateUSD || rates?.usd || 0) > 0
             ? (unitWeight / 1000) *
-              (v.shippingType === "sea"
-                ? 7.1
-                : v.shippingType === "custom"
-                  ? v.customShippingRate || 0
-                  : 18.3) *
+              getShippingRatePerKg(v.shippingType, v.customShippingRate) *
               (v.rateUSD || rates?.usd || 0)
             : 0;
       const unitManagementUAH = purchased > 0 ? managementUAH / purchased : 0;
@@ -502,11 +499,7 @@ export function ProductOverviewClient({
                     ? shippingUA / purchased
                     : unitWeight > 0 && (v.rateUSD || rates?.usd || 0) > 0
                       ? (unitWeight / 1000) *
-                        (v.shippingType === "sea"
-                          ? 7.1
-                          : v.shippingType === "custom"
-                            ? v.customShippingRate || 0
-                            : 18.3) *
+                        getShippingRatePerKg(v.shippingType, v.customShippingRate) *
                         (v.rateUSD || rates?.usd || 0)
                       : 0;
                 const unitManagementUAH =
@@ -519,10 +512,10 @@ export function ProductOverviewClient({
                 const variantIncome = sells * actualNetPrice;
                 const shippingLabel =
                   v.shippingType === "sea"
-                    ? "Море 7.1$/кг"
+                    ? `Море ${SHIPPING_RATES.sea}$/кг`
                     : v.shippingType === "custom"
                       ? `Своя ${v.customShippingRate || 0}$/кг`
-                      : "Авиа 18.3$/кг";
+                      : `Авиа ${SHIPPING_RATES.air}$/кг`;
 
                 return (
                   <div

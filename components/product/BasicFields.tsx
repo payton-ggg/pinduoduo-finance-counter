@@ -9,6 +9,7 @@ import {
 } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Calculator, Copy, Check } from "lucide-react";
+import { SHIPPING_RATES, getShippingRatePerKg } from "@/lib/tariffs";
 
 type VariantFieldsProps = {
   prefix: string;
@@ -54,12 +55,7 @@ export function VariantFields({
     }
 
     if (rateUSD !== undefined && rateUSD > 0) {
-      let ratePerKgUSD = 0;
-      switch (shippingType) {
-        case "air": ratePerKgUSD = 18.3; break;
-        case "sea": ratePerKgUSD = 7.1; break;
-        case "custom": ratePerKgUSD = customShippingRate || 0; break;
-      }
+      const ratePerKgUSD = getShippingRatePerKg(shippingType, customShippingRate);
 
       const calcUSD = ((weight || 0) / 1000) * (purchasedCount || 0) * ratePerKgUSD;
       const calcUAH = parseFloat((calcUSD * rateUSD).toFixed(2));
@@ -89,12 +85,7 @@ export function VariantFields({
 
   const calculateShipping = (isManual = false) => {
     if (weight && purchasedCount && rateUSD) {
-      let ratePerKgUSD = 0;
-      switch (shippingType) {
-        case "air": ratePerKgUSD = 18.3; break;
-        case "sea": ratePerKgUSD = 7.1; break;
-        case "custom": ratePerKgUSD = customShippingRate || 0; break;
-      }
+      const ratePerKgUSD = getShippingRatePerKg(shippingType, customShippingRate);
 
       const shippingCostUSD = (weight / 1000) * purchasedCount * ratePerKgUSD;
       const shippingCostUAH = shippingCostUSD * rateUSD;
@@ -260,8 +251,8 @@ export function VariantFields({
             className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
             {...register(`${prefix}.shippingType`)}
           >
-            <option value="air">Авиа (18.3$ / кг)</option>
-            <option value="sea">Море (7.1$ / кг)</option>
+            <option value="air">Авиа ({SHIPPING_RATES.air}$ / кг)</option>
+            <option value="sea">Море ({SHIPPING_RATES.sea}$ / кг)</option>
             <option value="custom">Своя цена / кг</option>
           </select>
         </div>
