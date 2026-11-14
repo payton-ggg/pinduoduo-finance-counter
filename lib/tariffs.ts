@@ -23,3 +23,4 @@ export function getShippingRatePerKg(
   }
   return SHIPPING_RATES.air;
 }
+
