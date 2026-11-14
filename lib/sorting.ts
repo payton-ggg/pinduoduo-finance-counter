@@ -60,7 +60,7 @@ export function getProductMetrics(p: ProductUI, globalRate?: number): ProductMet
           (firstWeight / 1000) * ratePerKgUSD * firstRateUSD;
       }
 
-      // Purchase price including unit shipping
+
       firstPurchaseCostUAH = baseCost + firstUnitShippingUAH;
       firstSalePrice = first.priceInUA ?? p.priceInUA ?? 0;
 
