@@ -1,14 +1,27 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
+// Parse CLI flags: --dry-run, --air 18.5, --sea 7.3
+const args = process.argv.slice(2);
+const isDryRun = args.includes('--dry-run');
+
+function getArgValue(flag) {
+  const index = args.indexOf(flag);
+  if (index !== -1 && args[index + 1]) {
+    const val = parseFloat(args[index + 1]);
+    if (!isNaN(val)) return val;
+  }
+  return null;
+}
+
 const NEW_RATES = {
-  air: 18.5,
-  sea: 7.3,
+  air: getArgValue('--air') ?? 18.5,
+  sea: getArgValue('--sea') ?? 7.3,
 };
 
 async function updateShippingRates(dryRun = false) {
   console.log(`Starting shipping rate update... (Mode: ${dryRun ? 'DRY-RUN' : 'LIVE'})`);
-  console.log(`New tariffs: Air = $${NEW_RATES.air}/kg, Sea = $${NEW_RATES.sea}/kg\n`);
+  console.log(`Tariffs: Air = $${NEW_RATES.air}/kg, Sea = $${NEW_RATES.sea}/kg\n`);
 
   const variants = await prisma.variant.findMany({
     include: {
@@ -115,8 +128,6 @@ async function updateShippingRates(dryRun = false) {
 
   return changes;
 }
-
-const isDryRun = process.argv.includes('--dry-run');
 
 updateShippingRates(isDryRun)
   .catch((err) => {

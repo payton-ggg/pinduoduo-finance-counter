@@ -1,4 +1,5 @@
 import type { ProductUI } from "@/components/dashboard/ProductCard";
+import { getShippingRatePerKg, SHIPPING_RATES } from "./tariffs";
 
 export type SortKey =
   | "default"
@@ -50,12 +51,10 @@ export function getProductMetrics(p: ProductUI, globalRate?: number): ProductMet
       if (firstPurchased > 0 && firstShipping > 0) {
         firstUnitShippingUAH = firstShipping / firstPurchased;
       } else if (firstWeight > 0 && firstRateUSD > 0) {
-        const ratePerKgUSD =
-          first.shippingType === "sea"
-            ? 7.1
-            : first.shippingType === "custom"
-              ? first.customShippingRate || 0
-              : 18.3;
+        const ratePerKgUSD = getShippingRatePerKg(
+          first.shippingType,
+          first.customShippingRate
+        );
         firstUnitShippingUAH =
           (firstWeight / 1000) * ratePerKgUSD * firstRateUSD;
       }
@@ -84,7 +83,7 @@ export function getProductMetrics(p: ProductUI, globalRate?: number): ProductMet
     if (purchased > 0 && shipping > 0) {
       firstUnitShippingUAH = shipping / purchased;
     } else if (weight > 0 && rateUSD > 0) {
-      firstUnitShippingUAH = (weight / 1000) * 18.3 * rateUSD;
+      firstUnitShippingUAH = (weight / 1000) * SHIPPING_RATES.air * rateUSD;
     }
     firstPurchaseCostUAH = baseCost + firstUnitShippingUAH;
     const actualNetPrice =

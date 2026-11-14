@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
+import { SHIPPING_RATES, getShippingRatePerKg } from "@/lib/tariffs";
 
 type ProductPreviewProps = {
   data: any;
@@ -362,11 +363,7 @@ export function ProductPreview({
                   ? shippingUA / purchased
                   : unitWeight > 0 && (v.rateUSD || rates?.usd || 0) > 0
                     ? (unitWeight / 1000) *
-                      (v.shippingType === "sea"
-                        ? 7.1
-                        : v.shippingType === "custom"
-                          ? v.customShippingRate || 0
-                          : 18.3) *
+                      getShippingRatePerKg(v.shippingType, v.customShippingRate) *
                       (v.rateUSD || rates?.usd || 0)
                     : 0;
               const unitManagementUAH =
@@ -376,10 +373,10 @@ export function ProductPreview({
 
               const shippingLabel =
                 v.shippingType === "sea"
-                  ? "Море (7.1$/кг)"
+                  ? `Море (${SHIPPING_RATES.sea}$/кг)`
                   : v.shippingType === "custom"
                     ? `Своя (${v.customShippingRate || 0}$/кг)`
-                    : "Авиа (18.3$/кг)";
+                    : `Авиа (${SHIPPING_RATES.air}$/кг)`;
 
               return (
                 <div
