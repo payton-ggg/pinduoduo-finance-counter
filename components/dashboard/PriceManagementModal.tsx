@@ -109,13 +109,14 @@ export function PriceManagementModal({
 		touchStartY.current = null;
 	};
 
-	// Helper to calculate auto netPrice (standard 3% + 30 UAH OLX / commission formula)
+	// Helper to calculate auto netPrice (standard 3% + flat commission OLX formula)
 	const calcNetPrice = (
 		sellPrice: number | null | undefined,
+		flatCommission: number = 30,
 	): number | null => {
 		if (sellPrice === null || sellPrice === undefined || sellPrice <= 0)
 			return null;
-		return Math.round((sellPrice * 0.97 - 30) * 100) / 100;
+		return Math.round((sellPrice * 0.97 - flatCommission) * 100) / 100;
 	};
 
 	// Get current variant values (draft or original)
@@ -123,12 +124,13 @@ export function PriceManagementModal({
 		(variant: ProductVariantUI, fallbackProduct: ProductUI) => {
 			const variantKey = variant.id || `${fallbackProduct.id}-default`;
 			const draft = drafts[variantKey];
+			const flatCommission = variant.commissionFlat ?? 30;
 
 			const priceCNY = draft ? draft.priceCNY : variant.priceCNY || 0;
 			const priceInUA = draft ? draft.priceInUA : (variant.priceInUA ?? null);
 			const netPrice = draft
 				? draft.netPrice
-				: (variant.netPrice ?? calcNetPrice(priceInUA));
+				: (variant.netPrice ?? calcNetPrice(priceInUA, flatCommission));
 			const purchasedCount = draft
 				? draft.purchasedCount
 				: (variant.purchasedCount ?? fallbackProduct.totalPurchased ?? 0);
@@ -198,9 +200,10 @@ export function PriceManagementModal({
 		value: number | null,
 	) => {
 		const variantKey = variant.id || `${fallbackProduct.id}-default`;
+		const flatCommission = variant.commissionFlat ?? 30;
 		const origPriceCNY = variant.priceCNY || 0;
 		const origPriceInUA = variant.priceInUA ?? null;
-		const origNetPrice = variant.netPrice ?? calcNetPrice(origPriceInUA);
+		const origNetPrice = variant.netPrice ?? calcNetPrice(origPriceInUA, flatCommission);
 		const origPurchasedCount =
 			variant.purchasedCount ?? fallbackProduct.totalPurchased ?? 0;
 		const origSellsCount =
@@ -224,7 +227,7 @@ export function PriceManagementModal({
 
 		// Auto update net price if selling price was changed and netPrice wasn't manually customized
 		if (field === "priceInUA") {
-			updatedDraft.netPrice = calcNetPrice(value);
+			updatedDraft.netPrice = calcNetPrice(value, flatCommission);
 		}
 
 		// Check if this matches original values

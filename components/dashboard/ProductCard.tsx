@@ -36,6 +36,7 @@ export type ProductVariantUI = {
   weight?: number | null;
   shippingType?: string | null;
   customShippingRate?: number | null;
+  commissionFlat?: number | null;
   pddSearchQuery?: string | null;
   isIncluded?: boolean;
 };
@@ -106,6 +107,9 @@ export const ProductCard = memo(function ProductCard({
             shippingUA: product.shippingUA,
             managementUAH: product.managementUAH,
             weight: product.weight,
+            shippingType: null,
+            customShippingRate: null,
+            commissionFlat: null,
           } as ProductVariantUI,
         ];
   const activeVariant = variants[priceIndex] || variants[0];

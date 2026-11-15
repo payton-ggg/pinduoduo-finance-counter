@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getAuthRole } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
+  const role = await getAuthRole();
+  if (!role) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const body = await req.json();
     const {
@@ -46,12 +52,15 @@ export async function POST(req: Request) {
     }
 
     if (targetVariantId) {
+      const currentVar = await prisma.variant.findUnique({
+        where: { id: targetVariantId },
+        select: { sellsCount: true },
+      });
+      const newSells = (currentVar?.sellsCount || 0) + saleQty;
       await prisma.variant.update({
         where: { id: targetVariantId },
         data: {
-          sellsCount: {
-            increment: saleQty,
-          },
+          sellsCount: newSells,
         },
       });
     }

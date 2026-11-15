@@ -73,6 +73,7 @@ export async function POST(req: Request) {
               rateUSD: v.rateUSD ?? null,
               shippingType: v.shippingType || null,
               customShippingRate: v.customShippingRate ?? null,
+              commissionFlat: v.commissionFlat ?? null,
               isIncluded: v.isIncluded ?? true,
             }))
           : [{
@@ -89,6 +90,7 @@ export async function POST(req: Request) {
               rateUSD: firstVariant.rateUSD ?? null,
               shippingType: firstVariant.shippingType || null,
               customShippingRate: firstVariant.customShippingRate ?? null,
+              commissionFlat: firstVariant.commissionFlat ?? null,
               isIncluded: firstVariant.isIncluded ?? true,
             }],
       },
@@ -118,6 +120,8 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: "Access denied" }, { status: 403 });
   }
 
+  await prisma.expense.deleteMany({ where: { productId: id } });
+  await prisma.income.deleteMany({ where: { productId: id } });
   await prisma.variant.deleteMany({ where: { productId: id } });
   await prisma.product.delete({ where: { id } });
   return NextResponse.json({ message: "Product deleted" });

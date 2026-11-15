@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
       managementUAH?: number;
       rateCNY?: number;
       rateUSD?: number;
+      commissionFlat?: number;
       isIncluded?: boolean;
     }> = body.updates;
 
@@ -112,6 +113,12 @@ export async function POST(req: NextRequest) {
             data.rateUSD !== undefined
               ? data.rateUSD !== null
                 ? Number(data.rateUSD)
+                : null
+              : undefined,
+          commissionFlat:
+            data.commissionFlat !== undefined
+              ? data.commissionFlat !== null
+                ? Number(data.commissionFlat)
                 : null
               : undefined,
           isIncluded:

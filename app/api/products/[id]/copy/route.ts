@@ -67,6 +67,7 @@ export async function POST(
             rateUSD: v.rateUSD,
             shippingType: v.shippingType,
             customShippingRate: v.customShippingRate,
+            commissionFlat: v.commissionFlat,
             isIncluded: v.isIncluded,
           })),
         },

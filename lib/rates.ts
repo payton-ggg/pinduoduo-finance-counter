@@ -10,9 +10,9 @@ const CACHE_DURATION_MS = 60 * 60 * 1000; // 1 hour
 
 // Default/fallback rates in case APIs are completely unreachable or timeout
 const FALLBACK_RATES: ExchangeRates = {
-  cny: 6.8,  // Approximate CNY/UAH rate
-  usd: 41.5, // Approximate USD/UAH rate
-  eur: 45.0, // Approximate EUR/UAH rate
+  cny: 6.85, // Approximate CNY/UAH rate
+  usd: 45.0, // Approximate USD/UAH rate
+  eur: 48.0, // Approximate EUR/UAH rate
 };
 
 export async function getExchangeRates(): Promise<ExchangeRates> {
@@ -70,33 +70,40 @@ export async function getExchangeRates(): Promise<ExchangeRates> {
         fetch("https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=CNY&json", {
           next: { revalidate: 3600 },
           signal: AbortSignal.timeout(1500),
-        }),
+        }).catch(() => null),
         fetch("https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=USD&json", {
           next: { revalidate: 3600 },
           signal: AbortSignal.timeout(1500),
-        }),
+        }).catch(() => null),
         fetch("https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=EUR&json", {
           next: { revalidate: 3600 },
           signal: AbortSignal.timeout(1500),
-        }),
+        }).catch(() => null),
       ]);
 
-      const [cnyData, usdData, eurData] = await Promise.all([
-        cnyRes.json(),
-        usdRes.json(),
-        eurRes.json(),
-      ]);
+      if (cnyRes?.ok) {
+        const cnyData = await cnyRes.json().catch(() => null);
+        if (Array.isArray(cnyData) && cnyData.length > 0 && typeof cnyData[0].rate === "number") {
+          rates.cny = cnyData[0].rate * 1.02;
+          success = true;
+        }
+      }
 
-      if (cnyData && cnyData.length > 0) {
-        rates.cny = cnyData[0].rate * 1.02;
+      if (usdRes?.ok) {
+        const usdData = await usdRes.json().catch(() => null);
+        if (Array.isArray(usdData) && usdData.length > 0 && typeof usdData[0].rate === "number") {
+          rates.usd = usdData[0].rate * 1.02;
+          success = true;
+        }
       }
-      if (usdData && usdData.length > 0) {
-        rates.usd = usdData[0].rate * 1.02;
+
+      if (eurRes?.ok) {
+        const eurData = await eurRes.json().catch(() => null);
+        if (Array.isArray(eurData) && eurData.length > 0 && typeof eurData[0].rate === "number") {
+          rates.eur = eurData[0].rate * 1.02;
+          success = true;
+        }
       }
-      if (eurData && eurData.length > 0) {
-        rates.eur = eurData[0].rate * 1.02;
-      }
-      success = true;
     } catch (e) {
       console.error("Failed to fetch NBU exchange rates", e);
     }

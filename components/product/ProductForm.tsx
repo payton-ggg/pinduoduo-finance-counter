@@ -597,6 +597,31 @@ export default function ProductForm({
         });
         if (!res.ok) throw new Error("Failed to create product");
         const data = await res.json();
+
+        if (Array.isArray(values.incomes)) {
+          for (const inc of values.incomes) {
+            if (Number(inc.amount) > 0) {
+              await fetch("/api/incomes", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ productId: data.id, amount: Number(inc.amount) }),
+              });
+            }
+          }
+        }
+
+        if (Array.isArray(values.expenses)) {
+          for (const exp of values.expenses) {
+            if (Number(exp.amount) > 0) {
+              await fetch("/api/expenses", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ productId: data.id, amount: Number(exp.amount), type: exp.type }),
+              });
+            }
+          }
+        }
+
         router.push(`/product/${data.id}`);
         return;
       }

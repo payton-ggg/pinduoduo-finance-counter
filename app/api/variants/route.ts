@@ -19,6 +19,8 @@ export async function POST(req: Request) {
       rateUSD: data.rateUSD ?? null,
       shippingType: data.shippingType || null,
       customShippingRate: data.customShippingRate ?? null,
+      commissionFlat: data.commissionFlat ?? null,
+      isIncluded: data.isIncluded ?? true,
     },
   });
   return NextResponse.json(variant);
@@ -43,6 +45,8 @@ export async function PATCH(req: Request) {
       rateUSD: rest.rateUSD !== undefined ? rest.rateUSD : undefined,
       shippingType: rest.shippingType !== undefined ? rest.shippingType : undefined,
       customShippingRate: rest.customShippingRate !== undefined ? rest.customShippingRate : undefined,
+      commissionFlat: rest.commissionFlat !== undefined ? rest.commissionFlat : undefined,
+      isIncluded: rest.isIncluded !== undefined ? rest.isIncluded : undefined,
     },
   });
   return NextResponse.json(variant);

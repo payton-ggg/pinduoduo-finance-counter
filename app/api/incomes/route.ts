@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
+import { getAuthRole } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
-const prisma = new PrismaClient();
-
 export async function GET(req: Request) {
+  const role = await getAuthRole();
+  if (!role) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { searchParams } = new URL(req.url);
   const productId = searchParams.get("productId");
   const incomes = await prisma.income.findMany({
@@ -16,6 +20,11 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const role = await getAuthRole();
+  if (!role) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const data = await req.json();
   const created = await prisma.income.create({
     data: {
@@ -27,6 +36,11 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
+  const role = await getAuthRole();
+  if (!role) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const data = await req.json();
   const updated = await prisma.income.update({
     where: { id: data.id },
@@ -38,6 +52,11 @@ export async function PATCH(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  const role = await getAuthRole();
+  if (!role) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { id } = await req.json();
   await prisma.income.delete({ where: { id } });
   return NextResponse.json({ message: "Income deleted" });

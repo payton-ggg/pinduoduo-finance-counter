@@ -112,6 +112,7 @@ export async function PATCH(
               rateUSD: v.rateUSD !== undefined ? v.rateUSD : undefined,
               shippingType: v.shippingType !== undefined ? v.shippingType : undefined,
               customShippingRate: v.customShippingRate !== undefined ? v.customShippingRate : undefined,
+              commissionFlat: v.commissionFlat !== undefined ? v.commissionFlat : undefined,
               isIncluded: v.isIncluded !== undefined ? v.isIncluded : undefined,
             },
           });
@@ -132,6 +133,7 @@ export async function PATCH(
               rateUSD: v.rateUSD ?? null,
               shippingType: v.shippingType || null,
               customShippingRate: v.customShippingRate ?? null,
+              commissionFlat: v.commissionFlat ?? null,
               isIncluded: v.isIncluded ?? true,
             },
           });

@@ -67,7 +67,7 @@ export function getProductMetrics(p: ProductUI, globalRate?: number): ProductMet
       for (const v of included) {
         const net =
           v.netPrice ??
-          ((v.priceInUA || 0) > 0 ? (v.priceInUA || 0) * 0.97 - 30 : 0);
+          ((v.priceInUA || 0) > 0 ? (v.priceInUA || 0) * 0.97 - (v.commissionFlat ?? 30) : 0);
         calcRev += (Number(v.purchasedCount ?? p.totalPurchased) || 0) * net;
       }
       projectedRevenue = calcRev;
