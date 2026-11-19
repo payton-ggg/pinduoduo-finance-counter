@@ -1,7 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// Parse CLI flags: --dry-run, --air 18.5, --sea 7.3
 const args = process.argv.slice(2);
 const isDryRun = args.includes('--dry-run');
 
